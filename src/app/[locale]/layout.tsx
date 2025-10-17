@@ -19,11 +19,11 @@ export const metadata: Metadata = {
   description: "Padelgraph - Your padel social network",
   icons: {
     icon: [
-      { url: '/pg_logo_minimal_01.png', sizes: '32x32', type: 'image/png' },
-      { url: '/pg_logo_minimal_01.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/branding/pg_logo_minimal_01.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/branding/pg_logo_minimal_01.png', sizes: '16x16', type: 'image/png' },
     ],
-    apple: '/pg_logo_minimal_01.png',
-    shortcut: '/pg_logo_minimal_01.png',
+    apple: '/images/branding/pg_logo_minimal_01.png',
+    shortcut: '/images/branding/pg_logo_minimal_01.png',
   },
 };
 

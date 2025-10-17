@@ -35,14 +35,13 @@ export default function Navigation({ t }: NavigationProps) {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/padelgraph_logo_01.png"
+              src="/images/branding/padelgraph_logo_01.png"
               alt="PadelGraph Logo"
-              width={40}
-              height={40}
+              width={120}
+              height={120}
               className="rounded-xl"
               priority
             />
-            <span className="text-xl font-bold">PadelGraph</span>
           </Link>
 
           {/* Desktop Navigation */}

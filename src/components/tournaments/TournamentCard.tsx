@@ -7,12 +7,13 @@
 
 import Link from 'next/link';
 import { Calendar, Users, MapPin, Trophy } from 'lucide-react';
+import type { TournamentType } from '@/types/database';
 
 interface TournamentCardProps {
   tournament: {
     id: string;
     name: string;
-    type: 'americano' | 'mexicano';
+    type: TournamentType;
     status: 'draft' | 'published' | 'in_progress' | 'completed' | 'cancelled';
     starts_at: string;
     max_participants: number;
@@ -31,9 +32,15 @@ const statusColors = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
-const typeLabels = {
+const typeLabels: Record<TournamentType, string> = {
   americano: 'Americano',
   mexicano: 'Mexicano',
+  round_robin: 'Round Robin',
+  knockout_single: 'Eliminación Simple',
+  knockout_double: 'Eliminación Doble',
+  swiss: 'Sistema Suizo',
+  monrad: 'Monrad',
+  compass: 'Compass Draw',
 };
 
 export function TournamentCard({ tournament }: TournamentCardProps) {

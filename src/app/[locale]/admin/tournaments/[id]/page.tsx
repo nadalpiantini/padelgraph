@@ -31,6 +31,7 @@ import type {
   TournamentMatchWithDetails,
   TournamentStandingWithProfile,
 } from '@/types/database';
+import FairPlayPanel from '@/components/admin/FairPlayPanel';
 
 interface AdminDashboardData {
   tournament: Tournament;
@@ -659,6 +660,12 @@ export default function AdminTournamentPage({
             </div>
           </div>
         )}
+
+        {/* Fair-Play Management */}
+        <FairPlayPanel 
+          tournamentId={tournamentId}
+          participants={data.participants}
+        />
 
         {/* Export Options */}
         <div className="bg-white rounded-lg shadow">
