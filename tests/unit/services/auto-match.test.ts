@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Supabase
-vi.mock('@/lib/supabase/server', () => ({
+vi.mock('../../../src/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
@@ -25,7 +25,7 @@ describe('Auto-Match Service', () => {
       rpc: vi.fn(),
     };
 
-    const { createClient } = require('@/lib/supabase/server');
+    const { createClient } = require('../../../src/lib/supabase/server');
     createClient.mockResolvedValue(mockSupabase);
   });
 

@@ -167,7 +167,7 @@ export default async function RankingsPage() {
                               />
                             ) : (
                               <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-sm font-medium">
-                                {player.username.charAt(0).toUpperCase()}
+                                {player.username?.charAt(0)?.toUpperCase() || '?'}
                               </div>
                             )}
                             <div>
@@ -176,7 +176,7 @@ export default async function RankingsPage() {
                               </div>
                               {player.full_name && (
                                 <div className="text-sm text-slate-400">
-                                  @{player.username}
+                                  @{player.username || 'unknown'}
                                 </div>
                               )}
                             </div>
