@@ -2,6 +2,7 @@
 
 import { Users, BarChart3 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import Image from 'next/image';
 
 interface HeroProps {
   t: {
@@ -23,6 +24,18 @@ export default function Hero({ t }: HeroProps) {
 
       <div className="max-w-7xl mx-auto relative">
         <div className="text-center max-w-4xl mx-auto">
+          {/* Logo */}
+          <div className="mb-8 flex justify-center">
+            <Image
+              src="/images/branding/padelgraph_logo_01.png"
+              alt="PadelGraph Logo"
+              width={200}
+              height={200}
+              className="rounded-xl"
+              priority
+            />
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 animate-fade-in">
             <BarChart3 className="w-4 h-4 text-indigo-400" aria-hidden="true" />
