@@ -257,8 +257,8 @@ export interface Database {
         Update: Partial<Omit<Booking, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
-    Views: {};
-    Functions: {};
-    Enums: {};
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
   };
 }

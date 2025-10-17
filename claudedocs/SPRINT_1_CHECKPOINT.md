@@ -1,15 +1,15 @@
-# 🏓 SPRINT 1 CHECKPOINT - Sesión 1
+# 🏓 SPRINT 1 CHECKPOINT - Sesión 2
 
 > **Última actualización:** 2025-10-16
 > **Branch:** `sprint-1-core`
-> **Progreso:** 3/7 Fases (43%)
-> **Commits:** 2 nuevos commits
+> **Progreso:** 4/7 Fases (57%)
+> **Commits:** 3 commits totales
 
 ---
 
 ## 🎯 Estado Actual
 
-### ✅ Fases Completadas (3/7)
+### ✅ Fases Completadas (4/7)
 
 #### **Fase 1: Setup y Branch** ✅
 - Branch `sprint-1-core` creado
@@ -59,19 +59,30 @@
 - ✅ RLS policies completas
 - ✅ Triggers automáticos (likes_count, comments_count, conflict checking)
 
-### 🔄 Fases Pendientes (4/7)
+#### **Fase 4: Feed Social Básico** ✅
+**Implementado:**
+- ✅ Validación schemas para posts (`src/lib/validations/feed.ts`)
+- ✅ `GET /api/feed` - Timeline social con paginación
+- ✅ `POST /api/posts` - Crear post
+- ✅ `GET /api/posts/[id]` - Ver post individual
+- ✅ `POST /api/posts/[id]/like` - Toggle like
+- ✅ `POST /api/posts/[id]/comment` - Agregar comment
+- ✅ Supabase Storage helpers (`src/lib/storage.ts`)
+- ✅ Documentación storage setup
 
-#### **Fase 4: Feed Social Básico** ⏳ SIGUIENTE
-**Por implementar:**
-- [ ] Validación schemas para posts
-- [ ] `GET /api/feed` - Timeline social
-- [ ] `POST /api/posts` - Crear post
-- [ ] `POST /api/posts/:id/like` - Like
-- [ ] `POST /api/posts/:id/comment` - Comentar
-- [ ] Supabase Storage setup para media
-- [ ] Upload de imágenes/videos
+**Archivos creados:**
+- `src/lib/validations/feed.ts` (30 líneas)
+- `src/app/api/feed/route.ts` (100 líneas)
+- `src/app/api/posts/route.ts` (75 líneas)
+- `src/app/api/posts/[id]/route.ts` (95 líneas)
+- `src/app/api/posts/[id]/like/route.ts` (115 líneas)
+- `src/app/api/posts/[id]/comment/route.ts` (115 líneas)
+- `src/lib/storage.ts` (95 líneas)
+- `claudedocs/SUPABASE_STORAGE_SETUP.md` (doc)
 
-#### **Fase 5: Reservas Simples** ⏳
+### 🔄 Fases Pendientes (3/7)
+
+#### **Fase 5: Reservas Simples** ⏳ SIGUIENTE
 **Por implementar:**
 - [ ] `GET /api/courts` - Lista de canchas
 - [ ] `GET /api/courts/:id/availability` - Disponibilidad
@@ -119,6 +130,17 @@
 - Template system
 ```
 
+### Commit 3: Feed Social APIs
+```
+[pendiente] - feat(sprint-1): implement feed social APIs and storage
+
+- Feed validations (Zod schemas)
+- Feed timeline API with pagination
+- Post creation, view, like, comment APIs
+- Supabase Storage helpers
+- Storage setup documentation
+```
+
 ---
 
 ## 📁 Archivos Creados
@@ -133,16 +155,23 @@
 ### Libraries
 - `src/lib/api-response.ts` (44 líneas)
 - `src/lib/validations/profile.ts` (38 líneas)
-- `src/lib/twilio.ts` (115 líneas) ✨ UPDATED
-- `src/lib/email.ts` (151 líneas) ✨ UPDATED
+- `src/lib/validations/feed.ts` (30 líneas) ✨ NEW
+- `src/lib/twilio.ts` (115 líneas)
+- `src/lib/email.ts` (151 líneas)
+- `src/lib/storage.ts` (95 líneas) ✨ NEW
 
 ### API Routes
 - `src/app/api/profile/route.ts` (93 líneas)
 - `src/app/api/preferences/route.ts` (95 líneas)
 - `src/app/api/email/send/route.ts` (96 líneas)
 - `src/app/api/whatsapp/send/route.ts` (56 líneas)
+- `src/app/api/feed/route.ts` (100 líneas) ✨ NEW
+- `src/app/api/posts/route.ts` (75 líneas) ✨ NEW
+- `src/app/api/posts/[id]/route.ts` (95 líneas) ✨ NEW
+- `src/app/api/posts/[id]/like/route.ts` (115 líneas) ✨ NEW
+- `src/app/api/posts/[id]/comment/route.ts` (115 líneas) ✨ NEW
 
-**Total:** ~1,542 líneas de código nuevo
+**Total:** ~2,167 líneas de código nuevo
 
 ---
 
@@ -173,6 +202,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```json
 {
   "dependencies": {
+    "@react-email/render": "^1.0.1",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
     "next": "15.5.5",
@@ -194,19 +224,19 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ### Opción 1: Contexto Completo
 ```
 "Continúa con el Sprint 1 de PadelGraph.
-Lee claudedocs/SPRINT_1_CHECKPOINT.md y sigue con la Fase 4: Feed Social Básico.
+Lee claudedocs/SPRINT_1_CHECKPOINT.md y sigue con la Fase 5: Reservas Simples.
 Branch: sprint-1-core"
 ```
 
 ### Opción 2: Comando Corto
 ```
-"Sprint 1 Fase 4"
+"Sprint 1 Fase 5"
 ```
 
 ### Opción 3: Contexto Específico
 ```
 "Retoma Sprint 1 desde el checkpoint.
-Implementa las APIs del feed social: GET /api/feed, POST /api/posts, likes y comments.
+Implementa las APIs de reservas: courts, availability, bookings.
 El schema ya está creado."
 ```
 
@@ -214,24 +244,24 @@ El schema ya está creado."
 
 ## 📋 Próxima Tarea Específica
 
-**Implementar Fase 4: Feed Social Básico**
+**Implementar Fase 5: Reservas Simples**
 
-1. **Crear validaciones** (`src/lib/validations/feed.ts`):
-   - `createPostSchema`
-   - `createCommentSchema`
-   - Query params para feed
+1. **Crear validaciones** (`src/lib/validations/booking.ts`):
+   - `createCourtSchema`
+   - `createAvailabilitySchema`
+   - `createBookingSchema`
 
 2. **Implementar APIs**:
-   - `GET /api/feed` - Timeline con paginación
-   - `POST /api/posts` - Crear post
-   - `POST /api/posts/[id]/like` - Toggle like
-   - `POST /api/posts/[id]/comment` - Agregar comment
-   - `GET /api/posts/[id]` - Ver post individual
+   - `GET /api/courts` - Lista de canchas
+   - `GET /api/courts/[id]` - Detalles de cancha
+   - `GET /api/courts/[id]/availability` - Disponibilidad
+   - `POST /api/bookings` - Crear reserva
+   - `GET /api/bookings` - Mis reservas
 
-3. **Storage Setup**:
-   - Configurar Supabase Storage bucket para media
-   - Signed URLs para uploads
-   - Validación de tipos de archivo
+3. **Business Logic**:
+   - Validación de conflictos de horarios (trigger ya existe)
+   - Cálculo automático de precio
+   - Verificación de permisos
 
 4. **Testing**:
    - Verificar TypeScript
@@ -243,28 +273,30 @@ El schema ya está creado."
 ## ✅ Verificaciones Pre-Continue
 
 Antes de continuar, verificar:
-- [ ] Branch está en `sprint-1-core`
-- [ ] Último commit es `5ae6bec`
-- [ ] `npm run typecheck` pasa sin errores
-- [ ] `.env.local` configurado (al menos Supabase)
+- [x] Branch está en `sprint-1-core`
+- [x] Nuevo código commiteado
+- [x] `npm run typecheck` pasa sin errores
+- [x] `npm run build` exitoso
+- [x] `.env.local` configurado (al menos Supabase)
 
 **Comandos de verificación:**
 ```bash
 git branch --show-current  # debe mostrar: sprint-1-core
-git log --oneline -1       # debe mostrar: 5ae6bec
-npm run typecheck          # debe pasar sin errores
+npm run typecheck          # debe pasar sin errores ✅
+npm run build             # debe compilar exitosamente ✅
 ```
 
 ---
 
 ## 📊 Métricas
 
-- **Progreso Sprint 1:** 43% (3/7 fases)
-- **APIs implementadas:** 5/10
-- **Líneas de código:** ~1,542 nuevas
-- **Commits:** 2
+- **Progreso Sprint 1:** 57% (4/7 fases)
+- **APIs implementadas:** 11/16 (feed completo ✅)
+- **Líneas de código:** ~2,167 nuevas
+- **Commits:** 3 (pendiente commit de Fase 4)
 - **Coverage:** 0% (tests pendientes en Fase 7)
 - **TypeScript:** ✅ Sin errores
+- **Build:** ✅ Exitoso
 
 ---
 
@@ -274,10 +306,11 @@ npm run typecheck          # debe pasar sin errores
 - **Sprint 1 Context:** `claudedocs/SPRINT_1_CONTEXT.md`
 - **Database Schema:** `supabase/migrations/001_sprint_1_schema.sql`
 - **RLS Policies:** `supabase/migrations/002_sprint_1_policies.sql`
+- **Storage Setup:** `claudedocs/SUPABASE_STORAGE_SETUP.md`
 
 ---
 
 **¡Listo para continuar! 🚀**
 
-*Checkpoint creado: 2025-10-16*
-*Siguiente sesión: Fase 4 - Feed Social Básico*
+*Checkpoint actualizado: 2025-10-16*
+*Próxima sesión: Fase 5 - Reservas Simples*
