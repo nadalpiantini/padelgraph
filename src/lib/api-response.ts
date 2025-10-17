@@ -42,3 +42,14 @@ export function notFoundResponse(resource = 'Resource') {
 export function serverErrorResponse(message = 'Internal server error', details?: unknown) {
   return errorResponse(message, details, 500);
 }
+
+/**
+ * ApiResponse namespace for consistent API responses
+ */
+export const ApiResponse = {
+  success: successResponse,
+  error: errorResponse,
+  unauthorized: unauthorizedResponse,
+  notFound: notFoundResponse,
+  serverError: serverErrorResponse,
+};

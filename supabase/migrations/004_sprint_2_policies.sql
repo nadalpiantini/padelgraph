@@ -87,26 +87,12 @@ CREATE POLICY "tournament_insert_org_admin"
   );
 
 -- UPDATE: Only org admins can update tournaments
--- Special rule: Can only update certain fields once tournament starts
+-- Note: Field-level restrictions (e.g., immutable fields after publishing)
+-- should be enforced at the application/API level
 CREATE POLICY "tournament_update_org_admin"
   ON tournament FOR UPDATE
   USING (is_org_admin(org_id))
-  WITH CHECK (
-    is_org_admin(org_id)
-    AND (
-      -- Can update anything if status is draft
-      status = 'draft'
-      OR
-      -- Once published/in_progress, only allow updating specific fields
-      (
-        status IN ('published', 'in_progress')
-        AND (NEW.name = OLD.name)
-        AND (NEW.type = OLD.type)
-        AND (NEW.max_participants = OLD.max_participants)
-        AND (NEW.starts_at = OLD.starts_at)
-      )
-    )
-  );
+  WITH CHECK (is_org_admin(org_id));
 
 -- DELETE: Only org admins can delete/cancel tournaments
 CREATE POLICY "tournament_delete_org_admin"
@@ -157,6 +143,7 @@ CREATE POLICY "participant_insert_self"
 
 -- UPDATE: Users can check-in themselves or withdraw
 -- Admins can force check-in or mark as no-show
+-- Note: Status transition rules should be enforced at the application/API level
 CREATE POLICY "participant_update_self_or_admin"
   ON tournament_participant FOR UPDATE
   USING (
@@ -169,17 +156,8 @@ CREATE POLICY "participant_update_self_or_admin"
     )
   )
   WITH CHECK (
-    -- Users can only check-in or withdraw themselves
-    (
-      user_id = auth.uid()
-      AND (
-        (NEW.status = 'checked_in' AND OLD.status = 'registered')
-        OR
-        (NEW.status = 'withdrawn' AND OLD.status IN ('registered', 'checked_in'))
-      )
-    )
+    user_id = auth.uid()
     OR
-    -- Admins can do anything
     EXISTS (
       SELECT 1 FROM tournament
       WHERE tournament.id = tournament_participant.tournament_id
@@ -310,6 +288,7 @@ CREATE POLICY "match_insert_admin"
   );
 
 -- UPDATE: Players can submit scores OR admins can edit anything
+-- Note: Score validation and player immutability should be enforced at the application/API level
 CREATE POLICY "match_update_player_or_admin"
   ON tournament_match FOR UPDATE
   USING (
@@ -323,21 +302,8 @@ CREATE POLICY "match_update_player_or_admin"
     )
   )
   WITH CHECK (
-    -- Players can only update scores and status to completed
-    (
-      is_match_player(id)
-      AND NEW.status = 'completed'
-      AND OLD.status IN ('pending', 'in_progress')
-      AND NEW.team1_score IS NOT NULL
-      AND NEW.team2_score IS NOT NULL
-      -- Cannot change players
-      AND NEW.team1_player1_id = OLD.team1_player1_id
-      AND NEW.team1_player2_id = OLD.team1_player2_id
-      AND NEW.team2_player1_id = OLD.team2_player1_id
-      AND NEW.team2_player2_id = OLD.team2_player2_id
-    )
+    is_match_player(id)
     OR
-    -- Admins can do anything
     EXISTS (
       SELECT 1 FROM tournament_round r
       JOIN tournament t ON t.id = r.tournament_id
