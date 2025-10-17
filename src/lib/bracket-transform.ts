@@ -7,8 +7,7 @@
 
 import type {
   TournamentMatch,
-  TournamentBracket,
-  BracketType
+  TournamentBracket
 } from '@/types/database';
 
 export interface BracketParticipant {
@@ -50,11 +49,13 @@ export function transformBracketData(
   const isDouble = tournamentType === 'knockout_double';
 
   // Group brackets by type
+  // For double elimination: 'main' is upper bracket, 'losers' is lower bracket
+  // For single elimination: 'main' is the only bracket
   const upperBrackets = brackets.filter(b =>
-    b.bracket_type === 'main' || b.bracket_type === 'upper'
+    b.bracket_type === 'main'
   );
   const lowerBrackets = brackets.filter(b =>
-    b.bracket_type === 'lower'
+    b.bracket_type === 'losers'
   );
 
   // Transform upper bracket

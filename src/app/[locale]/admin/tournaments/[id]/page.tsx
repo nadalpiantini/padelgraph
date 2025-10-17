@@ -32,6 +32,7 @@ import type {
   TournamentStandingWithProfile,
 } from '@/types/database';
 import FairPlayPanel from '@/components/admin/FairPlayPanel';
+import BracketVisualization from '@/components/tournaments/BracketVisualization';
 
 interface AdminDashboardData {
   tournament: Tournament;
@@ -661,8 +662,18 @@ export default function AdminTournamentPage({
           </div>
         )}
 
+        {/* Bracket Visualization */}
+        {['knockout_single', 'knockout_double', 'monrad', 'compass'].includes(data.tournament.type) && (
+          <div className="mb-8">
+            <BracketVisualization
+              tournamentId={tournamentId}
+              tournamentType={data.tournament.type}
+            />
+          </div>
+        )}
+
         {/* Fair-Play Management */}
-        <FairPlayPanel 
+        <FairPlayPanel
           tournamentId={tournamentId}
           participants={data.participants}
         />

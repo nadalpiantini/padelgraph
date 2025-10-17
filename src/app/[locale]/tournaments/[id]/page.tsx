@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { StandingsTable } from '@/components/tournaments/StandingsTable';
 import { CheckInButton } from '@/components/tournaments/CheckInButton';
+import BracketVisualization from '@/components/tournaments/BracketVisualization';
 import type { TournamentParticipantWithProfile } from '@/types/database';
 
 async function getTournamentDetails(id: string) {
@@ -74,10 +75,20 @@ export default async function TournamentDetailPage({
     (timeUntilStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
   );
 
+  // Determine if bracket visualization should be shown
+  const bracketTypes = [
+    'knockout_single',
+    'knockout_double',
+    'monrad',
+    'compass',
+  ];
+  const showBracket = bracketTypes.includes(tournament.tournament.type);
+
   const tabs = [
     { key: 'overview', label: 'Resumen' },
     { key: 'participants', label: 'Participantes' },
     { key: 'standings', label: 'Clasificación' },
+    ...(showBracket ? [{ key: 'bracket', label: 'Cuadro' }] : []),
     { key: 'board', label: 'Rotation Board' },
   ];
 
@@ -290,6 +301,13 @@ export default async function TournamentDetailPage({
 
           {tab === 'standings' && (
             <StandingsTable standings={tournament.standings} />
+          )}
+
+          {tab === 'bracket' && showBracket && (
+            <BracketVisualization
+              tournamentId={id}
+              tournamentType={tournament.tournament.type}
+            />
           )}
 
           {tab === 'board' && (
