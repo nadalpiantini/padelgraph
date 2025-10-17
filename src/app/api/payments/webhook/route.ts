@@ -1,3 +1,4 @@
+import { log } from "@/lib/logger";
 /**
  * PayPal Webhook Handler
  * POST /api/payments/webhook
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     const isValid = await paypalService.verifyWebhookSignature(headers, body);
 
     if (!isValid) {
-      console.error('[Webhook] Invalid PayPal signature');
+      log.error('[Webhook] Invalid PayPal signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     const validation = paypalWebhookSchema.safeParse(event);
 
     if (!validation.success) {
-      console.error('[Webhook] Invalid webhook payload:', validation.error);
+      log.error('[Webhook] Invalid webhook payload', { errors: validation.error.issues });
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     const result = await paypalService.handleWebhook(validation.data);
 
     if (!result.success || !result.bookingId) {
-      console.error('[Webhook] Webhook processing failed:', result.error);
+      log.error('[Webhook] Webhook processing failed', { error: result.error });
       return NextResponse.json({ error: result.error || 'Processing failed' }, { status: 400 });
     }
 
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
         .eq('id', result.bookingId);
 
       if (updateError) {
-        console.error('[Webhook] Failed to update booking:', updateError);
+        log.error('[Webhook] Failed to update booking', { error: updateError });
         // Don't fail webhook - log and continue
       }
     }
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
     // Acknowledge webhook
     return NextResponse.json({ received: true, status: result.status }, { status: 200 });
   } catch (error) {
-    console.error('[Webhook] Unexpected error:', error);
+    log.error('[Webhook] Unexpected error', { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

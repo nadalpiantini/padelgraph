@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { syncPayPalSubscription } from '@/lib/services/subscriptions';
 import { createClient } from '@/lib/supabase/server';
+import { log } from '@/lib/logger';
 
 // PayPal Webhook Resource Types
 interface PayPalSubscriptionResource {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     const eventType = parsedBody.event_type;
     const resource = parsedBody.resource;
 
-    console.log(`PayPal webhook received: ${eventType}`);
+    log.info('PayPal webhook received', { eventType });
 
     // Handle different event types
     switch (eventType) {
@@ -62,12 +63,12 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${eventType}`);
+        log.warn('Unhandled PayPal event type', { eventType });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Error processing PayPal webhook:', error);
+    log.error('Error processing PayPal webhook', { error });
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
@@ -83,12 +84,12 @@ async function verifyWebhookSignature(
   
   // In development, allow skipping verification if webhook ID not configured
   if (!webhookId && process.env.NODE_ENV !== 'production') {
-    console.warn('⚠️  PAYPAL_WEBHOOK_ID not configured - skipping verification in development');
+    log.warn('PAYPAL_WEBHOOK_ID not configured - skipping verification in development');
     return true;
   }
 
   if (!webhookId) {
-    console.error('❌ PAYPAL_WEBHOOK_ID required in production');
+    log.error('PAYPAL_WEBHOOK_ID required in production');
     return false;
   }
 
@@ -100,7 +101,7 @@ async function verifyWebhookSignature(
   const authAlgo = request.headers.get('paypal-auth-algo');
 
   if (!transmissionId || !transmissionTime || !certUrl || !transmissionSig || !authAlgo) {
-    console.error('❌ Missing required PayPal webhook headers');
+    log.error('Missing required PayPal webhook headers');
     return false;
   }
 
@@ -123,7 +124,7 @@ async function verifyWebhookSignature(
     });
 
     if (!authResponse.ok) {
-      console.error('❌ Failed to get PayPal access token');
+      log.error('Failed to get PayPal access token', { status: authResponse.status });
       return false;
     }
 
@@ -152,7 +153,7 @@ async function verifyWebhookSignature(
     );
 
     if (!verifyResponse.ok) {
-      console.error('❌ PayPal webhook verification API call failed:', verifyResponse.status);
+      log.error('PayPal webhook verification API call failed', { status: verifyResponse.status });
       return false;
     }
 
@@ -160,14 +161,14 @@ async function verifyWebhookSignature(
     const isValid = verifyData.verification_status === 'SUCCESS';
 
     if (!isValid) {
-      console.error('❌ PayPal webhook signature verification failed');
+      log.error('PayPal webhook signature verification failed');
     } else {
-      console.log('✅ PayPal webhook signature verified successfully');
+      log.info('PayPal webhook signature verified successfully');
     }
 
     return isValid;
   } catch (error) {
-    console.error('❌ Error verifying PayPal webhook signature:', error);
+    log.error('Error verifying PayPal webhook signature', { error });
     return false;
   }
 }
@@ -179,7 +180,7 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
   // Get user by PayPal email
   const subscriberEmail = subscriptionResource.subscriber?.email_address;
   if (!subscriberEmail) {
-    console.error('No subscriber email in PayPal webhook');
+    log.error('No subscriber email in PayPal webhook', { subscriptionId: subscriptionResource.id });
     return;
   }
 
@@ -190,7 +191,7 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
     .single();
 
   if (!user) {
-    console.error(`User not found for email: ${subscriberEmail}`);
+    log.error('User not found for PayPal subscription', { email: subscriberEmail });
     return;
   }
 
@@ -204,7 +205,7 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
     },
   });
 
-  console.log(`Subscription activated for user: ${user.user_id}`);
+  log.info('Subscription activated', { userId: user.user_id, subscriptionId: subscriptionResource.id });
 }
 
 async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
@@ -218,7 +219,7 @@ async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
     .single();
 
   if (!subscription) {
-    console.error(`Subscription not found: ${subscriptionResource.id}`);
+    log.error('Subscription not found for cancellation', { subscriptionId: subscriptionResource.id });
     return;
   }
 
@@ -237,12 +238,12 @@ async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
     .update({ current_plan: 'free' })
     .eq('user_id', subscription.user_id);
 
-  console.log(`Subscription cancelled for user: ${subscription.user_id}`);
+  log.info('Subscription cancelled', { userId: subscription.user_id });
 }
 
 async function handlePaymentCompleted(resource: unknown): Promise<void> {
   const paymentResource = resource as PayPalPaymentResource;
-  console.log(`Payment completed: ${paymentResource.id}`);
+  log.info('Payment completed', { paymentId: paymentResource.id });
   // Could log payment history here
 }
 
@@ -251,7 +252,7 @@ async function handlePaymentFailed(resource: unknown): Promise<void> {
   const supabase = await createClient();
 
   if (!paymentResource.billing_agreement_id) {
-    console.error('No billing_agreement_id in payment resource');
+    log.error('No billing_agreement_id in payment resource', { paymentId: paymentResource.id });
     return;
   }
 
@@ -271,5 +272,5 @@ async function handlePaymentFailed(resource: unknown): Promise<void> {
     })
     .eq('paypal_subscription_id', paymentResource.billing_agreement_id);
 
-  console.log(`Payment failed for user: ${subscription.user_id}`);
+  log.warn('Payment failed', { userId: subscription.user_id, paymentId: paymentResource.id });
 }

@@ -1,3 +1,4 @@
+import { log } from "@/lib/logger";
 /**
  * Capture PayPal Payment
  * POST /api/payments/capture
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
     const captureResult = await paypalService.capturePayment({ orderId });
 
     if (!captureResult.success) {
-      console.error('[Payment API] PayPal capture failed:', captureResult.error);
+      log.error('[Payment API] PayPal capture failed', { error: captureResult.error });
       return serverErrorResponse('Failed to capture payment', captureResult.error);
     }
 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
       .eq('id', bookingId);
 
     if (updateError) {
-      console.error('[Payment API] Failed to update booking:', updateError);
+      log.error('[Payment API] Failed to update booking', { error: updateError });
       return serverErrorResponse('Payment captured but booking update failed', updateError);
     }
 
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
       message: 'Payment captured successfully',
     });
   } catch (error) {
-    console.error('[Payment API] Unexpected error:', error);
+    log.error('[Payment API] Unexpected error', { error: error instanceof Error ? error.message : String(error) });
     return serverErrorResponse('Unexpected error occurred', error);
   }
 }

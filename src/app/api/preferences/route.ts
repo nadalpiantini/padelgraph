@@ -1,3 +1,4 @@
+import { log } from "@/lib/logger";
 /**
  * Preferences API endpoint
  * PUT /api/preferences - Update user preferences
@@ -42,7 +43,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (fetchError) {
-      console.error('[Preferences API] Error fetching profile:', fetchError);
+      log.error('[Preferences API] Error fetching profile', { error: fetchError });
       return serverErrorResponse('Failed to fetch current preferences', fetchError);
     }
 
@@ -83,13 +84,13 @@ export async function PUT(request: Request) {
       .single();
 
     if (updateError) {
-      console.error('[Preferences API] Error updating preferences:', updateError);
+      log.error('[Preferences API] Error updating preferences', { error: updateError });
       return serverErrorResponse('Failed to update preferences', updateError);
     }
 
     return successResponse(updatedProfile.preferences, 'Preferences updated successfully');
   } catch (error) {
-    console.error('[Preferences API] Unexpected error:', error);
+    log.error('[Preferences API] Unexpected error', { error: error instanceof Error ? error.message : String(error) });
     return serverErrorResponse('Unexpected error occurred', error);
   }
 }
