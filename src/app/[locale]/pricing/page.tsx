@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, X, Crown, Zap, Users, Shield, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { User } from '@supabase/supabase-js';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 interface PlanFeature {
   name: string;
@@ -131,6 +132,7 @@ const plans: Plan[] = [
 export default function PricingPage() {
   const router = useRouter();
   const supabase = createClient();
+  const analytics = useAnalytics();
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   // const [loading, setLoading] = useState(false); // Unused for now
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -138,6 +140,9 @@ export default function PricingPage() {
 
   useEffect(() => {
     loadUserAndPlan();
+
+    // Track pricing page view
+    analytics.trackPricingViewed();
   }, []);
 
   async function loadUserAndPlan() {
@@ -146,6 +151,9 @@ export default function PricingPage() {
 
       if (user) {
         setUser(user);
+
+        // Set user ID for analytics
+        analytics.setUserId(user.id);
 
         // Get current subscription
         const { data: subscription } = await supabase
@@ -189,6 +197,12 @@ export default function PricingPage() {
     setLoadingPlan(plan.id);
 
     try {
+      // Track plan selection
+      analytics.trackPlanSelected(plan.id);
+
+      // Track checkout initiation
+      analytics.trackCheckoutInitiated(plan.id);
+
       // Create PayPal subscription
       const response = await fetch('/api/paypal/create-subscription', {
         method: 'POST',

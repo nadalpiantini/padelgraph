@@ -190,7 +190,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Update local subscription record
-    const updateData: any = {
+    const updateData: {
+      plan: string;
+      paypal_plan_id: string;
+      updated_at: string;
+      plan_change_date?: string;
+      pending_plan?: string;
+      pending_plan_date?: string;
+    } = {
       plan: new_plan,
       paypal_plan_id: newPlanId,
       updated_at: new Date().toISOString(),

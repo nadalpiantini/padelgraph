@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import "../globals.css";
 import ClientErrorSuppressor from "@/components/ClientErrorSuppressor";
+import { AnalyticsProvider } from '@/lib/providers/AnalyticsProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +46,11 @@ export default async function LocaleLayout({
         suppressHydrationWarning
       >
         <ClientErrorSuppressor />
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+        <AnalyticsProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </AnalyticsProvider>
       </body>
     </html>
   );
