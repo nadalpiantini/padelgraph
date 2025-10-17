@@ -1,0 +1,26 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "¡Éxito!",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "feed": "Feed",
+    "bookings": "Reservas",
+    "profile": "Perfil",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "signUp": "Registrarse"
+  }
+}
