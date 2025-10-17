@@ -142,8 +142,8 @@ function getMetricColumn(metric: LeaderboardMetric): string {
 /**
  * Extract metric value from entry
  */
-function getMetricValue(entry: any, metric: LeaderboardMetric): number {
-  const metricMap: Record<LeaderboardMetric, keyof any> = {
+function getMetricValue(entry: Record<string, unknown>, metric: LeaderboardMetric): number {
+  const metricMap: Record<LeaderboardMetric, string> = {
     elo_rating: 'elo_rating',
     win_rate: 'win_rate',
     tournaments_won: 'tournaments_won',
@@ -152,7 +152,8 @@ function getMetricValue(entry: any, metric: LeaderboardMetric): number {
     cities_visited: 'cities_visited',
     fair_play_score: 'fair_play_score',
   };
-  return entry[metricMap[metric]] || 0;
+  const value = entry[metricMap[metric]];
+  return typeof value === 'number' ? value : 0;
 }
 
 /**
@@ -224,7 +225,7 @@ export async function precalculateLeaderboards(): Promise<void> {
             period_type: periodType,
             period_start: null,
             period_end: null,
-            rankings: rankings as any,
+            rankings: rankings as unknown,
             calculated_at: new Date().toISOString(),
           },
           {

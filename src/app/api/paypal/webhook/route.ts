@@ -5,6 +5,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { syncPayPalSubscription } from '@/lib/services/subscriptions';
 import { createClient } from '@/lib/supabase/server';
 
+// PayPal Webhook Resource Types
+interface PayPalSubscriptionResource {
+  id: string;
+  plan_id: string;
+  status: string;
+  billing_info?: unknown;
+  subscriber?: {
+    email_address?: string;
+  };
+}
+
+interface PayPalPaymentResource {
+  id: string;
+  billing_agreement_id?: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -90,11 +106,12 @@ function verifyWebhookSignature(request: NextRequest, _body: string): boolean {
   return true;
 }
 
-async function handleSubscriptionActivated(resource: any): Promise<void> {
+async function handleSubscriptionActivated(resource: unknown): Promise<void> {
+  const subscriptionResource = resource as PayPalSubscriptionResource;
   const supabase = await createClient();
 
   // Get user by PayPal email
-  const subscriberEmail = resource.subscriber?.email_address;
+  const subscriberEmail = subscriptionResource.subscriber?.email_address;
   if (!subscriberEmail) {
     console.error('No subscriber email in PayPal webhook');
     return;
@@ -112,26 +129,30 @@ async function handleSubscriptionActivated(resource: any): Promise<void> {
   }
 
   await syncPayPalSubscription(user.user_id, {
-    subscription_id: resource.id,
-    plan_id: resource.plan_id,
-    status: resource.status,
-    billing_info: resource.billing_info,
+    subscription_id: subscriptionResource.id,
+    plan_id: subscriptionResource.plan_id,
+    status: subscriptionResource.status,
+    billing_info: subscriptionResource.billing_info as {
+      next_billing_time: string;
+      last_payment: { amount: { value: string; currency_code: string } };
+    },
   });
 
   console.log(`Subscription activated for user: ${user.user_id}`);
 }
 
-async function handleSubscriptionCancelled(resource: any): Promise<void> {
+async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
+  const subscriptionResource = resource as PayPalSubscriptionResource;
   const supabase = await createClient();
 
   const { data: subscription } = await supabase
     .from('subscription')
     .select('user_id')
-    .eq('paypal_subscription_id', resource.id)
+    .eq('paypal_subscription_id', subscriptionResource.id)
     .single();
 
   if (!subscription) {
-    console.error(`Subscription not found: ${resource.id}`);
+    console.error(`Subscription not found: ${subscriptionResource.id}`);
     return;
   }
 
@@ -142,7 +163,7 @@ async function handleSubscriptionCancelled(resource: any): Promise<void> {
       canceled_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq('paypal_subscription_id', resource.id);
+    .eq('paypal_subscription_id', subscriptionResource.id);
 
   // Downgrade to free plan
   await supabase
@@ -153,18 +174,25 @@ async function handleSubscriptionCancelled(resource: any): Promise<void> {
   console.log(`Subscription cancelled for user: ${subscription.user_id}`);
 }
 
-async function handlePaymentCompleted(resource: any): Promise<void> {
-  console.log(`Payment completed: ${resource.id}`);
+async function handlePaymentCompleted(resource: unknown): Promise<void> {
+  const paymentResource = resource as PayPalPaymentResource;
+  console.log(`Payment completed: ${paymentResource.id}`);
   // Could log payment history here
 }
 
-async function handlePaymentFailed(resource: any): Promise<void> {
+async function handlePaymentFailed(resource: unknown): Promise<void> {
+  const paymentResource = resource as PayPalPaymentResource;
   const supabase = await createClient();
+
+  if (!paymentResource.billing_agreement_id) {
+    console.error('No billing_agreement_id in payment resource');
+    return;
+  }
 
   const { data: subscription } = await supabase
     .from('subscription')
     .select('user_id')
-    .eq('paypal_subscription_id', resource.billing_agreement_id)
+    .eq('paypal_subscription_id', paymentResource.billing_agreement_id)
     .single();
 
   if (!subscription) return;
@@ -175,7 +203,7 @@ async function handlePaymentFailed(resource: any): Promise<void> {
       status: 'past_due',
       updated_at: new Date().toISOString(),
     })
-    .eq('paypal_subscription_id', resource.billing_agreement_id);
+    .eq('paypal_subscription_id', paymentResource.billing_agreement_id);
 
   console.log(`Payment failed for user: ${subscription.user_id}`);
 }

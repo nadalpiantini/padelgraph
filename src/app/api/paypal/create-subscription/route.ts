@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     // Find approval URL
     const approvalUrl = subscriptionData.links?.find(
-      (link: any) => link.rel === 'approve'
+      (link: { rel: string; href: string }) => link.rel === 'approve'
     )?.href;
 
     if (!approvalUrl) {
