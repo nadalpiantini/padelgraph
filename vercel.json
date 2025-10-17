@@ -13,6 +13,12 @@
     "silent": false,
     "autoJobCancelation": true
   },
+  "crons": [
+    {
+      "path": "/api/cron/check-in-reminders",
+      "schedule": "0 * * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/api/health",
