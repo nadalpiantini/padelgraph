@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 
@@ -58,22 +58,9 @@ export default function Hero({ t }: HeroProps) {
           </div>
         </div>
 
-        {/* Hero Visual */}
-        <div className="mt-20 relative">
-          <div className="relative mx-auto max-w-5xl">
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10" />
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-slate-700/50 p-8 backdrop-blur-sm">
-              <div className="aspect-video bg-gradient-to-br from-indigo-900/20 to-purple-900/20 rounded-xl border border-indigo-500/20 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
-                <div className="relative z-10 text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/50">
-                    <Users className="w-12 h-12" aria-hidden="true" />
-                  </div>
-                  <p className="text-slate-400 text-lg">Your Padel Hub Awaits</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Tagline */}
+        <div className="mt-12 text-center">
+          <p className="text-slate-400 text-lg">Your Padel Hub Awaits</p>
         </div>
       </div>
     </section>
