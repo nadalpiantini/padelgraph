@@ -6,7 +6,6 @@ import Image from 'next/image';
 
 interface HeroProps {
   t: {
-    badge: string;
     title: string;
     subtitle: string;
     cta1: string;
@@ -34,12 +33,6 @@ export default function Hero({ t }: HeroProps) {
               className="rounded-xl"
               priority
             />
-          </div>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 animate-fade-in">
-            <BarChart3 className="w-4 h-4 text-indigo-400" aria-hidden="true" />
-            <span className="text-sm text-indigo-300">{t.badge}</span>
           </div>
 
           {/* Title */}
