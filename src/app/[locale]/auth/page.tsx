@@ -97,6 +97,7 @@ export default function AuthPage({
           {/* Tabs */}
           <div className="flex gap-2 mb-8">
             <button
+              data-testid="tab-login"
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
                 isLogin
@@ -107,6 +108,7 @@ export default function AuthPage({
               Log In
             </button>
             <button
+              data-testid="tab-signup"
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
                 !isLogin
@@ -118,7 +120,7 @@ export default function AuthPage({
             </button>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-6">
+          <form onSubmit={handleAuth} className="space-y-6" data-testid="auth-form">
             {!isLogin && (
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -127,6 +129,7 @@ export default function AuthPage({
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
+                    data-testid="username-input"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -144,6 +147,7 @@ export default function AuthPage({
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
+                  data-testid="email-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -161,6 +165,7 @@ export default function AuthPage({
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
+                  data-testid="password-input"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -173,6 +178,7 @@ export default function AuthPage({
 
             {error && (
               <div
+                data-testid="auth-error"
                 className={`p-4 rounded-lg ${
                   error.includes('Check your email')
                     ? 'bg-green-500/10 border border-green-500/20 text-green-400'
@@ -184,6 +190,7 @@ export default function AuthPage({
             )}
 
             <button
+              data-testid="auth-submit"
               type="submit"
               disabled={loading}
               className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-400 rounded-lg font-medium transition-all flex items-center justify-center gap-2"

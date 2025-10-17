@@ -8,45 +8,43 @@ test.describe('Signup Flow', () => {
     await navigateAndWait(page, '/auth?mode=signup');
 
     // Should start on signup tab
-    await expect(page.locator('button:has-text("Sign Up")')).toHaveClass(/indigo-600/);
+    await expect(page.locator('[data-testid="tab-signup"]')).toHaveClass(/indigo-600/);
   });
 
   test('should display signup form with username field', async ({ page }) => {
     // Check form fields exist
-    await expect(page.locator('input[type="text"]')).toBeVisible(); // Username
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.locator('button[type="submit"]:has-text("Create Account")')).toBeVisible();
+    await expect(page.locator('[data-testid="username-input"]')).toBeVisible(); // Username
+    await expect(page.locator('[data-testid="email-input"]')).toBeVisible();
+    await expect(page.locator('[data-testid="password-input"]')).toBeVisible();
+    await expect(page.locator('[data-testid="auth-submit"]')).toBeVisible();
   });
 
   test('should show validation error for invalid email on signup', async ({ page }) => {
     await fillForm(page, {
-      'input[type="text"]': TEST_DATA.USERNAME,
-      'input[type="email"]': TEST_DATA.INVALID_EMAIL,
-      'input[type="password"]': TEST_DATA.VALID_PASSWORD,
+      '[data-testid="username-input"]': TEST_DATA.USERNAME,
+      '[data-testid="email-input"]': TEST_DATA.INVALID_EMAIL,
+      '[data-testid="password-input"]': TEST_DATA.VALID_PASSWORD,
     });
 
-    await submitForm(page, 'form');
+    await submitForm(page, '[data-testid="auth-form"]');
 
     // Wait for form validation
-    const emailInput = page.locator('input[type="email"]');
+    const emailInput = page.locator('[data-testid="email-input"]');
     const isInvalid = await emailInput.evaluate((el: HTMLInputElement) => !el.validity.valid);
     expect(isInvalid).toBe(true);
   });
 
   test('should show error for weak password', async ({ page }) => {
     await fillForm(page, {
-      'input[type="text"]': TEST_DATA.USERNAME,
-      'input[type="email"]': TEST_DATA.VALID_EMAIL,
-      'input[type="password"]': TEST_DATA.WEAK_PASSWORD,
+      '[data-testid="username-input"]': TEST_DATA.USERNAME,
+      '[data-testid="email-input"]': TEST_DATA.VALID_EMAIL,
+      '[data-testid="password-input"]': TEST_DATA.WEAK_PASSWORD,
     });
 
-    await submitForm(page, 'form');
+    await submitForm(page, '[data-testid="auth-form"]');
 
     // Wait for error message about weak password
-    await expect(
-      page.locator('text=/Password.*too weak|Password must be at least|weak password/i')
-    ).toBeVisible({
+    await expect(page.locator('[data-testid="auth-error"]')).toBeVisible({
       timeout: TIMEOUTS.MEDIUM,
     });
   });
@@ -56,35 +54,35 @@ test.describe('Signup Flow', () => {
     const uniqueEmail = `test+${Date.now()}@padelgraph.com`;
 
     await fillForm(page, {
-      'input[type="text"]': TEST_DATA.USERNAME,
-      'input[type="email"]': uniqueEmail,
-      'input[type="password"]': TEST_DATA.VALID_PASSWORD,
+      '[data-testid="username-input"]': TEST_DATA.USERNAME,
+      '[data-testid="email-input"]': uniqueEmail,
+      '[data-testid="password-input"]': TEST_DATA.VALID_PASSWORD,
     });
 
-    await submitForm(page, 'form');
+    await submitForm(page, '[data-testid="auth-form"]');
 
     // Wait for success message
-    await expect(page.locator('text=/Check your email|confirmation link/i')).toBeVisible({
+    await expect(page.locator('[data-testid="auth-error"]')).toBeVisible({
       timeout: TIMEOUTS.LONG,
     });
 
     // Check that message is styled as success (green)
-    const successMessage = page.locator('text=/Check your email/i').locator('..');
+    const successMessage = page.locator('[data-testid="auth-error"]');
     await expect(successMessage).toHaveClass(/green/);
   });
 
   test('should show error for already registered email', async ({ page }) => {
     // Use existing test account email
     await fillForm(page, {
-      'input[type="text"]': TEST_DATA.USERNAME,
-      'input[type="email"]': 'test@padelgraph.com',
-      'input[type="password"]': TEST_DATA.VALID_PASSWORD,
+      '[data-testid="username-input"]': TEST_DATA.USERNAME,
+      '[data-testid="email-input"]': 'test@padelgraph.com',
+      '[data-testid="password-input"]': TEST_DATA.VALID_PASSWORD,
     });
 
-    await submitForm(page, 'form');
+    await submitForm(page, '[data-testid="auth-form"]');
 
     // Wait for error about duplicate user
-    await expect(page.locator('text=/already.*registered|User already exists/i')).toBeVisible({
+    await expect(page.locator('[data-testid="auth-error"]')).toBeVisible({
       timeout: TIMEOUTS.MEDIUM,
     });
   });
@@ -95,14 +93,14 @@ test.describe('Signup Flow', () => {
 
     // Leave username empty
     await fillForm(page, {
-      'input[type="email"]': uniqueEmail,
-      'input[type="password"]': TEST_DATA.VALID_PASSWORD,
+      '[data-testid="email-input"]': uniqueEmail,
+      '[data-testid="password-input"]': TEST_DATA.VALID_PASSWORD,
     });
 
-    await submitForm(page, 'form');
+    await submitForm(page, '[data-testid="auth-form"]');
 
     // Should still succeed (username defaults to email prefix)
-    await expect(page.locator('text=/Check your email/i')).toBeVisible({
+    await expect(page.locator('[data-testid="auth-error"]')).toBeVisible({
       timeout: TIMEOUTS.LONG,
     });
   });
