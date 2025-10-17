@@ -114,8 +114,9 @@ async function extractUserFeatures(userId: string): Promise<UserFeatures | null>
 }
 
 /**
- * Get user interaction history
+ * Get user interaction history (currently unused - for future enhancement)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUserInteractions(userId: string): Promise<UserItemInteraction[]> {
   const supabase = await createClient();
   const interactions: UserItemInteraction[] = [];
@@ -382,9 +383,6 @@ class RecommendationsEngine {
     if (!userFeatures) {
       throw new Error('User not found');
     }
-
-    // Get user interactions
-    const _interactions = await getUserInteractions(request.user_id);
 
     // Get all interactions from system (for collaborative filtering)
     const allInteractions = await this.getAllInteractions();

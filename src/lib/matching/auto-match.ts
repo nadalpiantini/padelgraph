@@ -151,7 +151,7 @@ async function checkRecentMatch(
     .gte('created_at', lookbackDate.toISOString())
     .limit(1);
 
-  return existingConversation && existingConversation.length > 0;
+  return !!(existingConversation && existingConversation.length > 0);
 }
 
 /**
@@ -167,7 +167,8 @@ async function checkOptOut(userId: string): Promise<boolean> {
     .single();
 
   // Default to enabled if no settings
-  return settings ? (settings.auto_match_enabled === false) : false;
+  if (!settings) return false;
+  return settings.auto_match_enabled === false;
 }
 
 // ============================================================================
