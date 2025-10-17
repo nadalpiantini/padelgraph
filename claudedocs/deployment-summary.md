@@ -293,3 +293,72 @@ To allow public API access without authentication:
 
 After disabling protection, the app will be fully accessible at:
 https://padelgraph-3qbjlvchq-nadalpiantini-fcbc2d66.vercel.app
+
+---
+
+## 📊 CLI Configuration Update (2025-10-17)
+
+### ✅ Completed
+1. **Vercel CLI** - Environment variables pulled successfully to `.env.local`
+2. **Supabase CLI** - Project linked to remote (kqftsiohgdzlyfqbhxbc)
+3. **Base Migration** - Created `000_base_schema.sql` for initial tables
+4. **Migration Fixes** - Fixed `004_sprint_2_policies.sql` (removed NEW/OLD comparisons)
+5. **Partial Migration** - Successfully applied migrations 000-003
+
+### ✅ Database Configuration Complete
+
+**Status:** All migrations (000-004) successfully applied to remote database
+
+**Applied Migrations:**
+- ✅ `000_base_schema.sql` - Base tables (organization, user_profile, org_member) + base policies
+- ✅ `001_sprint_1_schema.sql` - Sprint 1 tables (posts, courts, bookings)
+- ✅ `002_sprint_1_policies.sql` - Sprint 1 RLS policies
+- ✅ `003_sprint_2_schema.sql` - Sprint 2 tables (tournaments, matches, standings)
+- ✅ `004_sprint_2_policies.sql` - Sprint 2 RLS policies (fixed and applied)
+
+### Additional Fixes Applied
+
+**TypeScript Errors Fixed:**
+- Fixed unused parameter in `americano.ts:31` (_previousMatches)
+- Removed unused variable in `americano.ts:133` (matchPlayers)
+- TypeScript compilation: ✅ 0 errors
+- Production build: ✅ Success (119 kB shared JS)
+
+### Database Schema Status
+
+**Tables:** 14 total (10 Sprint 1 + 4 Sprint 2)
+**RLS Policies:** ~40 (all applied successfully)
+**Functions:** 6 helper functions (is_org_admin, is_tournament_participant, is_match_player, etc.)
+**Triggers:** 8 auto-update triggers
+
+---
+
+## 🎯 Remaining Deployment Steps
+
+### 1. Database Setup
+- [x] All migrations applied successfully (000-004)
+- [x] RLS policies active on all tables
+- [x] Helper functions created
+- [ ] Configure storage buckets (avatars, post-media) - Optional
+
+### 2. Vercel Configuration
+- [ ] Connect GitHub repository to Vercel
+- [ ] Configure custom domains (padelgraph.com, padelgraph.app)
+- [ ] Set up auto-deploy on push to main
+
+### 3. Cloudflare DNS
+- [ ] Add CNAME records for both domains
+- [ ] Configure SSL/TLS (Full strict mode)
+- [ ] Enable Always Use HTTPS
+
+### 4. Testing
+- [ ] Smoke tests on production deployment
+- [ ] API endpoint verification
+- [ ] Database connectivity test
+- [ ] Authentication flow test
+
+---
+
+**Last Updated:** 2025-10-17T11:00:00Z
+**Status:** ✅ CLI Fully Configured, All Migrations Applied (5/5), TypeScript Clean, Build Successful
+**Ready For:** Vercel Domain Configuration + Cloudflare DNS Setup
