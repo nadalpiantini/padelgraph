@@ -7,7 +7,7 @@ import { log } from '@/lib/logger';
 import { calculatePlayerStats } from '@/lib/services/analytics';
 import { precalculateLeaderboards } from '@/lib/services/leaderboards';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds max
 
 export async function GET(request: NextRequest) {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         // Calculate stats for each player in the tournament
         const playerIds = new Set<string>();
         matches?.forEach(match => {
-          match.participant?.forEach((p: any) => {
+          match.participant?.forEach((p: { user_id?: string }) => {
             if (p.user_id) playerIds.add(p.user_id);
           });
         });

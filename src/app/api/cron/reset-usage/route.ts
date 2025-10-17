@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { log } from '@/lib/logger';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds max
 
 export async function GET(request: NextRequest) {

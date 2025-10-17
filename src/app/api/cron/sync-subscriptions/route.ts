@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { log } from '@/lib/logger';
 import { syncPayPalSubscription } from '@/lib/services/subscriptions';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds max
 
 const PAYPAL_API_BASE =
@@ -81,7 +81,13 @@ export async function GET(request: NextRequest) {
       suspended: 0,
       reactivated: 0,
       errors: [] as string[],
-      discrepancies: [] as any[],
+      discrepancies: [] as Array<{
+        subscription_id: string;
+        issue?: string;
+        local_status?: string;
+        paypal_status?: string;
+        action: string;
+      }>,
     };
 
     // Process each subscription

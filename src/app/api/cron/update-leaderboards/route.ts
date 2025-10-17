@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { log } from '@/lib/logger';
 import { precalculateLeaderboards } from '@/lib/services/leaderboards';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds max
 
 export async function GET(request: NextRequest) {
