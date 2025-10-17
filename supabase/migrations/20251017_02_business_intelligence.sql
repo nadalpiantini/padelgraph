@@ -128,7 +128,7 @@ CREATE POLICY "Admins can view analytics events"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -138,7 +138,7 @@ CREATE POLICY "Admins can view sessions"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -148,7 +148,7 @@ CREATE POLICY "Admins can view funnel steps"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -158,7 +158,7 @@ CREATE POLICY "Admins can view business metrics"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -168,7 +168,7 @@ CREATE POLICY "Admins can manage email campaigns"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -178,7 +178,7 @@ CREATE POLICY "Admins can manage experiments"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );

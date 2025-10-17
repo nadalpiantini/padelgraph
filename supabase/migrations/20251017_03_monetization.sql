@@ -81,7 +81,7 @@ CREATE POLICY "Admins can view all subscriptions"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -96,7 +96,7 @@ CREATE POLICY "Admins can view all usage"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -111,7 +111,7 @@ CREATE POLICY "Admins can manage coupons"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );

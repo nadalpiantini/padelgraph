@@ -121,7 +121,7 @@ CREATE POLICY "Users can view public stats"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = player_stats.user_id
+      WHERE user_profile.id = player_stats.user_id
       AND user_profile.is_public = true
     )
   );
@@ -136,7 +136,7 @@ CREATE POLICY "Admins can manage achievements"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = auth.uid()
+      WHERE user_profile.id = auth.uid()
       AND user_profile.role = 'admin'
     )
   );
@@ -151,7 +151,7 @@ CREATE POLICY "Users can view public achievements"
   USING (
     EXISTS (
       SELECT 1 FROM user_profile
-      WHERE user_profile.user_id = user_achievement.user_id
+      WHERE user_profile.id = user_achievement.user_id
       AND user_profile.is_public = true
     )
   );
