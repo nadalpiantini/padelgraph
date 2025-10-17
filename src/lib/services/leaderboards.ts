@@ -111,13 +111,16 @@ async function calculateLeaderboard(
   }
 
   // Format entries
-  return data.map((entry, index) => ({
-    user_id: entry.user_id,
-    username: entry.user_profile.username,
-    avatar_url: entry.user_profile.avatar_url,
-    rank: index + 1,
-    value: getMetricValue(entry, metric),
-  }));
+  return data.map((entry, index) => {
+    const profile = Array.isArray(entry.user_profile) ? entry.user_profile[0] : entry.user_profile;
+    return {
+      user_id: entry.user_id,
+      username: profile.username,
+      avatar_url: profile.avatar_url,
+      rank: index + 1,
+      value: getMetricValue(entry, metric),
+    };
+  });
 }
 
 /**

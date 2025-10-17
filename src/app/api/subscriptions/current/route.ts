@@ -1,8 +1,8 @@
-// Sprint 5: Achievements API
-// GET /api/achievements - Get all achievements with user progress
+// Sprint 5: Current Subscription API
+// GET /api/subscriptions/current
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserAchievements } from '@/lib/services/achievements';
+import { getUserSubscription, getPlanLimits } from '@/lib/services/subscriptions';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(_request: NextRequest) {
@@ -19,15 +19,23 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const achievements = await getUserAchievements(user.id);
+    const subscription = await getUserSubscription(user.id);
+
+    if (!subscription) {
+      return NextResponse.json(
+        { error: 'Subscription not found' },
+        { status: 404 }
+      );
+    }
+
+    const limits = getPlanLimits(subscription.plan);
 
     return NextResponse.json({
-      achievements,
-      total: achievements.length,
-      unlocked: achievements.filter((a) => a.is_unlocked).length,
+      subscription,
+      limits,
     });
   } catch (error) {
-    console.error('Error in achievements API:', error);
+    console.error('Error fetching current subscription:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
