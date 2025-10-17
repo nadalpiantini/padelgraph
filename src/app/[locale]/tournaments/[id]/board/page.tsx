@@ -19,15 +19,14 @@ import {
 } from 'lucide-react';
 import { CourtCard } from '@/components/tournaments/CourtCard';
 import { StandingsTable } from '@/components/tournaments/StandingsTable';
+import type {
+  TournamentRound,
+  TournamentStandingWithProfile,
+  Tournament,
+} from '@/types/database';
 
 interface RotationBoardData {
-  round: {
-    id: string;
-    round_number: number;
-    status: 'pending' | 'in_progress' | 'completed';
-    starts_at?: string;
-    ends_at?: string;
-  };
+  round: TournamentRound;
   matches: Array<{
     id: string;
     court_id: string;
@@ -56,12 +55,8 @@ interface RotationBoardData {
       avatar_url?: string;
     };
   }>;
-  tournament: {
-    id: string;
-    name: string;
-    type: 'americano' | 'mexicano';
-  };
-  standings: any[];
+  tournament: Pick<Tournament, 'id' | 'name' | 'type'>;
+  standings: TournamentStandingWithProfile[];
 }
 
 export default function RotationBoardPage({
@@ -179,7 +174,7 @@ export default function RotationBoardPage({
       };
     }
     return acc;
-  }, {} as Record<string, { court: { id: string; name: string }; match: any }>);
+  }, {} as Record<string, { court: { id: string; name: string }; match: RotationBoardData['matches'][0] }>);
 
   return (
     <div className="min-h-screen bg-gray-50">

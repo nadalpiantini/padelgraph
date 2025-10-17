@@ -6,26 +6,10 @@
  */
 
 import { Trophy, Medal } from 'lucide-react';
-
-interface Standing {
-  rank: number;
-  user_id: string;
-  user_profile: {
-    full_name: string;
-    avatar_url?: string;
-  };
-  points: number;
-  matches_played: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  games_won: number;
-  games_lost: number;
-  games_diff: number;
-}
+import type { TournamentStandingWithProfile } from '@/types/database';
 
 interface StandingsTableProps {
-  standings: Standing[];
+  standings: TournamentStandingWithProfile[];
   currentUserId?: string;
   compact?: boolean;
 }
@@ -132,36 +116,36 @@ export function StandingsTable({
                   className={`${
                     isCurrentUser
                       ? 'bg-indigo-50 font-semibold'
-                      : standing.rank <= 3
+                      : (standing.rank ?? 0) <= 3
                       ? 'bg-yellow-50'
                       : ''
                   }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      {getRankIcon(standing.rank)}
+                      {standing.rank && getRankIcon(standing.rank)}
                       <span className="text-sm font-medium text-gray-900">
-                        {standing.rank}
+                        {standing.rank ?? '-'}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {standing.user_profile.avatar_url ? (
+                      {standing.profile.avatar_url ? (
                         <img
-                          src={standing.user_profile.avatar_url}
-                          alt={standing.user_profile.full_name}
+                          src={standing.profile.avatar_url}
+                          alt={standing.profile.name || 'Usuario'}
                           className="h-8 w-8 rounded-full object-cover mr-3"
                         />
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
                           <span className="text-xs font-medium text-gray-600">
-                            {standing.user_profile.full_name.charAt(0)}
+                            {standing.profile.name?.charAt(0) || '?'}
                           </span>
                         </div>
                       )}
                       <span className="text-sm text-gray-900">
-                        {standing.user_profile.full_name}
+                        {standing.profile.name || 'Usuario'}
                         {isCurrentUser && (
                           <span className="ml-2 text-indigo-600">(Tú)</span>
                         )}

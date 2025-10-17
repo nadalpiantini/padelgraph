@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { TournamentCard } from '@/components/tournaments/TournamentCard';
 import { Trophy, Search } from 'lucide-react';
+import type { TournamentWithDetails } from '@/types/database';
 
 async function getTournaments(filter?: string) {
   // TODO: Replace with actual API call
@@ -108,7 +109,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
         >
           {tournaments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tournaments.map((tournament: any) => (
+              {tournaments.map((tournament: TournamentWithDetails) => (
                 <TournamentCard key={tournament.id} tournament={tournament} />
               ))}
             </div>

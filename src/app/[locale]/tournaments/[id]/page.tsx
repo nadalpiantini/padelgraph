@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { StandingsTable } from '@/components/tournaments/StandingsTable';
 import { CheckInButton } from '@/components/tournaments/CheckInButton';
+import type { TournamentParticipantWithProfile } from '@/types/database';
 
 async function getTournamentDetails(id: string) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/tournaments/${id}`, {
@@ -141,7 +142,7 @@ export default async function TournamentDetailPage({
                   tournamentId={tournament.tournament.id}
                   status={
                     tournament.participants.find(
-                      (p: any) => p.user_id === 'current-user-id'
+                      (p: TournamentParticipantWithProfile) => p.user_id === 'current-user-id'
                     )?.status || 'not_registered'
                   }
                 />
@@ -263,19 +264,19 @@ export default async function TournamentDetailPage({
                 Participantes ({tournament.participants.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tournament.participants.map((p: any) => (
+                {tournament.participants.map((p: TournamentParticipantWithProfile) => (
                   <div
                     key={p.user_id}
                     className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                   >
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-600">
-                        {p.user_profile?.full_name?.charAt(0) || '?'}
+                        {p.profile?.name?.charAt(0) || '?'}
                       </span>
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">
-                        {p.user_profile?.full_name || 'Usuario'}
+                        {p.profile?.name || 'Usuario'}
                       </p>
                       <p className="text-xs text-gray-500 capitalize">
                         {p.status}

@@ -20,17 +20,24 @@ import {
   Clock,
   UserX,
 } from 'lucide-react';
+import type {
+  Tournament,
+  TournamentParticipantWithProfile,
+  TournamentRound,
+  TournamentMatchWithDetails,
+  TournamentStandingWithProfile,
+} from '@/types/database';
 
 interface AdminDashboardData {
-  tournament: any;
-  participants: any[];
-  all_rounds: any[];
-  all_matches: any[];
-  standings: any[];
+  tournament: Tournament;
+  participants: TournamentParticipantWithProfile[];
+  all_rounds: TournamentRound[];
+  all_matches: TournamentMatchWithDetails[];
+  standings: TournamentStandingWithProfile[];
   issues: {
-    missing_scores: any[];
-    overdue_matches: any[];
-    no_shows: any[];
+    missing_scores: TournamentMatchWithDetails[];
+    overdue_matches: TournamentMatchWithDetails[];
+    no_shows: TournamentParticipantWithProfile[];
   };
   stats: {
     total_participants: number;
@@ -340,12 +347,12 @@ export default function AdminTournamentPage({
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-600">
-                        {p.user_profile?.full_name?.charAt(0) || '?'}
+                        {p.profile?.name?.charAt(0) || '?'}
                       </span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {p.user_profile?.full_name || 'Usuario'}
+                        {p.profile?.name || 'Usuario'}
                       </p>
                       <p className="text-xs text-gray-500 capitalize">
                         {p.status}
