@@ -25,7 +25,7 @@ export default function Hero({ t }: HeroProps) {
         <div className="text-center max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6 animate-fade-in">
-            <BarChart3 className="w-4 h-4 text-indigo-400" />
+            <BarChart3 className="w-4 h-4 text-indigo-400" aria-hidden="true" />
             <span className="text-sm text-indigo-300">{t.badge}</span>
           </div>
 
@@ -44,16 +44,18 @@ export default function Hero({ t }: HeroProps) {
             <Link
               href="/rankings"
               className="group px-8 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40"
+              aria-label="View player rankings and leaderboards"
             >
               {t.cta1}
-              <BarChart3 className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <BarChart3 className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
             </Link>
             <Link
               href="/auth"
               className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-medium transition-all flex items-center gap-2"
+              aria-label="Join the padel community"
             >
               {t.cta2}
-              <Users className="w-5 h-5" />
+              <Users className="w-5 h-5" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -67,7 +69,7 @@ export default function Hero({ t }: HeroProps) {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
                 <div className="relative z-10 text-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/50">
-                    <Users className="w-12 h-12" />
+                    <Users className="w-12 h-12" aria-hidden="true" />
                   </div>
                   <p className="text-slate-400 text-lg">Your Padel Hub Awaits</p>
                 </div>

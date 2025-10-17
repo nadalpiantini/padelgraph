@@ -30,7 +30,8 @@ export default function Stats({ t }: StatsProps) {
     }
 
     return () => observer.disconnect();
-  }, [isVisible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -68,23 +69,39 @@ export default function Stats({ t }: StatsProps) {
   }, [isVisible]);
 
   return (
-    <section ref={sectionRef} className="py-20 px-6 bg-slate-900/30">
+    <section
+      ref={sectionRef}
+      className="py-20 px-6 bg-slate-900/30"
+      aria-label="Platform Statistics"
+    >
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div className="p-8">
-            <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent mb-3">
+            <div
+              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent mb-3"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {stats.players.toLocaleString()}+
             </div>
             <div className="text-xl text-slate-400">{t.players}</div>
           </div>
           <div className="p-8">
-            <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-3">
+            <div
+              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-3"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {stats.matches.toLocaleString()}+
             </div>
             <div className="text-xl text-slate-400">{t.matches}</div>
           </div>
           <div className="p-8">
-            <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-3">
+            <div
+              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-3"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {stats.clubs}+
             </div>
             <div className="text-xl text-slate-400">{t.clubs}</div>
