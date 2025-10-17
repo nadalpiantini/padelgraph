@@ -10,6 +10,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
 import { updateTournamentSchema } from '@/lib/validations/tournament';
+import { notifyTournamentPublished } from '@/lib/notifications/tournament';
 
 /**
  * GET /api/tournaments/[id]
@@ -158,6 +159,15 @@ export async function PUT(
     if (updateError) {
       console.error('Error updating tournament:', updateError);
       return ApiResponse.error('Failed to update tournament', 500);
+    }
+
+    // Send tournament published notification if status changed to published
+    if (updated.status === 'published' && tournament.status !== 'published') {
+      try {
+        await notifyTournamentPublished(updated.id);
+      } catch (notifError) {
+        console.error('[Notification] Tournament published failed:', notifError);
+      }
     }
 
     return ApiResponse.success({ tournament: updated }, 'Tournament updated successfully');

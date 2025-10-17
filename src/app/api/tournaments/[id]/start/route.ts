@@ -9,6 +9,10 @@ import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
 import { startTournamentSchema } from '@/lib/validations/tournament';
 import { TournamentEngine } from '@/lib/tournament-engine';
+import {
+  notifyTournamentStarts,
+  notifyMatchAssigned,
+} from '@/lib/notifications/tournament';
 import type {
   Participant,
   Court,
@@ -184,7 +188,23 @@ export async function POST(
       })
       .eq('id', id);
 
-    // TODO: Send tournament start notifications to all checked-in participants
+    // Send tournament start notifications to all checked-in participants
+    try {
+      await notifyTournamentStarts(id);
+    } catch (notifError) {
+      console.error('[Notification] Tournament start failed:', notifError);
+    }
+
+    // Send match assignment notifications for all Round 1 matches
+    try {
+      await Promise.all(
+        matches.map((match) => notifyMatchAssigned(match.id).catch((err) => {
+          console.error(`[Notification] Match assigned failed for ${match.id}:`, err);
+        }))
+      );
+    } catch (notifError) {
+      console.error('[Notification] Match assignments failed:', notifError);
+    }
 
     return ApiResponse.success(
       {

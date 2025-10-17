@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
 import { submitScoreSchema } from '@/lib/validations/tournament';
 import { TournamentEngine } from '@/lib/tournament-engine';
+import { notifyScoreSubmitted } from '@/lib/notifications/tournament';
 import type { Standing, Match, TournamentConfig } from '@/lib/tournament-engine';
 
 /**
@@ -172,6 +173,13 @@ export async function POST(
     if (allCompleted && tournament.settings?.auto_advance_rounds) {
       // Auto-advance to next round (handled by round complete endpoint)
       // TODO: Trigger round completion automatically
+    }
+
+    // Send score notification to all 4 players
+    try {
+      await notifyScoreSubmitted(matchId);
+    } catch (notifError) {
+      console.error('[Notification] Score submitted failed:', notifError);
     }
 
     return ApiResponse.success({ match: updatedMatch }, 'Score submitted successfully');

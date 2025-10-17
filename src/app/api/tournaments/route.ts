@@ -12,6 +12,7 @@ import {
   createTournamentSchema,
   tournamentQuerySchema,
 } from '@/lib/validations/tournament';
+import { notifyTournamentPublished } from '@/lib/notifications/tournament';
 
 /**
  * GET /api/tournaments
@@ -157,6 +158,15 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating tournament:', error);
       return ApiResponse.error('Failed to create tournament', 500);
+    }
+
+    // Send tournament published notification if status is published
+    if (tournament.status === 'published') {
+      try {
+        await notifyTournamentPublished(tournament.id);
+      } catch (notifError) {
+        console.error('[Notification] Tournament published failed:', notifError);
+      }
     }
 
     return ApiResponse.success(

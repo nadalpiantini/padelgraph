@@ -8,6 +8,11 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
 import { TournamentEngine } from '@/lib/tournament-engine';
+import {
+  notifyTournamentEnds,
+  notifyRoundStarts,
+  notifyMatchAssigned,
+} from '@/lib/notifications/tournament';
 import type { Participant, Court, Standing, Match } from '@/lib/tournament-engine';
 
 /**
@@ -105,6 +110,13 @@ export async function POST(
         .update({ status: 'completed', updated_at: new Date().toISOString() })
         .eq('id', id);
 
+      // Send tournament end notifications
+      try {
+        await notifyTournamentEnds(id);
+      } catch (notifError) {
+        console.error('[Notification] Tournament end failed:', notifError);
+      }
+
       return ApiResponse.success({
         round,
         tournament_complete: true,
@@ -169,7 +181,23 @@ export async function POST(
       return ApiResponse.error('Failed to create matches for next round', 500);
     }
 
-    // TODO: Send notifications for next round
+    // Send round start notifications
+    try {
+      await notifyRoundStarts(id, nextRoundNumber);
+    } catch (notifError) {
+      console.error('[Notification] Round start failed:', notifError);
+    }
+
+    // Send match assignment notifications for next round
+    try {
+      await Promise.all(
+        nextMatches.map((match) => notifyMatchAssigned(match.id).catch((err) => {
+          console.error(`[Notification] Match assigned failed for ${match.id}:`, err);
+        }))
+      );
+    } catch (notifError) {
+      console.error('[Notification] Match assignments failed:', notifError);
+    }
 
     return ApiResponse.success({
       completed_round: round,

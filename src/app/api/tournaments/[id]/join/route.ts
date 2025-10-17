@@ -7,6 +7,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
+import { notifyRegistrationConfirmed } from '@/lib/notifications/tournament';
 
 /**
  * POST /api/tournaments/[id]/join
@@ -84,7 +85,13 @@ export async function POST(
       return ApiResponse.error('Failed to register for tournament', 500);
     }
 
-    // TODO: Send registration confirmation notification
+    // Send registration confirmation notification
+    try {
+      await notifyRegistrationConfirmed(id, user.id);
+    } catch (notifError) {
+      console.error('[Notification] Registration confirmed failed:', notifError);
+      // Don't fail request if notification fails
+    }
 
     return ApiResponse.success(
       { participant },
