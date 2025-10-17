@@ -1,8 +1,8 @@
 # 🏓 PADELGRAPH - Sprint Management System
 
-> **Última actualización:** 2025-10-16
-> **Estado Global:** 🟡 BMAD Instalado, Listo para Sprint 0
-> **Progreso:** 0/6 Sprints (0%)
+> **Última actualización:** 2025-10-17
+> **Estado Global:** 🟢 Sprint 3 en Progreso (60%)
+> **Progreso:** 1.6/6 Sprints (27%)
 > **BMAD-METHOD:** ✅ v4.44.1 Instalado
 
 ---
@@ -11,10 +11,10 @@
 
 | Métrica | Valor | Target |
 |---------|-------|--------|
-| **Sprints Completados** | 1/6 | 6 |
-| **Features Implementadas** | 7/47 | 47 |
+| **Sprints Completados** | 1.6/6 (1 completo + 60% Sprint 3) | 6 |
+| **Features Implementadas** | 15/47 | 47 |
 | **Test Coverage** | 70% | 85% |
-| **Production Ready** | 🟡 Sprint 1 | ✅ |
+| **Production Ready** | 🟢 Sprint 1+3 Backend | ✅ |
 | **Usuarios Activos** | 0 | 5,000 |
 
 ---
@@ -94,24 +94,41 @@
 ---
 
 ### 🥉 **Sprint 3: Advanced Tournament Formats**
-**Estado:** 🟡 READY_TO_START
-**Duración:** 8-10 días
-**Chat ID:** `[pendiente]`
-**Branch:** `sprint-3-advanced-formats`
+**Estado:** 🟢 EN PROGRESO (60%)
+**Duración:** 8-10 días (Iniciado: 2025-10-17)
+**Chat ID:** `Sesión 2025-10-17` | Checkpoint: `claudedocs/SPRINT_3_CHECKPOINT.md`
+**Branch:** `main` (direct commits)
+**Commits:** 3 commits | Último: `a84fea5`
+**Deployment:** 🟡 Deploying to Vercel
 
 **Objetivos:**
-- [ ] Round Robin completo
-- [ ] Knockout/Eliminación Directa
-- [ ] Swiss System
-- [ ] Monrad System
-- [ ] Compass Draw
-- [ ] Brackets Visualization
+- [x] Round Robin completo
+- [x] Knockout/Eliminación Directa
+- [x] Swiss System
+- [x] Monrad System
+- [x] Compass Draw
+- [x] Bracket Progression System
+- [x] Tournament Generation APIs (7 endpoints)
+- [x] Branding System (logos + favicon)
+- [ ] Brackets Visualization UI
 - [ ] Fair-Play System
 - [ ] Multi-Tournament Admin
 
-**Dependencies:** Sprint 2 (tournament engine)
+**Progreso Actual:**
+- ✅ Database schema (tournament_bracket, tournament_group, fair_play)
+- ✅ 6 Tournament generators implementados
+- ✅ Bracket progression service (winner advancement, loser routing)
+- ✅ 7 API endpoints: /generate/round-robin, /knockout, /swiss, /monrad, /compass, /bracket, /advance
+- ✅ TypeScript types para 8 formatos
+- ✅ Branding: padelgraph_logo_01.png + pg_logo_minimal_01.png
+- ✅ ~2,016 líneas de tournament engine code
+- 🚧 UI Components pendientes (bracket visualization, format selector)
+- 🚧 Fair-Play system pendiente
+- 🚧 Testing pendiente
+
+**Dependencies:** Sprint 1 (auth, comms), Sprint 2 concepts merged
 **Context:** `claudedocs/SPRINT_3_CONTEXT.md`
-**Handoff Notes:** [pendiente]
+**Handoff Notes:** Backend completado, ready for UI + Testing phase
 
 ---
 
