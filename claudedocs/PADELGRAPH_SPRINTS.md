@@ -93,11 +93,33 @@
 
 ---
 
-### 🥉 **Sprint 3: Travel Mode & Graph Intelligence**
-**Estado:** 🔴 NO_INICIADO
-**Duración:** 10 días
+### 🥉 **Sprint 3: Advanced Tournament Formats**
+**Estado:** 🟡 READY_TO_START
+**Duración:** 8-10 días
 **Chat ID:** `[pendiente]`
-**Branch:** `sprint-3-travel-graph`
+**Branch:** `sprint-3-advanced-formats`
+
+**Objetivos:**
+- [ ] Round Robin completo
+- [ ] Knockout/Eliminación Directa
+- [ ] Swiss System
+- [ ] Monrad System
+- [ ] Compass Draw
+- [ ] Brackets Visualization
+- [ ] Fair-Play System
+- [ ] Multi-Tournament Admin
+
+**Dependencies:** Sprint 2 (tournament engine)
+**Context:** `claudedocs/SPRINT_3_CONTEXT.md`
+**Handoff Notes:** [pendiente]
+
+---
+
+### 🧩 **Sprint 4: Travel Mode & Graph Intelligence**
+**Estado:** 🔴 NO_INICIADO
+**Duración:** 10-12 días
+**Chat ID:** `[pendiente]`
+**Branch:** `sprint-4-travel-graph`
 
 **Objetivos:**
 - [ ] Modo viaje (travel_plan)
@@ -108,26 +130,7 @@
 - [ ] Feed de descubrimiento
 - [ ] Privacidad avanzada
 
-**Dependencies:** Sprint 1 (profiles, comms)
-**Handoff Notes:** [pendiente]
-
----
-
-### 🧩 **Sprint 4: Advanced Formats**
-**Estado:** 🔴 NO_INICIADO
-**Duración:** 10-12 días
-**Chat ID:** `[pendiente]`
-**Branch:** `sprint-4-formats`
-
-**Objetivos:**
-- [ ] Motor Ladder/Box League
-- [ ] Round Robin + Knockout
-- [ ] Monrad + Compass
-- [ ] Brackets avanzados
-- [ ] Sistema Fair-play
-- [ ] Admin multi-torneo
-
-**Dependencies:** Sprint 2 (tournament engine)
+**Dependencies:** Sprint 1 (profiles, comms), Sprint 2 (tournaments)
 **Handoff Notes:** [pendiente]
 
 ---
