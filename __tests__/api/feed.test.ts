@@ -122,7 +122,6 @@ describe('Feed API - GET /api/feed', () => {
     const request = new Request(`http://localhost:3000/api/feed?user_id=${targetUserId}&limit=10`);
 
     const response = await GET(request);
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockQuery.eq).toHaveBeenCalledWith('user_id', targetUserId);
@@ -162,7 +161,6 @@ describe('Feed API - GET /api/feed', () => {
     const request = new Request(`http://localhost:3000/api/feed?cursor=${cursorId}&limit=10`);
 
     const response = await GET(request);
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockQuery.lt).toHaveBeenCalledWith('created_at', '2025-10-16T00:00:00Z');

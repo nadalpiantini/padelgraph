@@ -204,7 +204,7 @@ describe('Admin API - Courts Management', () => {
       body: JSON.stringify(updateData),
     });
 
-    const response = await CourtPUT(request, { params: { id: mockCourt.id } });
+    const response = await CourtPUT(request, { params: Promise.resolve({ id: mockCourt.id }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -240,7 +240,7 @@ describe('Admin API - Courts Management', () => {
       method: 'DELETE',
     });
 
-    const response = await CourtDELETE(request, { params: { id: mockCourt.id } });
+    const response = await CourtDELETE(request, { params: Promise.resolve({ id: mockCourt.id }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -348,7 +348,7 @@ describe('Admin API - Availability Management', () => {
       body: JSON.stringify(updateData),
     });
 
-    const response = await AvailabilityPUT(request, { params: { id: mockAvailability.id } });
+    const response = await AvailabilityPUT(request, { params: Promise.resolve({ id: mockAvailability.id }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -399,7 +399,7 @@ describe('Admin API - Availability Management', () => {
       method: 'DELETE',
     });
 
-    const response = await AvailabilityDELETE(request, { params: { id: mockAvailability.id } });
+    const response = await AvailabilityDELETE(request, { params: Promise.resolve({ id: mockAvailability.id }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);

@@ -344,7 +344,6 @@ describe('Booking API - GET /api/bookings', () => {
     );
 
     const response = await GET(request);
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockQuery.eq).toHaveBeenCalledWith('status', 'pending');
