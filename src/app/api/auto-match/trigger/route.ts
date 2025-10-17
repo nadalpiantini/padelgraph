@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { triggerAutoMatch, batchAutoMatch } from '@/lib/services/auto-match';
+import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
 import { z } from 'zod';
 
 const triggerAutoMatchSchema = z.object({
@@ -43,6 +44,14 @@ export async function POST(request: Request) {
     }
 
     const { min_score, max_matches, send_message, batch_mode, max_users } = validation.data;
+
+    // Check usage limit for auto-match (unless batch mode - admin only)
+    if (!batch_mode) {
+      const limitResponse = await enforceUsageLimit(user.id, 'auto_match');
+      if (limitResponse) {
+        return limitResponse;
+      }
+    }
 
     // Check if batch mode (admin only)
     if (batch_mode) {
@@ -85,6 +94,12 @@ export async function POST(request: Request) {
         'Auto-match completed with no results'
       );
     }
+
+    // Record successful usage
+    await recordFeatureUsage(user.id, 'auto_match', 'trigger', {
+      matches_found: matches.length,
+      min_score,
+    });
 
     return successResponse(
       {

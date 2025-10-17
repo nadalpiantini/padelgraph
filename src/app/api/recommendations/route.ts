@@ -15,6 +15,7 @@ import {
   generateRecommendationsSchema,
 } from '@/lib/validations/recommendations';
 import { generateRecommendations } from '@/lib/services/recommendations';
+import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
 
 export async function GET(request: Request) {
   try {
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
     const targetUserId = user_id || user.id;
 
     // Check if user has permission (only self or admin)
+    let isAdmin = false;
     if (targetUserId !== user.id) {
       const { data: userProfile } = await supabase
         .from('user_profile')
@@ -129,6 +131,17 @@ export async function POST(request: Request) {
       if (!userProfile?.is_admin) {
         return unauthorizedResponse('Not authorized to generate recommendations for other users');
       }
+      isAdmin = userProfile.is_admin;
+    }
+
+    // Check usage limit for recommendations (admin override if targeting other users)
+    const limitResponse = await enforceUsageLimit(
+      targetUserId, 
+      'recommendation',
+      isAdmin && user_id !== user.id
+    );
+    if (limitResponse) {
+      return limitResponse;
     }
 
     // Check if fresh recommendations exist (unless force_refresh)
@@ -154,6 +167,13 @@ export async function POST(request: Request) {
       user_id: targetUserId,
       type,
       limit,
+    });
+
+    // Record successful usage
+    await recordFeatureUsage(targetUserId, 'recommendation', 'generate', {
+      type,
+      count: recommendations.length,
+      force_refresh,
     });
 
     return successResponse(

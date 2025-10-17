@@ -13,6 +13,7 @@ import {
   tournamentQuerySchema,
 } from '@/lib/validations/tournament';
 import { notifyTournamentPublished } from '@/lib/notifications/tournament';
+import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
 
 /**
  * GET /api/tournaments
@@ -125,6 +126,12 @@ export async function POST(request: NextRequest) {
       return ApiResponse.error('Unauthorized', 401);
     }
 
+    // Check usage limit for tournament creation (admin override enabled)
+    const limitResponse = await enforceUsageLimit(user.id, 'tournament', true);
+    if (limitResponse) {
+      return limitResponse;
+    }
+
     // Parse and validate request body
     const body = await request.json();
     const validated = createTournamentSchema.parse(body);
@@ -159,6 +166,12 @@ export async function POST(request: NextRequest) {
       console.error('Error creating tournament:', error);
       return ApiResponse.error('Failed to create tournament', 500);
     }
+
+    // Record successful usage
+    await recordFeatureUsage(user.id, 'tournament', 'create', {
+      tournament_id: tournament.id,
+      tournament_name: tournament.name,
+    });
 
     // Send tournament published notification if status is published
     if (tournament.status === 'published') {

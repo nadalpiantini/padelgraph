@@ -44,13 +44,23 @@ export async function POST(request: NextRequest) {
     // Handle different event types
     switch (eventType) {
       case 'BILLING.SUBSCRIPTION.ACTIVATED':
-      case 'BILLING.SUBSCRIPTION.UPDATED':
         await handleSubscriptionActivated(resource);
         break;
 
+      case 'BILLING.SUBSCRIPTION.UPDATED':
+        await handleSubscriptionUpdated(resource);
+        break;
+
       case 'BILLING.SUBSCRIPTION.CANCELLED':
-      case 'BILLING.SUBSCRIPTION.SUSPENDED':
         await handleSubscriptionCancelled(resource);
+        break;
+
+      case 'BILLING.SUBSCRIPTION.SUSPENDED':
+        await handleSubscriptionSuspended(resource);
+        break;
+
+      case 'BILLING.SUBSCRIPTION.EXPIRED':
+        await handleSubscriptionExpired(resource);
         break;
 
       case 'PAYMENT.SALE.COMPLETED':
@@ -58,8 +68,11 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'PAYMENT.SALE.DENIED':
-      case 'PAYMENT.SALE.REFUNDED':
         await handlePaymentFailed(resource);
+        break;
+
+      case 'PAYMENT.SALE.REFUNDED':
+        await handlePaymentRefunded(resource);
         break;
 
       default:
@@ -273,4 +286,125 @@ async function handlePaymentFailed(resource: unknown): Promise<void> {
     .eq('paypal_subscription_id', paymentResource.billing_agreement_id);
 
   log.warn('Payment failed', { userId: subscription.user_id, paymentId: paymentResource.id });
+}
+
+async function handleSubscriptionUpdated(resource: unknown): Promise<void> {
+  const subscriptionResource = resource as PayPalSubscriptionResource;
+  const supabase = await createClient();
+
+  // Find existing subscription
+  const { data: subscription } = await supabase
+    .from('subscription')
+    .select('user_id')
+    .eq('paypal_subscription_id', subscriptionResource.id)
+    .single();
+
+  if (!subscription) {
+    log.error('Subscription not found for update', { subscriptionId: subscriptionResource.id });
+    return;
+  }
+
+  // Sync updated subscription data
+  await syncPayPalSubscription(subscription.user_id, {
+    subscription_id: subscriptionResource.id,
+    plan_id: subscriptionResource.plan_id,
+    status: subscriptionResource.status,
+    billing_info: subscriptionResource.billing_info as {
+      next_billing_time: string;
+      last_payment: { amount: { value: string; currency_code: string } };
+    },
+  });
+
+  log.info('Subscription updated', { userId: subscription.user_id, subscriptionId: subscriptionResource.id });
+}
+
+async function handleSubscriptionSuspended(resource: unknown): Promise<void> {
+  const subscriptionResource = resource as PayPalSubscriptionResource;
+  const supabase = await createClient();
+
+  const { data: subscription } = await supabase
+    .from('subscription')
+    .select('user_id')
+    .eq('paypal_subscription_id', subscriptionResource.id)
+    .single();
+
+  if (!subscription) {
+    log.error('Subscription not found for suspension', { subscriptionId: subscriptionResource.id });
+    return;
+  }
+
+  // Update subscription status to suspended
+  await supabase
+    .from('subscription')
+    .update({
+      status: 'suspended',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('paypal_subscription_id', subscriptionResource.id);
+
+  log.warn('Subscription suspended', { userId: subscription.user_id });
+}
+
+async function handleSubscriptionExpired(resource: unknown): Promise<void> {
+  const subscriptionResource = resource as PayPalSubscriptionResource;
+  const supabase = await createClient();
+
+  const { data: subscription } = await supabase
+    .from('subscription')
+    .select('user_id')
+    .eq('paypal_subscription_id', subscriptionResource.id)
+    .single();
+
+  if (!subscription) {
+    log.error('Subscription not found for expiration', { subscriptionId: subscriptionResource.id });
+    return;
+  }
+
+  // Mark subscription as expired and downgrade to free
+  await supabase
+    .from('subscription')
+    .update({
+      status: 'expired',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('paypal_subscription_id', subscriptionResource.id);
+
+  // Downgrade user to free plan
+  await supabase
+    .from('user_profile')
+    .update({ current_plan: 'free' })
+    .eq('user_id', subscription.user_id);
+
+  log.info('Subscription expired, user downgraded to free', { userId: subscription.user_id });
+}
+
+async function handlePaymentRefunded(resource: unknown): Promise<void> {
+  const paymentResource = resource as PayPalPaymentResource;
+  const supabase = await createClient();
+
+  // Log the refund in usage_log for tracking
+  if (paymentResource.billing_agreement_id) {
+    const { data: subscription } = await supabase
+      .from('subscription')
+      .select('user_id')
+      .eq('paypal_subscription_id', paymentResource.billing_agreement_id)
+      .single();
+
+    if (subscription) {
+      // Log refund event
+      await supabase.from('usage_log').insert({
+        user_id: subscription.user_id,
+        feature: 'payment',
+        action: 'refund',
+        timestamp: new Date().toISOString(),
+        metadata: { payment_id: paymentResource.id },
+        period_start: new Date().toISOString().split('T')[0],
+        period_end: new Date().toISOString().split('T')[0],
+      });
+
+      log.info('Payment refunded', { userId: subscription.user_id, paymentId: paymentResource.id });
+    }
+  } else {
+    log.warn('Payment refunded without billing agreement', { paymentId: paymentResource.id });
+  }
 }
