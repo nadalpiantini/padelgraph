@@ -6,13 +6,18 @@
 
 ## Deployment Status
 
-✅ **Successfully Deployed to Vercel**
+✅ **Successfully Deployed to Vercel with Environment Variables**
 
 ### URLs
 
-- **Production URL:** https://padelgraph-dpycv8htd-nadalpiantini-fcbc2d66.vercel.app
-- **Inspect Dashboard:** https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/9rXjNMkqBzAJM7vgw51d6zh7nyA7
+- **Production URL (Latest):** https://padelgraph-3qbjlvchq-nadalpiantini-fcbc2d66.vercel.app
+- **Latest Build:** https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/Cw8ZxEcapakCRmLqEqLEVSs6PP1S
+- **Project Dashboard:** https://vercel.com/nadalpiantini-fcbc2d66/padelgraph
 - **Settings:** https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings
+
+### Deployment History
+1. **Initial Deployment** (2025-10-17 04:10 UTC) - Without env vars
+2. **Production Deployment** (2025-10-17 09:57 UTC) - ✅ With Supabase env vars configured
 
 ### Project Configuration
 
@@ -119,6 +124,45 @@ vercel env add SUPABASE_SERVICE_ROLE_KEY
 # ... etc
 ```
 
+## Vercel Protection Settings
+
+⚠️ **Deployment Protection is ENABLED**
+
+The deployment requires Vercel authentication to access. This is normal for preview/development deployments.
+
+### What This Means
+
+- Direct API access returns 401 (Authentication Required)
+- You need to login to Vercel to access the deployment
+- Production deployments typically disable this protection
+- Automated testing requires bypass tokens
+
+### How to Disable (Production)
+
+**Option 1: Vercel Dashboard**
+1. Go to: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings/deployment-protection
+2. Select "None" for Production deployments
+3. Keep enabled for Preview deployments (recommended)
+
+**Option 2: vercel.json**
+```json
+{
+  "deploymentProtection": {
+    "production": false,
+    "preview": true
+  }
+}
+```
+
+### Configured Environment Variables
+
+✅ **All Critical Variables Set:**
+- `NEXT_PUBLIC_SUPABASE_URL` - Configured
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Configured
+- `SUPABASE_SERVICE_ROLE_KEY` - Configured
+- `NEXT_PUBLIC_APP_URL` - Configured
+- `NEXT_PUBLIC_APP_NAME` - Configured
+
 ## Build Warnings
 
 ### Non-Critical
@@ -215,6 +259,7 @@ vercel env pull .env.local
 
 ## Success Metrics
 
+### Initial Deployment
 - ✅ TypeScript compilation: 0 errors
 - ✅ Production build: Success (4.8s)
 - ✅ Deployment time: ~47 seconds
@@ -222,8 +267,29 @@ vercel env pull .env.local
 - ✅ Static pages: 18/18 generated
 - ✅ Project created and linked
 
+### Production Deployment (With Env Vars)
+- ✅ TypeScript compilation: 0 errors
+- ✅ Production build: Success (13.1s)
+- ✅ Deployment time: ~40 seconds
+- ✅ Build cache: Reused (faster build)
+- ✅ Static pages: 18/18 generated
+- ✅ Environment variables: 6 configured
+- ✅ Supabase integration: Ready
+
 ---
 
-**Deployment Completed:** 2025-10-17T04:10:00Z
-**Build ID:** 9rXjNMkqBzAJM7vgw51d6zh7nyA7
-**Status:** ✅ Ready
+**Initial Deployment:** 2025-10-17T04:10:00Z (Build: 9rXjNMkqBzAJM7vgw51d6zh7nyA7)
+**Production Deployment:** 2025-10-17T09:57:00Z (Build: Cw8ZxEcapakCRmLqEqLEVSs6PP1S)
+**Current Status:** ✅ Ready with Environment Variables
+
+## Next Action Required
+
+🔧 **Disable Vercel Protection for Public Access**
+
+To allow public API access without authentication:
+1. Visit: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings/deployment-protection
+2. Set Production protection to "None"
+3. Or create `vercel.json` with protection settings
+
+After disabling protection, the app will be fully accessible at:
+https://padelgraph-3qbjlvchq-nadalpiantini-fcbc2d66.vercel.app
