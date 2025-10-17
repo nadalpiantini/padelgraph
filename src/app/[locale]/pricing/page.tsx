@@ -361,7 +361,7 @@ export default function PricingPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Our Free plan lets you try core features without any time limit. You can upgrade
-                  to access premium features when you're ready.
+                  to access premium features when you&apos;re ready.
                 </p>
               </CardContent>
             </Card>
@@ -373,7 +373,7 @@ export default function PricingPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Yes, you can cancel your subscription at any time from your account settings.
-                  You'll retain access until the end of your billing period.
+                  You&apos;ll retain access until the end of your billing period.
                 </p>
               </CardContent>
             </Card>
