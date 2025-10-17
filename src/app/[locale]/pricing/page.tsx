@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Crown, Zap, Users, TrendingUp, Shield, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import type { User } from '@supabase/supabase-js';
 
 interface PlanFeature {
   name: string;
@@ -133,7 +134,7 @@ export default function PricingPage() {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [loading, setLoading] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     loadUserAndPlan();
