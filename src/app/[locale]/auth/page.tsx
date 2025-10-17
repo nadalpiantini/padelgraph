@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import Image from 'next/image';
 
 export default function AuthPage({
@@ -22,7 +21,7 @@ export default function AuthPage({
   const supabase = createClient();
 
   // Check query params for mode and errors
-  useState(() => {
+  useEffect(() => {
     searchParams.then((params) => {
       if (params.mode === 'signup') {
         setIsLogin(false);
@@ -31,7 +30,7 @@ export default function AuthPage({
         setError(params.message);
       }
     });
-  });
+  }, [searchParams]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,13 +39,20 @@ export default function AuthPage({
 
     try {
       if (isLogin) {
-        // Login
-        const { error } = await supabase.auth.signInWithPassword({
+        // Login with password
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
         if (error) throw error;
-        router.push('/');
+
+        if (data.session) {
+          // Session established - redirect using i18n-aware router
+          router.push('/');
+          // Force page refresh to update auth state
+          router.refresh();
+        }
       } else {
         // Sign up
         const { error } = await supabase.auth.signUp({
@@ -56,10 +62,12 @@ export default function AuthPage({
             data: {
               username: username || email.split('@')[0],
             },
+            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
           },
         });
+
         if (error) throw error;
-        setError('Check your email for the confirmation link!');
+        setError('✅ Check your email for the confirmation link!');
       }
     } catch (err) {
       const error = err as { message?: string };
