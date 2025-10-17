@@ -103,7 +103,8 @@ ALTER TABLE user_profile
   ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1,
   ADD COLUMN IF NOT EXISTS current_plan VARCHAR(50) DEFAULT 'free',
   ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT true,
-  ADD COLUMN IF NOT EXISTS email_preferences JSONB DEFAULT '{"marketing": true, "digest": true, "achievements": true}'::jsonb;
+  ADD COLUMN IF NOT EXISTS email_preferences JSONB DEFAULT '{"marketing": true, "digest": true, "achievements": true}'::jsonb,
+  ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'player';
 
 -- RLS Policies for Phase 1
 ALTER TABLE player_stats ENABLE ROW LEVEL SECURITY;
