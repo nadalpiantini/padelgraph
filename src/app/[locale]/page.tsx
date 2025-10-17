@@ -49,14 +49,23 @@ export default async function HomePage({
   const t = await getTranslations('homepage');
 
   // Fetch top players data from API
-  const playersResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/rankings?limit=3`,
-    {
-      cache: 'no-store', // Real-time data
-      // Alternatively use: next: { revalidate: 300 } for 5-min cache
+  let players = [];
+  try {
+    const playersResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/rankings?limit=3`,
+      {
+        cache: 'no-store', // Real-time data
+        // Alternatively use: next: { revalidate: 300 } for 5-min cache
+      }
+    );
+    if (playersResponse.ok) {
+      const data = await playersResponse.json();
+      players = data.players || [];
     }
-  );
-  const { players } = await playersResponse.json();
+  } catch (error) {
+    console.error('Failed to fetch rankings:', error);
+    // Fallback to empty array - page still loads
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
