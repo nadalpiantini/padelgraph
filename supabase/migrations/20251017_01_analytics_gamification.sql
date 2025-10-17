@@ -1,6 +1,9 @@
 -- Sprint 5: Analytics & Gamification Database Schema
 -- Part 1: Player stats, achievements, leaderboards
 
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Player Statistics (aggregated)
 CREATE TABLE player_stats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

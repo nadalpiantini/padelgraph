@@ -82,7 +82,6 @@ export default async function HomePage({
       <main>
         <Hero
           t={{
-            badge: t('hero.badge'),
             title: t('hero.title'),
             subtitle: t('hero.subtitle'),
             cta1: t('hero.cta1'),
