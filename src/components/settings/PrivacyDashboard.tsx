@@ -12,7 +12,6 @@ import {
   MessageCircle,
   Download,
   History,
-  Info,
   Check,
 } from 'lucide-react';
 import type {
@@ -81,7 +80,7 @@ export default function PrivacyDashboard({ userId, t }: PrivacyDashboardProps) {
       if (response.ok) {
         const data = await response.json();
         setSettings(data);
-        loadPreview(data);
+        loadPreview();
       }
     } catch (error) {
       console.error('Error loading privacy settings:', error);
@@ -90,7 +89,7 @@ export default function PrivacyDashboard({ userId, t }: PrivacyDashboardProps) {
     }
   };
 
-  const loadPreview = async (currentSettings: PrivacySettings) => {
+  const loadPreview = async () => {
     try {
       const response = await fetch('/api/privacy-settings/preview');
       if (response.ok) {

@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Users, ArrowRight, Activity } from 'lucide-react';
 
-interface GraphNode {
+interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
   name: string;
   avatar?: string;
@@ -19,9 +19,7 @@ interface GraphNode {
   isTarget?: boolean;
 }
 
-interface GraphLink {
-  source: string;
-  target: string;
+interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   connectionType: string;
 }
 
@@ -104,12 +102,12 @@ export function ConnectionVisualizer({
 
     // Create force simulation
     const simulation = d3
-      .forceSimulation(nodes as d3.SimulationNodeDatum[])
+      .forceSimulation(nodes)
       .force(
         'link',
         d3
-          .forceLink(links)
-          .id((d: any) => d.id)
+          .forceLink<GraphNode, GraphLink>(links)
+          .id((d) => d.id)
           .distance(150)
       )
       .force('charge', d3.forceManyBody().strength(-300))
@@ -174,12 +172,12 @@ export function ConnectionVisualizer({
     // Update positions on simulation tick
     simulation.on('tick', () => {
       link
-        .attr('x1', (d: any) => d.source.x)
-        .attr('y1', (d: any) => d.source.y)
-        .attr('x2', (d: any) => d.target.x)
-        .attr('y2', (d: any) => d.target.y);
+        .attr('x1', (d) => (d.source as GraphNode).x ?? 0)
+        .attr('y1', (d) => (d.source as GraphNode).y ?? 0)
+        .attr('x2', (d) => (d.target as GraphNode).x ?? 0)
+        .attr('y2', (d) => (d.target as GraphNode).y ?? 0);
 
-      node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+      node.attr('transform', (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
     });
 
     // Drag behavior
@@ -200,6 +198,8 @@ export function ConnectionVisualizer({
         event.subject.fy = null;
       });
 
+    // Apply drag behavior (type assertion needed for D3 selection compatibility)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     node.call(drag as any);
 
     // Cleanup
