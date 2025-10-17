@@ -16,10 +16,9 @@ interface PaymentIntentResponse {
 }
 
 export class StripeService {
-  private secretKey: string;
-
+  // Configuration will be implemented in future sprints
   constructor() {
-    this.secretKey = process.env.STRIPE_SECRET_KEY || '';
+    // Placeholder for future implementation
   }
 
   /**
@@ -40,7 +39,7 @@ export class StripeService {
    * Handle webhook
    * @stub - To be implemented in future sprints
    */
-  async handleWebhook(payload: string, signature: string): Promise<boolean> {
+  async handleWebhook(_payload: string, _signature: string): Promise<boolean> {
     console.log('[Stripe] Webhook stub called');
     return false;
   }

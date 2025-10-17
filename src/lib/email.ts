@@ -17,13 +17,10 @@ interface EmailResponse {
 }
 
 export class EmailService {
-  private apiKey: string;
-  private fromEmail: string;
-
+  // Configuration will be implemented in Sprint 1
   constructor() {
     // Will use either Resend or Postmark based on env vars
-    this.apiKey = process.env.RESEND_API_KEY || process.env.POSTMARK_SERVER_TOKEN || '';
-    this.fromEmail = process.env.EMAIL_FROM || 'noreply@padelgraph.com';
+    // Placeholder for future implementation
   }
 
   /**

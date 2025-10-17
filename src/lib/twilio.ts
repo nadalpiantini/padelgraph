@@ -16,14 +16,9 @@ interface TwilioResponse {
 }
 
 export class TwilioService {
-  private accountSid: string;
-  private authToken: string;
-  private whatsappFrom: string;
-
+  // Configuration will be implemented in Sprint 1
   constructor() {
-    this.accountSid = process.env.TWILIO_ACCOUNT_SID || '';
-    this.authToken = process.env.TWILIO_AUTH_TOKEN || '';
-    this.whatsappFrom = process.env.TWILIO_WHATSAPP_FROM || '';
+    // Placeholder for future implementation
   }
 
   /**
