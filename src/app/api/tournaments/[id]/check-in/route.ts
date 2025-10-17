@@ -8,35 +8,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
 import { checkInSchema } from '@/lib/validations/tournament';
-
-/**
- * Calculate distance between two geographic coordinates using Haversine formula
- *
- * @param lat1 - Latitude of first point
- * @param lng1 - Longitude of first point
- * @param lat2 - Latitude of second point
- * @param lng2 - Longitude of second point
- * @returns Distance in meters
- */
-function calculateDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
-  const R = 6371e3; // Earth radius in meters
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lng2 - lng1) * Math.PI) / 180;
-
-  const a =
-    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c; // Distance in meters
-}
+import { validateGeofence } from '@/lib/geofencing';
 
 /**
  * POST /api/tournaments/[id]/check-in
@@ -109,18 +81,16 @@ export async function POST(
     }
 
     // GPS Geofencing Validation
-    const distance = calculateDistance(
+    const geofenceResult = validateGeofence(
       validated.lat,
       validated.lng,
       tournament.location_lat,
-      tournament.location_lng
+      tournament.location_lng,
+      tournament.geofence_radius_meters
     );
 
-    if (distance > tournament.geofence_radius_meters) {
-      return ApiResponse.error(
-        `You must be within ${tournament.geofence_radius_meters}m of the venue to check in. You are ${Math.round(distance)}m away.`,
-        400
-      );
+    if (!geofenceResult.valid) {
+      return ApiResponse.error(geofenceResult.message, 400);
     }
 
     // Update participant to checked_in
