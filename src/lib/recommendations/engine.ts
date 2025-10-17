@@ -116,6 +116,7 @@ async function extractUserFeatures(userId: string): Promise<UserFeatures | null>
 /**
  * Get user interaction history (currently unused - for future enhancement)
  */
+// @ts-expect-error - Future enhancement: getUserInteractions for advanced recommendations
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUserInteractions(userId: string): Promise<UserItemInteraction[]> {
   const supabase = await createClient();
