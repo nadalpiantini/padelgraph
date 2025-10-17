@@ -21,7 +21,7 @@
  * - Fair consolation structure
  */
 
-import type { Match } from './types';
+import type { Match, Participant } from './types';
 import { generateKnockoutBracket, type KnockoutBracket } from './knockout';
 
 export interface ConsolationBracket {
@@ -71,7 +71,7 @@ export interface CompassDrawStructure {
  * @returns Complete Compass Draw structure
  */
 export function generateCompassDraw(
-  participants: any[],
+  participants: Participant[],
   seeding: 'random' | 'ranked' | 'manual' = 'ranked',
   seedOrder?: string[],
   isDoubles: boolean = true
