@@ -24,11 +24,13 @@
 ## Pre-Deployment Validation
 
 ### TypeScript Check
+
 ```bash
 ✅ PASSED - No compilation errors
 ```
 
 ### Production Build
+
 ```bash
 ✅ PASSED - Build completed successfully in 4.8s
 - 18 static pages generated
@@ -37,6 +39,7 @@
 ```
 
 ### Test Fixes Applied
+
 - Fixed async route params in admin, booking, and feed tests
 - Removed unused variables causing TS6133 errors
 - Aligned with Next.js 15 async route handler types
@@ -44,7 +47,8 @@
 ## Build Summary
 
 ### Route Statistics
-```
+
+```yaml
 Total Routes: 23 API endpoints + 2 pages
 - Static Routes: 2 (/, /_not-found)
 - Dynamic Routes: 21 API endpoints
@@ -52,6 +56,7 @@ Total Routes: 23 API endpoints + 2 pages
 ```
 
 ### Bundle Sizes
+
 - **Smallest Page:** / (5.38 kB)
 - **Largest Page:** /[locale] (21.6 kB)
 - **Shared JS:** 118 kB (chunks optimized)
@@ -63,6 +68,7 @@ Total Routes: 23 API endpoints + 2 pages
 The following environment variables need to be configured in Vercel:
 
 #### Critical (Supabase)
+
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=        # Required for database access
 NEXT_PUBLIC_SUPABASE_ANON_KEY=   # Required for client auth
@@ -70,12 +76,14 @@ SUPABASE_SERVICE_ROLE_KEY=       # Required for server operations
 ```
 
 #### Application
+
 ```bash
 NEXT_PUBLIC_APP_URL=             # Set to production URL
 NEXT_PUBLIC_APP_NAME=PadelGraph  # Already set
 ```
 
 #### Optional Services
+
 ```bash
 # Email (Resend)
 RESEND_API_KEY=                  # For email notifications
@@ -97,11 +105,13 @@ PAYPAL_MODE=production           # Switch from sandbox
 ### How to Configure
 
 **Option 1: Vercel Dashboard**
+
 1. Go to: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings/environment-variables
 2. Add each variable with appropriate scope (Production/Preview/Development)
 3. Redeploy for changes to take effect
 
 **Option 2: Vercel CLI**
+
 ```bash
 vercel env add NEXT_PUBLIC_SUPABASE_URL
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -112,7 +122,8 @@ vercel env add SUPABASE_SERVICE_ROLE_KEY
 ## Build Warnings
 
 ### Non-Critical
-```
+
+```ini
 ⚠️ experimental.turbo is deprecated
    → Move to config.turbopack in next.config.ts
 
@@ -128,12 +139,14 @@ These warnings do not affect deployment success but indicate optional features t
 ## Post-Deployment Steps
 
 ### Immediate Actions
+
 1. ✅ Configure Supabase environment variables
 2. ✅ Test API endpoints with proper auth
 3. ✅ Verify database connectivity
 4. ✅ Set up custom domain (optional)
 
 ### Optional Enhancements
+
 - Configure PayPal for payment processing
 - Set up Resend/Postmark for email notifications
 - Configure Twilio for WhatsApp/SMS
@@ -143,6 +156,7 @@ These warnings do not affect deployment success but indicate optional features t
 ## Deployment Commands Reference
 
 ### Useful Vercel CLI Commands
+
 ```bash
 # View deployment logs
 vercel inspect padelgraph-dpycv8htd-nadalpiantini-fcbc2d66.vercel.app --logs
@@ -163,6 +177,7 @@ vercel env pull .env.local
 ## Next Steps
 
 ### Sprint 1 Completion
+
 1. Configure all required environment variables
 2. Test full authentication flow
 3. Verify booking system functionality
@@ -171,6 +186,7 @@ vercel env pull .env.local
 6. Production domain setup (if applicable)
 
 ### Maintenance
+
 - Monitor deployment logs for errors
 - Set up automatic deployments on git push (configure GitHub integration)
 - Configure custom domain if needed
@@ -181,15 +197,18 @@ vercel env pull .env.local
 ### Common Issues
 
 **Issue: 401 on API endpoints**
+
 - Ensure Supabase environment variables are configured
 - Check Vercel Protection settings (currently enabled)
 
 **Issue: Build fails**
+
 - Run `npm run typecheck` locally first
 - Check for missing dependencies
 - Verify Next.js version compatibility
 
 **Issue: Environment variables not working**
+
 - Redeploy after adding variables
 - Check variable scope (Production/Preview/Development)
 - Verify no typos in variable names
