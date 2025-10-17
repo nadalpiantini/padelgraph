@@ -17,6 +17,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Padelgraph",
   description: "Padelgraph - Your padel social network",
+  icons: {
+    icon: [
+      { url: '/pg_logo_minimal_01.png', sizes: '32x32', type: 'image/png' },
+      { url: '/pg_logo_minimal_01.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/pg_logo_minimal_01.png',
+    shortcut: '/pg_logo_minimal_01.png',
+  },
 };
 
 export default async function LocaleLayout({

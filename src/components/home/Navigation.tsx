@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Trophy, Globe, Menu, X } from 'lucide-react';
+import Image from 'next/image';
+import { Globe, Menu, X } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 
@@ -32,10 +33,15 @@ export default function Navigation({ t }: NavigationProps) {
     <>
       <nav className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Trophy className="w-6 h-6" />
-            </div>
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/padelgraph_logo_01.png"
+              alt="PadelGraph Logo"
+              width={40}
+              height={40}
+              className="rounded-xl"
+              priority
+            />
             <span className="text-xl font-bold">PadelGraph</span>
           </Link>
 

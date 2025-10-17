@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 
 interface FooterProps {
@@ -19,9 +19,13 @@ export default function Footer({ t }: FooterProps) {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Trophy className="w-5 h-5" />
-            </div>
+            <Image
+              src="/padelgraph_logo_01.png"
+              alt="PadelGraph Logo"
+              width={32}
+              height={32}
+              className="rounded-lg"
+            />
             <span className="font-bold">PadelGraph</span>
           </div>
 
