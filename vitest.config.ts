@@ -11,9 +11,9 @@ export default defineConfig({
     pool: 'forks',
     poolOptions: {
       forks: {
-        singleFork: true,
-        maxForks: 1,
-        isolate: false,
+        singleFork: false,
+        maxForks: 4,
+        isolate: true,
       },
     },
     testTimeout: 10000,
@@ -22,9 +22,6 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
-      // Temporarily skip tests with mock issues causing OOM
-      'tests/unit/services/auto-match.test.ts',
-      'tests/unit/services/recommendations.test.ts',
     ],
     coverage: {
       provider: 'v8',

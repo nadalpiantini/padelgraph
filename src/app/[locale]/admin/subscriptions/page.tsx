@@ -22,16 +22,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import {
-  CreditCard,
   Users,
   TrendingUp,
   AlertCircle,
   DollarSign,
-  Calendar,
   Search,
   Download,
   RefreshCw,
@@ -39,7 +36,7 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { formatDate } from '@/lib/utils/format';
 import { toast } from '@/hooks/use-toast';
 
 interface SubscriptionData {
@@ -319,7 +316,7 @@ export default function AdminSubscriptionsPage() {
       case 'cancelled':
         return 'destructive';
       case 'past_due':
-        return 'warning';
+        return 'secondary';
       case 'suspended':
         return 'secondary';
       default:
@@ -426,9 +423,9 @@ export default function AdminSubscriptionsPage() {
             />
           </div>
         </div>
-        <Select value={filterPlan} onValueChange={setFilterPlan}>
+        <Select value={filterPlan} onChange={(e) => setFilterPlan(e.target.value)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by plan" />
+            <option value="">Filter by plan</option>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
@@ -438,9 +435,9 @@ export default function AdminSubscriptionsPage() {
             <SelectItem value="club">Club</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
+        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
+            <option value="">Filter by status</option>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>

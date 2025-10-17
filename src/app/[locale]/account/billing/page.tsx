@@ -13,8 +13,6 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
   CreditCard,
-  Calendar,
-  TrendingUp,
   RefreshCw,
   Download,
   AlertCircle,
@@ -26,7 +24,7 @@ import {
   Award,
   Zap,
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { formatDate } from '@/lib/utils/format';
 import { toast } from '@/hooks/use-toast';
 
 interface SubscriptionData {
@@ -240,7 +238,7 @@ export default function BillingPage() {
       case 'cancelled':
         return 'destructive';
       case 'past_due':
-        return 'warning';
+        return 'secondary';
       case 'suspended':
         return 'secondary';
       default:

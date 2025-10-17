@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Crown, Zap, Users, TrendingUp, Shield, Star } from 'lucide-react';
+import { Check, X, Crown, Zap, Users, Shield, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { User } from '@supabase/supabase-js';
 
@@ -132,7 +132,7 @@ export default function PricingPage() {
   const router = useRouter();
   const supabase = createClient();
   const [currentPlan, setCurrentPlan] = useState<string>('free');
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false); // Unused for now
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 

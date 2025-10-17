@@ -15,7 +15,7 @@ import {
   generateRecommendationsSchema,
 } from '@/lib/validations/recommendations';
 import { generateRecommendations } from '@/lib/services/recommendations';
-import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
+import { enforceUsageLimit, recordFeatureUsage, UsageLimitError, enforceUsageLimitWithAdminBypass } from '@/lib/middleware/usage-limiter';
 
 export async function GET(request: Request) {
   try {
@@ -135,13 +135,18 @@ export async function POST(request: Request) {
     }
 
     // Check usage limit for recommendations (admin override if targeting other users)
-    const limitResponse = await enforceUsageLimit(
-      targetUserId, 
-      'recommendation',
-      isAdmin && user_id !== user.id
-    );
-    if (limitResponse) {
-      return limitResponse;
+    try {
+      if (isAdmin && user_id !== user.id) {
+        // Admin bypass when querying for other users
+        await enforceUsageLimitWithAdminBypass(targetUserId, 'recommendation');
+      } else {
+        await enforceUsageLimit(targetUserId, 'recommendation');
+      }
+    } catch (error) {
+      if (error instanceof UsageLimitError) {
+        return errorResponse(error.message, 403);
+      }
+      throw error;
     }
 
     // Check if fresh recommendations exist (unless force_refresh)

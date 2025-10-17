@@ -1,319 +1,161 @@
-// Sprint 5 Phase 2: Usage Limiter Middleware
-// Enforces feature usage limits based on subscription plan
+// Sprint 5 Phase 3: Usage Limit Enforcement Middleware
+// Prevents users from exceeding their plan limits
 
-import { createClient } from '@/lib/supabase/server';
-import { getPlanLimits, logFeatureUsage } from '@/lib/services/subscriptions';
+import { checkUsageLimit, logFeatureUsage, getUserSubscription } from '@/lib/services/subscriptions';
 import { NextResponse } from 'next/server';
-import { log } from '@/lib/logger';
-
-export type FeatureType = 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan';
-
-interface UsageCheckResult {
-  allowed: boolean;
-  remaining: number;
-  limit: number;
-  plan: string;
-  message?: string;
-}
-
-interface UsageError {
-  error: string;
-  code: 'USAGE_LIMIT_EXCEEDED' | 'AUTHENTICATION_REQUIRED' | 'SUBSCRIPTION_ERROR';
-  message: string;
-  current_usage?: number;
-  limit?: number;
-  upgrade_url?: string;
-  plan?: string;
-}
 
 /**
- * Check if user has access to a specific feature based on their subscription
+ * Custom error for usage limit exceeded
  */
-export async function checkFeatureAccess(
-  userId: string,
-  feature: FeatureType
-): Promise<UsageCheckResult> {
-  try {
-    const supabase = await createClient();
+export class UsageLimitError extends Error {
+  public readonly code: string;
+  public readonly upgradeUrl: string;
+  public readonly currentUsage: number;
+  public readonly limit: number;
+  public readonly plan: string;
 
-    // Get user's current subscription
-    const { data: subscription } = await supabase
-      .from('subscription')
-      .select('plan, status')
-      .eq('user_id', userId)
-      .single();
-
-    const plan = subscription?.plan || 'free';
-    const status = subscription?.status || 'active';
-
-    // Check if subscription is active
-    if (status !== 'active' && status !== 'trialing') {
-      log.warn('Subscription not active', { userId, status });
-      return {
-        allowed: false,
-        remaining: 0,
-        limit: 0,
-        plan,
-        message: 'Subscription is not active',
-      };
-    }
-
-    // Get plan limits
-    const limits = getPlanLimits(plan);
-
-    // Check if feature has a limit
-    const featureLimits = {
-      tournament: limits.tournaments,
-      auto_match: limits.autoMatch,
-      recommendation: limits.recommendations,
-      travel_plan: limits.travelPlans,
+  constructor(
+    feature: string,
+    currentUsage: number,
+    limit: number,
+    plan: string
+  ) {
+    const featureNames: Record<string, string> = {
+      tournament: 'tournaments',
+      auto_match: 'auto-matches',
+      recommendation: 'recommendations',
+      travel_plan: 'travel plans',
     };
 
-    const limit = featureLimits[feature];
+    const featureName = featureNames[feature] || feature;
+    super(
+      `You've reached your limit of ${limit} ${featureName} for the ${plan} plan. Upgrade to continue.`
+    );
 
-    // Unlimited access
-    if (limit === 'unlimited' || limit === -1) {
-      return {
-        allowed: true,
-        remaining: -1,
-        limit: -1,
-        plan,
-      };
-    }
+    this.name = 'UsageLimitError';
+    this.code = 'USAGE_LIMIT_EXCEEDED';
+    this.upgradeUrl = '/pricing';
+    this.currentUsage = currentUsage;
+    this.limit = limit;
+    this.plan = plan;
+  }
 
-    // Get current period dates
-    const now = new Date();
-    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    // Count usage in current period
-    const { data: usageLogs, error } = await supabase
-      .from('usage_log')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('feature', feature)
-      .gte('timestamp', periodStart.toISOString())
-      .lte('timestamp', periodEnd.toISOString());
-
-    if (error) {
-      log.error('Error fetching usage logs', { error, userId, feature });
-      throw error;
-    }
-
-    const currentUsage = usageLogs?.length || 0;
-    const numericLimit = limit as number; // We know it's a number at this point
-    const remaining = numericLimit - currentUsage;
-
+  toJSON() {
     return {
-      allowed: currentUsage < numericLimit,
-      remaining: Math.max(0, remaining),
-      limit: numericLimit,
-      plan,
-      message: remaining <= 0 ? `You've reached your ${feature} limit for this month` : undefined,
+      error: this.message,
+      code: this.code,
+      upgrade_url: this.upgradeUrl,
+      current_usage: this.currentUsage,
+      limit: this.limit,
+      plan: this.plan,
     };
-  } catch (error) {
-    log.error('Error checking feature access', { error, userId, feature });
-    throw error;
   }
 }
 
 /**
- * Middleware to enforce usage limits on API routes
+ * Check if user has admin override
+ * Admins bypass usage limits
  */
-export async function enforceUsageLimit(
-  userId: string | null,
-  feature: FeatureType,
-  adminOverride = false
-): Promise<NextResponse | null> {
-  // Check authentication
-  if (!userId) {
-    return NextResponse.json(
-      {
-        error: 'Authentication required',
-        code: 'AUTHENTICATION_REQUIRED',
-        message: 'You must be logged in to access this feature',
-      } as UsageError,
-      { status: 401 }
-    );
-  }
-
-  // Admin bypass
-  if (adminOverride) {
-    const supabase = await createClient();
-    const { data: profile } = await supabase
-      .from('user_profile')
-      .select('role')
-      .eq('id', userId)
-      .single();
-
-    if (profile?.role === 'admin') {
-      log.info('Admin override for usage limit', { userId, feature });
-      return null; // Allow access
-    }
-  }
-
-  try {
-    const accessResult = await checkFeatureAccess(userId, feature);
-
-    if (!accessResult.allowed) {
-      const errorResponse: UsageError = {
-        error: 'Usage limit exceeded',
-        code: 'USAGE_LIMIT_EXCEEDED',
-        message: accessResult.message || `You've reached your limit of ${accessResult.limit} ${feature}s for the ${accessResult.plan} plan`,
-        current_usage: accessResult.limit - accessResult.remaining,
-        limit: accessResult.limit,
-        upgrade_url: '/pricing',
-        plan: accessResult.plan,
-      };
-
-      log.warn('Usage limit exceeded', { userId, feature, ...accessResult });
-
-      return NextResponse.json(errorResponse, { status: 403 });
-    }
-
-    // Access allowed
-    return null;
-  } catch (error) {
-    log.error('Error enforcing usage limit', { error, userId, feature });
-
-    return NextResponse.json(
-      {
-        error: 'Subscription check failed',
-        code: 'SUBSCRIPTION_ERROR',
-        message: 'Unable to verify your subscription status',
-      } as UsageError,
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * Log successful feature usage
- */
-export async function recordFeatureUsage(
-  userId: string,
-  feature: FeatureType,
-  action: string,
-  metadata?: Record<string, unknown>
-): Promise<void> {
-  try {
-    await logFeatureUsage(userId, feature, action, metadata);
-    log.info('Feature usage recorded', { userId, feature, action });
-  } catch (error) {
-    // Don't fail the request if logging fails
-    log.error('Failed to record feature usage', { error, userId, feature, action });
-  }
-}
-
-/**
- * Get usage statistics for a user
- */
-export async function getUserUsageStats(userId: string): Promise<{
-  tournaments: { used: number; limit: number };
-  auto_matches: { used: number; limit: number };
-  recommendations: { used: number; limit: number };
-  travel_plans: { used: number; limit: number };
-  plan: string;
-  period: { start: Date; end: Date };
-}> {
+export async function hasAdminOverride(userId: string): Promise<boolean> {
+  const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();
 
-  // Get subscription plan
-  const { data: subscription } = await supabase
-    .from('subscription')
-    .select('plan')
+  const { data: user } = await supabase
+    .from('user_profile')
+    .select('role')
     .eq('user_id', userId)
     .single();
 
-  const plan = subscription?.plan || 'free';
-  const limits = getPlanLimits(plan);
-
-  // Get current period
-  const now = new Date();
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-  // Get usage counts
-  const { data: usageCounts } = await supabase
-    .from('usage_log')
-    .select('feature')
-    .eq('user_id', userId)
-    .gte('timestamp', periodStart.toISOString())
-    .lte('timestamp', periodEnd.toISOString());
-
-  // Count by feature
-  const featureCounts: Record<string, number> = {
-    tournament: 0,
-    auto_match: 0,
-    recommendation: 0,
-    travel_plan: 0,
-  };
-
-  usageCounts?.forEach((log) => {
-    if (log.feature in featureCounts) {
-      featureCounts[log.feature]++;
-    }
-  });
-
-  return {
-    tournaments: { 
-      used: featureCounts.tournament, 
-      limit: limits.tournaments === 'unlimited' ? -1 : limits.tournaments 
-    },
-    auto_matches: { 
-      used: featureCounts.auto_match, 
-      limit: limits.autoMatch === 'unlimited' ? -1 : limits.autoMatch 
-    },
-    recommendations: { 
-      used: featureCounts.recommendation, 
-      limit: limits.recommendations === 'unlimited' ? -1 : limits.recommendations 
-    },
-    travel_plans: { 
-      used: featureCounts.travel_plan, 
-      limit: limits.travelPlans === 'unlimited' ? -1 : limits.travelPlans 
-    },
-    plan,
-    period: { start: periodStart, end: periodEnd },
-  };
+  return user?.role === 'admin';
 }
 
 /**
- * Helper to create error response for exceeded limits
+ * Check if user can use a feature and return error Response if limit exceeded
+ * @param userId User ID
+ * @param feature Feature to check
+ * @param adminBypass If true, admins bypass limits (default: false for backward compatibility)
+ * @returns NextResponse with error if limit exceeded, null if allowed
  */
-export function createUsageLimitError(
-  feature: FeatureType,
-  currentUsage: number,
-  limit: number,
-  plan: string
-): NextResponse {
-  const featureNames: Record<FeatureType, string> = {
-    tournament: 'tournaments',
-    auto_match: 'auto-matches',
-    recommendation: 'recommendations',
-    travel_plan: 'travel plans',
-  };
+export async function enforceUsageLimit(
+  userId: string,
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  adminBypass: boolean = false
+): Promise<NextResponse | null> {
+  // Check admin bypass if enabled
+  if (adminBypass) {
+    const isAdmin = await hasAdminOverride(userId);
+    if (isAdmin) {
+      console.log(`[Usage Limiter] Admin bypass for user ${userId}, feature ${feature}`);
+      return null;
+    }
+  }
 
-  const upgradePlans: Record<string, string> = {
-    free: 'Pro',
-    pro: 'Premium',
-    premium: 'Club',
-    club: 'Club', // Already at max
-  };
+  const { allowed, remaining, limit } = await checkUsageLimit(userId, feature);
 
-  const message = plan === 'club'
-    ? `You've reached the maximum limit of ${limit} ${featureNames[feature]} for this month`
-    : `You've reached your limit of ${limit} ${featureNames[feature]} for the ${plan} plan. Upgrade to ${upgradePlans[plan]} for more.`;
+  if (!allowed) {
+    // Get user's subscription to include plan name in error
+    const subscription = await getUserSubscription(userId);
+    const plan = subscription?.plan || 'free';
 
-  return NextResponse.json(
-    {
-      error: 'Usage limit exceeded',
-      code: 'USAGE_LIMIT_EXCEEDED',
-      message,
-      current_usage: currentUsage,
+    const error = new UsageLimitError(
+      feature,
+      limit - remaining,
       limit,
-      upgrade_url: plan === 'club' ? undefined : '/pricing',
-      plan,
-    } as UsageError,
-    { status: 403 }
-  );
+      plan
+    );
+
+    // Return NextResponse for API route compatibility
+    return NextResponse.json(error.toJSON(), { status: 403 });
+  }
+
+  return null;
+}
+
+/**
+ * Middleware wrapper for API routes
+ * Checks usage limit and logs usage after successful operation
+ */
+export async function withUsageLimit(
+  userId: string,
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  operation: () => Promise<unknown>,
+  metadata?: Record<string, unknown>
+): Promise<unknown> {
+  // Check limit before operation
+  const limitResponse = await enforceUsageLimit(userId, feature);
+  if (limitResponse) {
+    return limitResponse;
+  }
+
+  // Execute operation
+  const result = await operation();
+
+  // Log usage after successful operation
+  await logFeatureUsage(userId, feature, 'create', metadata);
+
+  return result;
+}
+
+/**
+ * Enforce usage limit with admin bypass
+ * @throws {UsageLimitError} If usage limit is exceeded and user is not admin
+ */
+export async function enforceUsageLimitWithAdminBypass(
+  userId: string,
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan'
+): Promise<NextResponse | null> {
+  return enforceUsageLimit(userId, feature, true);
+}
+
+/**
+ * Record feature usage (wrapper for logFeatureUsage)
+ * Exported for backward compatibility with existing code
+ */
+export async function recordFeatureUsage(
+  userId: string,
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  action: string = 'create',
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  await logFeatureUsage(userId, feature, action, metadata);
 }

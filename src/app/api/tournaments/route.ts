@@ -13,7 +13,7 @@ import {
   tournamentQuerySchema,
 } from '@/lib/validations/tournament';
 import { notifyTournamentPublished } from '@/lib/notifications/tournament';
-import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
+import { recordFeatureUsage, UsageLimitError, enforceUsageLimitWithAdminBypass } from '@/lib/middleware/usage-limiter';
 
 /**
  * GET /api/tournaments
@@ -127,9 +127,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check usage limit for tournament creation (admin override enabled)
-    const limitResponse = await enforceUsageLimit(user.id, 'tournament', true);
-    if (limitResponse) {
-      return limitResponse;
+    try {
+      await enforceUsageLimitWithAdminBypass(user.id, 'tournament');
+    } catch (error) {
+      if (error instanceof UsageLimitError) {
+        return ApiResponse.error(error.message, 403);
+      }
+      throw error;
     }
 
     // Parse and validate request body

@@ -10,7 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { triggerAutoMatch, batchAutoMatch } from '@/lib/services/auto-match';
-import { enforceUsageLimit, recordFeatureUsage } from '@/lib/middleware/usage-limiter';
+import { enforceUsageLimit, recordFeatureUsage, UsageLimitError } from '@/lib/middleware/usage-limiter';
 import { z } from 'zod';
 
 const triggerAutoMatchSchema = z.object({
@@ -47,9 +47,13 @@ export async function POST(request: Request) {
 
     // Check usage limit for auto-match (unless batch mode - admin only)
     if (!batch_mode) {
-      const limitResponse = await enforceUsageLimit(user.id, 'auto_match');
-      if (limitResponse) {
-        return limitResponse;
+      try {
+        await enforceUsageLimit(user.id, 'auto_match');
+      } catch (error) {
+        if (error instanceof UsageLimitError) {
+          return errorResponse(error.message, 403);
+        }
+        throw error;
       }
     }
 
