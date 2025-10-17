@@ -300,3 +300,245 @@ export function getByePlayersForRound(
 
   return [];
 }
+
+/**
+ * Generate Round Robin with groups and playoffs
+ *
+ * Tournament Structure:
+ * - Phase 1: Multiple groups play round robin independently
+ * - Phase 2: Top N from each group advance to knockout playoffs
+ *
+ * @param participants - All tournament participants
+ * @param groupCount - Number of groups (2-4 typical)
+ * @param topPerGroup - How many advance from each group
+ * @param isDoubles - Doubles format flag
+ * @returns Group stage rounds + playoff bracket structure
+ */
+export function generateRoundRobinWithGroups(
+  participants: Participant[],
+  groupCount: number = 2,
+  topPerGroup: number = 2,
+  isDoubles: boolean = true
+): {
+  groups: {
+    groupName: string;
+    groupNumber: number;
+    participants: Participant[];
+    rounds: { roundNumber: number; matches: Omit<Match, 'id' | 'court_id'>[] }[];
+  }[];
+  playoffBracketSize: number;
+} {
+  if (groupCount < 2 || groupCount > 8) {
+    throw new Error('Group count must be between 2 and 8');
+  }
+
+  const checkedIn = participants.filter((p) => p.status === 'checked_in');
+
+  if (checkedIn.length < groupCount * 2) {
+    throw new Error(`Need at least ${groupCount * 2} players for ${groupCount} groups`);
+  }
+
+  // Divide participants into groups
+  const groupedParticipants = divideIntoGroups(checkedIn, groupCount);
+
+  // Generate round robin for each group
+  const groups = groupedParticipants.map((groupParticipants, index) => ({
+    groupName: String.fromCharCode(65 + index), // A, B, C, etc.
+    groupNumber: index + 1,
+    participants: groupParticipants,
+    rounds: generateRoundRobin(groupParticipants, isDoubles),
+  }));
+
+  // Calculate playoff bracket size (topPerGroup × groupCount)
+  const playoffBracketSize = topPerGroup * groupCount;
+
+  return {
+    groups,
+    playoffBracketSize,
+  };
+}
+
+/**
+ * Divide participants into balanced groups
+ *
+ * Uses snake draft method to ensure balanced groups:
+ * Group A: 1, 4, 5, 8, 9...
+ * Group B: 2, 3, 6, 7, 10...
+ *
+ * @param participants - All participants
+ * @param groupCount - Number of groups
+ * @returns Array of participant arrays (one per group)
+ */
+function divideIntoGroups(
+  participants: Participant[],
+  groupCount: number
+): Participant[][] {
+  const groups: Participant[][] = Array.from({ length: groupCount }, () => []);
+
+  // Snake draft: 1→2→3, then 3→2→1, repeat
+  let currentGroup = 0;
+  let direction = 1; // 1 = forward, -1 = backward
+
+  for (const participant of participants) {
+    groups[currentGroup].push(participant);
+
+    currentGroup += direction;
+
+    // Reverse direction at boundaries
+    if (currentGroup >= groupCount) {
+      currentGroup = groupCount - 1;
+      direction = -1;
+    } else if (currentGroup < 0) {
+      currentGroup = 0;
+      direction = 1;
+    }
+  }
+
+  return groups;
+}
+
+/**
+ * Get group standings from match results
+ *
+ * @param groupMatches - All matches for a specific group
+ * @param participants - Participants in this group
+ * @returns Standings sorted by points/tiebreakers
+ */
+export function getGroupStandings(
+  groupMatches: Match[],
+  participants: Participant[]
+): {
+  user_id: string;
+  points: number;
+  matches_won: number;
+  matches_drawn: number;
+  matches_lost: number;
+  games_won: number;
+  games_lost: number;
+  games_diff: number;
+}[] {
+  const standings = new Map(
+    participants.map((p) => [
+      p.user_id,
+      {
+        user_id: p.user_id,
+        points: 0,
+        matches_won: 0,
+        matches_drawn: 0,
+        matches_lost: 0,
+        games_won: 0,
+        games_lost: 0,
+        games_diff: 0,
+      },
+    ])
+  );
+
+  // Process completed matches (simplified - assumes win = 3 pts, draw = 1 pt)
+  const completed = groupMatches.filter((m) => m.status === 'completed');
+
+  for (const match of completed) {
+    if (match.team1_score === undefined || match.team2_score === undefined) continue;
+
+    const team1Players = [match.team1_player1_id, match.team1_player2_id];
+    const team2Players = [match.team2_player1_id, match.team2_player2_id];
+
+    const isDraw = match.is_draw || match.team1_score === match.team2_score;
+    const team1Wins = !isDraw && (match.winner_team === 1 || match.team1_score > match.team2_score);
+
+    // Update Team 1
+    for (const playerId of team1Players) {
+      const standing = standings.get(playerId);
+      if (!standing) continue;
+
+      standing.games_won += match.team1_score;
+      standing.games_lost += match.team2_score;
+      standing.games_diff = standing.games_won - standing.games_lost;
+
+      if (isDraw) {
+        standing.matches_drawn += 1;
+        standing.points += 1;
+      } else if (team1Wins) {
+        standing.matches_won += 1;
+        standing.points += 3;
+      } else {
+        standing.matches_lost += 1;
+      }
+    }
+
+    // Update Team 2
+    for (const playerId of team2Players) {
+      const standing = standings.get(playerId);
+      if (!standing) continue;
+
+      standing.games_won += match.team2_score;
+      standing.games_lost += match.team1_score;
+      standing.games_diff = standing.games_won - standing.games_lost;
+
+      if (isDraw) {
+        standing.matches_drawn += 1;
+        standing.points += 1;
+      } else if (!team1Wins) {
+        standing.matches_won += 1;
+        standing.points += 3;
+      } else {
+        standing.matches_lost += 1;
+      }
+    }
+  }
+
+  // Sort by points → games_diff → games_won
+  const sorted = Array.from(standings.values()).sort((a, b) => {
+    if (a.points !== b.points) return b.points - a.points;
+    if (a.games_diff !== b.games_diff) return b.games_diff - a.games_diff;
+    return b.games_won - a.games_won;
+  });
+
+  return sorted;
+}
+
+/**
+ * Get top qualifiers from each group
+ *
+ * @param groupStandings - Standings for each group
+ * @param topPerGroup - How many qualify from each group
+ * @returns Qualified participants with their group and rank
+ */
+export function getQualifiersFromGroups(
+  groupStandings: Map<
+    string,
+    {
+      user_id: string;
+      points: number;
+      games_diff: number;
+      games_won: number;
+    }[]
+  >,
+  topPerGroup: number
+): {
+  user_id: string;
+  group: string;
+  groupRank: number;
+  points: number;
+}[] {
+  const qualifiers: {
+    user_id: string;
+    group: string;
+    groupRank: number;
+    points: number;
+  }[] = [];
+
+  for (const [groupName, standings] of groupStandings.entries()) {
+    const topN = standings.slice(0, topPerGroup);
+
+    topN.forEach((standing, index) => {
+      qualifiers.push({
+        user_id: standing.user_id,
+        group: groupName,
+        groupRank: index + 1,
+        points: standing.points,
+      });
+    });
+  }
+
+  return qualifiers;
+}
