@@ -3,7 +3,7 @@
 
 -- Analytics Events
 CREATE TABLE analytics_event (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_name VARCHAR(100) NOT NULL,
   user_id UUID REFERENCES user_profile(user_id) ON DELETE SET NULL,
   session_id VARCHAR(100) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE analytics_event (
 
 -- User Sessions
 CREATE TABLE user_session (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id VARCHAR(100) UNIQUE NOT NULL,
   user_id UUID REFERENCES user_profile(user_id) ON DELETE SET NULL,
   started_at TIMESTAMPTZ DEFAULT NOW(),
@@ -32,7 +32,7 @@ CREATE TABLE user_session (
 
 -- Funnel Steps
 CREATE TABLE funnel_step (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   funnel_name VARCHAR(50) NOT NULL,
   step_name VARCHAR(50) NOT NULL,
   step_order INTEGER NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE funnel_step (
 
 -- Business Metrics (daily snapshots)
 CREATE TABLE business_metric (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   metric_name VARCHAR(50) NOT NULL,
   metric_value DECIMAL(10,2) NOT NULL,
   date DATE NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE business_metric (
 
 -- Email Campaigns
 CREATE TABLE email_campaign (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(100) NOT NULL,
   campaign_type VARCHAR(50), -- onboarding, retention, reengagement, promotional
   trigger_type VARCHAR(50), -- time_based, event_based, manual
@@ -71,7 +71,7 @@ CREATE TABLE email_campaign (
 
 -- A/B Testing Experiments
 CREATE TABLE experiment (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(100) NOT NULL,
   description TEXT,
   success_metric VARCHAR(100) NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE experiment (
 
 -- Experiment Assignments
 CREATE TABLE experiment_assignment (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   experiment_id UUID REFERENCES experiment(id) ON DELETE CASCADE,
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
   variant VARCHAR(50) NOT NULL,

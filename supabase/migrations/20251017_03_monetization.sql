@@ -3,7 +3,7 @@
 
 -- Subscriptions
 CREATE TABLE subscription (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
   paypal_customer_id VARCHAR(100),
   paypal_subscription_id VARCHAR(100) UNIQUE,
@@ -25,7 +25,7 @@ CREATE TABLE subscription (
 
 -- Usage Tracking
 CREATE TABLE usage_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
   feature VARCHAR(50) NOT NULL, -- tournament, auto_match, recommendation, travel_plan
   action VARCHAR(50) NOT NULL, -- create, view, use
@@ -37,7 +37,7 @@ CREATE TABLE usage_log (
 
 -- Coupons
 CREATE TABLE coupon (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code VARCHAR(50) UNIQUE NOT NULL,
   description TEXT,
   discount_type VARCHAR(20), -- percentage, fixed_amount, free_trial_extension, plan_upgrade

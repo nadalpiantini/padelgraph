@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Player Statistics (aggregated)
 CREATE TABLE player_stats (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
 
   -- Time period
@@ -46,7 +46,7 @@ CREATE TABLE player_stats (
 
 -- Achievements
 CREATE TABLE achievement (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug VARCHAR(50) UNIQUE NOT NULL,
   name VARCHAR(100) NOT NULL,
   description TEXT,
@@ -63,7 +63,7 @@ CREATE TABLE achievement (
 
 -- User Achievements
 CREATE TABLE user_achievement (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
   achievement_id UUID REFERENCES achievement(id) ON DELETE CASCADE,
   progress INTEGER DEFAULT 0,
@@ -75,7 +75,7 @@ CREATE TABLE user_achievement (
 
 -- Leaderboards (precalculated)
 CREATE TABLE leaderboard (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type VARCHAR(50) NOT NULL,
   scope_id UUID,
   metric VARCHAR(50) NOT NULL,
