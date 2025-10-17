@@ -283,6 +283,27 @@ export default function AdminTournamentPage({
     }
   };
 
+  const handleExportCSV = async () => {
+    setActionLoading('export-csv');
+    try {
+      const res = await fetch(
+        `/api/tournaments/${tournamentId}/export/standings?format=csv`
+      );
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `standings-${tournamentId}.csv`;
+        a.click();
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -677,7 +698,11 @@ export default function AdminTournamentPage({
                 </span>
               </button>
 
-              <button className="flex flex-col items-center gap-2 p-4 border-2 border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
+              <button
+                onClick={handleExportCSV}
+                disabled={actionLoading === 'export-csv'}
+                className="flex flex-col items-center gap-2 p-4 border-2 border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors disabled:opacity-50"
+              >
                 <Download className="h-8 w-8 text-indigo-600" />
                 <span className="font-medium text-gray-900">
                   Exportar CSV
