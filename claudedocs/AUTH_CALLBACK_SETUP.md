@@ -33,14 +33,17 @@ Added:
 #### Site URL
 Set to your production domain:
 ```
-https://axis6.app
+https://padelgraph.com
 ```
+(Or your Vercel deployment URL if custom domain not configured)
 
 #### Redirect URLs
 Add all valid redirect URLs (whitelist):
 ```
-https://axis6.app/auth/callback
-https://axis6.app/**
+https://padelgraph.com/auth/callback
+https://padelgraph.com/**
+https://*.vercel.app/auth/callback
+https://*.vercel.app/**
 http://localhost:3000/auth/callback (for local development)
 http://localhost:3000/**
 ```
@@ -73,7 +76,7 @@ Default template should work, but verify the path is `/auth/callback`.
 
 ### Production Testing
 - [ ] User signup sends email
-- [ ] Email link redirects to `https://axis6.app/auth/callback`
+- [ ] Email link redirects to `https://padelgraph.com/auth/callback`
 - [ ] Callback exchanges code for session
 - [ ] User redirected to home page
 - [ ] User session persists
