@@ -179,7 +179,7 @@ export function calculateBracketLayout(structure: BracketStructure) {
 export function getMatchPosition(
   match: BracketMatchNode,
   layout: ReturnType<typeof calculateBracketLayout>,
-  totalMatchesInRound: number,
+  _totalMatchesInRound: number,
   matchIndexInRound: number,
   isLowerBracket: boolean = false
 ): { x: number; y: number } {
@@ -188,7 +188,6 @@ export function getMatchPosition(
   const x = (match.round - 1) * (matchWidth + horizontalGap) + horizontalGap;
 
   // Calculate vertical spacing to center matches
-  const totalHeight = (totalMatchesInRound * matchHeight) + ((totalMatchesInRound - 1) * verticalGap);
   const startY = isLowerBracket
     ? upperHeight + 60 // Gap between upper and lower brackets
     : 0;

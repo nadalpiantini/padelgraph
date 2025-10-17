@@ -1,130 +1,120 @@
 /**
  * Tournament Bracket API
  *
- * GET /api/tournaments/[id]/bracket - Get tournament bracket structure
+ * GET /api/tournaments/[id]/bracket - Get bracket structure with matches
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApiResponse } from '@/lib/api-response';
+import type { TournamentBracket } from '@/types/database';
 
 /**
- * GET /api/tournaments/[id]/bracket
+ * GET - Retrieve Tournament Bracket
  *
- * Retrieve full bracket structure with progression mapping
- * For knockout, double elimination, monrad, compass tournaments
+ * Returns bracket structure organized by bracket type (main/losers/consolation)
+ * with all associated matches including team details.
  */
 export async function GET(
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
     const supabase = await createClient();
+    const tournamentId = (await params).id;
 
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return ApiResponse.error('Unauthorized', 401);
-    }
-
-    // Fetch tournament
-    const { data: tournament, error: tournamentError } = await supabase
-      .from('tournament')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (tournamentError || !tournament) {
-      return ApiResponse.error('Tournament not found', 404);
-    }
-
-    // Validate tournament type supports brackets
-    const bracketTypes = [
-      'knockout_single',
-      'knockout_double',
-      'monrad',
-      'compass',
-    ];
-    if (!bracketTypes.includes(tournament.type)) {
-      return ApiResponse.error(
-        'Bracket structure only available for knockout-style tournaments',
-        400
+    // Auth check
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        ApiResponse.error('No autorizado', 401),
+        { status: 401 }
       );
     }
 
-    // Fetch bracket structure
+    // Verify tournament exists and user has access
+    const { data: tournament, error: tournamentError } = await supabase
+      .from('tournament')
+      .select(`
+        *,
+        org_member!inner(role)
+      `)
+      .eq('id', tournamentId)
+      .eq('org_member.user_id', user.id)
+      .single();
+
+    if (tournamentError || !tournament) {
+      return NextResponse.json(
+        ApiResponse.error('Torneo no encontrado', 404),
+        { status: 404 }
+      );
+    }
+
+    // Get all brackets for this tournament
     const { data: brackets, error: bracketsError } = await supabase
       .from('tournament_bracket')
       .select('*')
-      .eq('tournament_id', id)
-      .order('bracket_type', { ascending: true })
+      .eq('tournament_id', tournamentId)
       .order('round_number', { ascending: true })
       .order('position', { ascending: true });
 
     if (bracketsError) {
       console.error('Error fetching brackets:', bracketsError);
-      return ApiResponse.error('Failed to fetch brackets', 500);
+      return NextResponse.json(
+        ApiResponse.error('Error al obtener brackets', 500),
+        { status: 500 }
+      );
     }
 
-    // Fetch all tournament matches
+    // Get all matches for this tournament with team details
     const { data: matches, error: matchesError } = await supabase
       .from('tournament_match')
-      .select(
-        `
+      .select(`
         *,
-        tournament_round!inner(tournament_id, round_number)
-      `
-      )
-      .eq('tournament_round.tournament_id', id);
+        tournament_round!inner(round_number),
+        team1_player1:team1_player1_id(id, name, avatar_url),
+        team1_player2:team1_player2_id(id, name, avatar_url),
+        team2_player1:team2_player1_id(id, name, avatar_url),
+        team2_player2:team2_player2_id(id, name, avatar_url)
+      `)
+      .eq('tournament_round.tournament_id', tournamentId)
+      .order('tournament_round.round_number', { ascending: true });
 
     if (matchesError) {
       console.error('Error fetching matches:', matchesError);
-      return ApiResponse.error('Failed to fetch matches', 500);
+      return NextResponse.json(
+        ApiResponse.error('Error al obtener partidos', 500),
+        { status: 500 }
+      );
     }
 
-    // Group brackets by type
-    const bracketsByType: Record<string, typeof brackets> = {};
-    brackets?.forEach((bracket) => {
-      if (!bracketsByType[bracket.bracket_type]) {
-        bracketsByType[bracket.bracket_type] = [];
+    // Group brackets by type for easier visualization
+    const bracketsByType = (brackets || []).reduce((acc, bracket) => {
+      const type = bracket.bracket_type;
+      if (!acc[type]) {
+        acc[type] = [];
       }
-      bracketsByType[bracket.bracket_type].push(bracket);
-    });
+      acc[type].push(bracket);
+      return acc;
+    }, {} as Record<string, TournamentBracket[]>);
 
-    // Build progression map
-    const progressionMap = brackets?.map((bracket) => ({
-      match_id: bracket.match_id,
-      bracket_position: {
-        type: bracket.bracket_type,
-        round: bracket.round_number,
-        position: bracket.position,
-      },
-      winner_from: bracket.winner_from_match_id,
-      loser_from: bracket.loser_from_match_id,
-    }));
-
-    // Calculate bracket statistics
-    const stats = {
-      total_brackets: Object.keys(bracketsByType).length,
-      total_positions: brackets?.length || 0,
-      total_matches: matches?.length || 0,
-      completed_matches:
-        matches?.filter((m) => m.status === 'completed').length || 0,
+    // Format response
+    const response = {
+      brackets: bracketsByType,
+      matches: matches || [],
+      tournamentType: tournament.type,
     };
 
-    return ApiResponse.success({
-      tournament_id: id,
-      tournament_type: tournament.type,
-      brackets: bracketsByType,
-      progression_map: progressionMap,
-      matches,
-      stats,
-    });
+    return NextResponse.json(
+      ApiResponse.success(response, 'Bracket obtenido exitosamente'),
+      { status: 200 }
+    );
+
   } catch (error) {
-    console.error('Bracket retrieval error:', error);
-    return ApiResponse.error('Internal server error', 500);
+    console.error('Error in GET /api/tournaments/[id]/bracket:', error);
+    return NextResponse.json(
+      ApiResponse.error('Error interno del servidor', 500),
+      { status: 500 }
+    );
   }
 }

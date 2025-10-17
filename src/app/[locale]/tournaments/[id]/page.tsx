@@ -19,6 +19,7 @@ import {
 import { StandingsTable } from '@/components/tournaments/StandingsTable';
 import { CheckInButton } from '@/components/tournaments/CheckInButton';
 import BracketVisualization from '@/components/tournaments/BracketVisualization';
+import GroupStandingsTables from '@/components/tournaments/GroupStandingsTables';
 import type { TournamentParticipantWithProfile } from '@/types/database';
 
 async function getTournamentDetails(id: string) {
@@ -300,7 +301,17 @@ export default async function TournamentDetailPage({
           )}
 
           {tab === 'standings' && (
-            <StandingsTable standings={tournament.standings} />
+            <>
+              {/* Check if tournament has groups */}
+              {tournament.tournament.format_settings?.groups > 1 ? (
+                <GroupStandingsTables
+                  tournamentId={id}
+                  standings={tournament.standings}
+                />
+              ) : (
+                <StandingsTable standings={tournament.standings} />
+              )}
+            </>
           )}
 
           {tab === 'bracket' && showBracket && (

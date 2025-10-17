@@ -7,18 +7,20 @@
 
 import Link from 'next/link';
 import { Calendar, Users, MapPin, Trophy } from 'lucide-react';
-import type { TournamentType } from '@/types/database';
+import type { Tournament, TournamentType } from '@/types/database';
 
 interface TournamentCardProps {
-  tournament: {
-    id: string;
-    name: string;
-    type: TournamentType;
-    status: 'draft' | 'published' | 'in_progress' | 'completed' | 'cancelled';
-    starts_at: string;
-    max_participants: number;
-    location_lat: number;
-    location_lng: number;
+  tournament: Pick<
+    Tournament,
+    | 'id'
+    | 'name'
+    | 'type'
+    | 'status'
+    | 'starts_at'
+    | 'max_participants'
+    | 'location_lat'
+    | 'location_lng'
+  > & {
     participant_count?: number;
     user_status?: 'not_registered' | 'registered' | 'checked_in' | 'withdrawn';
   };
