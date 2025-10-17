@@ -1,6 +1,8 @@
 /**
  * Individual Court API endpoint
- * GET /api/courts/[id] - Get court details with availability schedule
+ * GET /api/courts/[id] - Get court details
+ * PUT /api/courts/[id] - Update court (admin only)
+ * DELETE /api/courts/[id] - Deactivate court (admin only, soft delete)
  */
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -22,6 +24,9 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * GET /api/courts/[id] - Get court details with availability
+ */
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const supabase = await createClient();
@@ -44,7 +49,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       return unauthorizedResponse('Not authenticated');
     }
 
-    // Fetch court with organization and availability schedule
+    // Fetch court with organization and availability
     const { data: court, error: courtError } = await supabase
       .from('court')
       .select(
@@ -53,8 +58,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         organization:organization (
           id,
           name,
-          slug,
-          type
+          slug
         ),
         availability:availability (
           id,
@@ -69,19 +73,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
       .eq('id', id)
       .single();
 
-    if (courtError) {
-      if (courtError.code === 'PGRST116') {
-        return notFoundResponse('Court');
-      }
-      console.error('[Court API] Error fetching court:', courtError);
-      return serverErrorResponse('Failed to fetch court', courtError);
-    }
-
-    if (!court) {
+    if (courtError || !court) {
       return notFoundResponse('Court');
     }
 
-    return successResponse(court);
+    return successResponse({ court });
   } catch (error) {
     console.error('[Court API] Unexpected error:', error);
     return serverErrorResponse('Unexpected error occurred', error);
@@ -89,7 +85,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 /**
- * PUT /api/courts/[id] - Update court (admin only)
+ * PUT /api/courts/[id] - Update court details
  */
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
@@ -113,7 +109,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return unauthorizedResponse('Not authenticated');
     }
 
-    // Check if user has access to this court
+    // Check if user has admin access to this court
     const { hasAccess, error: permError } = await checkCourtAccess(user.id, id);
 
     if (!hasAccess) {
@@ -158,7 +154,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 /**
- * DELETE /api/courts/[id] - Soft delete court (owner only)
+ * DELETE /api/courts/[id] - Deactivate court (soft delete)
  */
 export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
@@ -182,15 +178,15 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       return unauthorizedResponse('Not authenticated');
     }
 
-    // Check if user has access to this court
+    // Check if user has admin access to this court
     const { hasAccess, error: permError } = await checkCourtAccess(user.id, id);
 
     if (!hasAccess) {
       return errorResponse(permError || 'Insufficient permissions', [], 403);
     }
 
-    // Soft delete by setting active to false
-    const { data: deletedCourt, error: deleteError } = await supabase
+    // Soft delete: set active to false
+    const { data: deactivatedCourt, error: deleteError } = await supabase
       .from('court')
       .update({ active: false })
       .eq('id', id)
@@ -198,17 +194,17 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       .single();
 
     if (deleteError) {
-      console.error('[Court API] Error deleting court:', deleteError);
-      return serverErrorResponse('Failed to delete court', deleteError);
+      console.error('[Court API] Error deactivating court:', deleteError);
+      return serverErrorResponse('Failed to deactivate court', deleteError);
     }
 
-    if (!deletedCourt) {
+    if (!deactivatedCourt) {
       return notFoundResponse('Court');
     }
 
     return successResponse({
-      court: deletedCourt,
-      message: 'Court deleted successfully',
+      court: deactivatedCourt,
+      message: 'Court deactivated successfully',
     });
   } catch (error) {
     console.error('[Court API] Unexpected error:', error);
