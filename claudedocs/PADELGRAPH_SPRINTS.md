@@ -40,22 +40,33 @@
 ---
 
 ### 🥇 **Sprint 1: Core & Comunicación**
-**Estado:** 🔴 NO_INICIADO
+**Estado:** 🟡 EN_PROGRESO (43% - Sesión 1)
 **Duración:** 7-10 días
-**Chat ID:** `[pendiente]`
+**Chat ID:** `Sesión 1 (2025-10-16)` | Checkpoint: `claudedocs/SPRINT_1_CHECKPOINT.md`
 **Branch:** `sprint-1-core`
+**Commits:** `1037a0b`, `5ae6bec`
 
 **Objetivos:**
-- [ ] Auth y user_profile
-- [ ] WhatsApp (Twilio Conversations)
-- [ ] Email (Resend/Postmark)
-- [ ] Feed social básico
-- [ ] Reservas simples
+- [x] Auth y user_profile (Backend)
+- [x] WhatsApp (Twilio)
+- [x] Email (Resend)
+- [ ] Feed social básico (APIs pendientes)
+- [ ] Reservas simples (APIs pendientes)
 - [ ] Admin clubs panel
 - [ ] i18n EN/ES completo
 
+**Progreso Detallado:**
+- ✅ Database schema extendido (user_profile, post, court, booking)
+- ✅ RLS policies completas
+- ✅ Profile APIs (GET/PUT /api/profile, PUT /api/preferences)
+- ✅ Communication APIs (POST /api/email/send, POST /api/whatsapp/send)
+- ✅ Twilio service (WhatsApp + SMS)
+- ✅ Resend service (Email + templates)
+- ⏳ Feed APIs (schema listo, endpoints pendientes)
+- ⏳ Booking APIs (schema listo, endpoints pendientes)
+
 **Dependencies:** Sprint 0 completado
-**Handoff Notes:** [se completará al finalizar Sprint 0]
+**Handoff Notes:** Ver `SPRINT_1_CHECKPOINT.md` para retomar desde Fase 4
 
 ---
 
