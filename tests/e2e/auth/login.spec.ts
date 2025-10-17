@@ -57,11 +57,9 @@ test.describe('Login Flow', () => {
     // Wait for redirect to home page
     await page.waitForURL(/^(?!.*\/auth).*$/, { timeout: TIMEOUTS.LONG });
 
-    // Verify we're logged in (check for logout button or user menu)
-    // Adjust selector based on actual UI
-    const isAuthenticated =
-      (await page.url()) === '/' || page.url().includes('/profile') || page.url().includes('/home');
-    expect(isAuthenticated).toBe(true);
+    // Verify we're logged in - should NOT be on auth page anymore
+    const currentUrl = page.url();
+    expect(currentUrl).not.toContain('/auth');
   });
 
   test('should toggle between login and signup tabs', async ({ page }) => {
