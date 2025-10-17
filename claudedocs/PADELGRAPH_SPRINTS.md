@@ -171,21 +171,50 @@
 ---
 
 ### 🧮 **Sprint 5: Growth & Monetization**
-**Estado:** 🔴 NO_INICIADO
-**Duración:** 7-9 días
+**Estado:** 📋 READY_TO_START
+**Duración:** 2-3 semanas (14-21 días)
 **Chat ID:** `[pendiente]`
-**Branch:** `sprint-5-growth`
+**Branch:** `sprint-5-growth-monetization`
+**Commits:** 1 commit (context) | Último: `1c3ca03`
+**Context:** `claudedocs/SPRINT_5_CONTEXT.md` (1,322 líneas)
 
-**Objetivos:**
-- [ ] Stripe planes live
-- [ ] Trials/coupons
-- [ ] Analytics (Mixpanel/Amplitude)
-- [ ] KPIs automáticos
-- [ ] SEO público
-- [ ] Campañas automatizadas
+**Objetivos (9 Main Features):**
+- [ ] **Player Analytics & Stats Dashboard**
+  - ELO rating system, win/loss ratios, match history
+  - Recharts visualizations, time-based filtering
+- [ ] **Achievements & Badges System**
+  - 30+ achievements across 6 categories
+  - XP points system, level progression, badge gallery
+- [ ] **Leaderboards & Rankings**
+  - 8 leaderboard types (ELO, wins, fair-play, city, club, etc.)
+  - Real-time WebSocket updates, filters & pagination
+- [ ] **Stripe Production & 4-Tier Subscriptions**
+  - Free / Pro (€9.99) / Premium (€19.99) / Club (€99.99)
+  - Usage limits, subscription management, billing portal
+- [ ] **Trials, Coupons & Referral Program**
+  - 14-day free trial, coupon system, referral rewards
+  - Viral growth engine, promo campaigns
+- [ ] **Business Analytics & KPI Dashboard**
+  - DAU/MAU tracking, MRR/ARR metrics, churn analysis
+  - Cohort retention, funnel analysis, LTV calculation
+- [ ] **SEO & Public Pages**
+  - SSR landing pages, Schema.org markup, sitemap
+  - Core Web Vitals optimization, social media cards
+- [ ] **Automated Email Campaigns**
+  - 5-email onboarding sequence, re-engagement campaigns
+  - Resend + React Email templates
+- [ ] **A/B Testing & Growth Experiments**
+  - Experiment framework, statistical significance testing
+  - Multi-variant testing, conversion optimization
 
-**Dependencies:** Sprint 0 (Stripe setup)
-**Handoff Notes:** [pendiente]
+**Technical Scope:**
+- 13 new database tables (player_stats, achievement, subscription, analytics_event, etc.)
+- 35+ API endpoints across 8 domains
+- 9 UI components (Analytics Dashboard, Achievements Gallery, Leaderboards, etc.)
+- 5-phase implementation plan (Database → APIs → Intelligence → UI → Testing)
+
+**Dependencies:** Sprint 1 (auth, profiles), Sprint 2 (tournaments), Sprint 4 (social graph)
+**Handoff Notes:** Context document ready. 4-tier subscription model designed. Ready for implementation.
 
 ---
 

@@ -114,87 +114,19 @@ async function extractUserFeatures(userId: string): Promise<UserFeatures | null>
 }
 
 /**
- * Get user interaction history (currently unused - for future enhancement)
+ * Get user interaction history
+ *
+ * Note: This function is reserved for future enhancement when implementing
+ * advanced collaborative filtering with historical interaction data.
+ *
+ * Planned features:
+ * - Track played_with interactions from match history
+ * - Track tournament attendance
+ * - Track bookmarked recommendations
+ * - Use for advanced recommendation scoring
+ *
+ * Implementation deferred to future sprint to maintain clean build.
  */
-// @ts-expect-error - Future enhancement: getUserInteractions for advanced recommendations
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getUserInteractions(userId: string): Promise<UserItemInteraction[]> {
-  const supabase = await createClient();
-  const interactions: UserItemInteraction[] = [];
-
-  // Played with interactions
-  const { data: playedWith } = await supabase
-    .from('match')
-    .select('id, team1_player1_id, team1_player2_id, team2_player1_id, team2_player2_id, created_at')
-    .or(`team1_player1_id.eq.${userId},team1_player2_id.eq.${userId},team2_player1_id.eq.${userId},team2_player2_id.eq.${userId}`)
-    .eq('status', 'completed')
-    .limit(100);
-
-  if (playedWith) {
-    for (const match of playedWith) {
-      const players = [
-        match.team1_player1_id,
-        match.team1_player2_id,
-        match.team2_player1_id,
-        match.team2_player2_id,
-      ].filter((id) => id !== userId);
-
-      for (const playerId of players) {
-        interactions.push({
-          user_id: userId,
-          item_id: playerId,
-          item_type: 'player',
-          interaction_type: 'played_with',
-          interaction_strength: 1.0,
-          timestamp: new Date(match.created_at),
-        });
-      }
-    }
-  }
-
-  // Tournament participation
-  const { data: tournaments } = await supabase
-    .from('tournament_participant')
-    .select('tournament_id, created_at')
-    .eq('user_id', userId)
-    .limit(50);
-
-  if (tournaments) {
-    for (const tournament of tournaments) {
-      interactions.push({
-        user_id: userId,
-        item_id: tournament.tournament_id,
-        item_type: 'tournament',
-        interaction_type: 'attended',
-        interaction_strength: 1.0,
-        timestamp: new Date(tournament.created_at),
-      });
-    }
-  }
-
-  // Bookmarked items (from recommendation table with shown=true, clicked=true)
-  const { data: bookmarks } = await supabase
-    .from('recommendation')
-    .select('recommended_id, recommended_type, created_at')
-    .eq('user_id', userId)
-    .eq('clicked', true)
-    .limit(50);
-
-  if (bookmarks) {
-    for (const bookmark of bookmarks) {
-      interactions.push({
-        user_id: userId,
-        item_id: bookmark.recommended_id,
-        item_type: bookmark.recommended_type as 'player' | 'club' | 'tournament',
-        interaction_type: 'bookmarked',
-        interaction_strength: 0.8,
-        timestamp: new Date(bookmark.created_at),
-      });
-    }
-  }
-
-  return interactions;
-}
 
 // ============================================================================
 // Recommendation Generation

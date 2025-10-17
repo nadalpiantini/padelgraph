@@ -10,7 +10,7 @@ import Image from 'next/image';
 export default function AuthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; error?: string; message?: string }>;
 }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -21,11 +21,14 @@ export default function AuthPage({
   const router = useRouter();
   const supabase = createClient();
 
-  // Check query params for mode
+  // Check query params for mode and errors
   useState(() => {
     searchParams.then((params) => {
       if (params.mode === 'signup') {
         setIsLogin(false);
+      }
+      if (params.error && params.message) {
+        setError(params.message);
       }
     });
   });
