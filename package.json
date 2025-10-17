@@ -26,6 +26,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
     "canvas": "^3.2.0",
+    "clsx": "^2.1.1",
     "csv-stringify": "^6.6.0",
     "d3": "^7.9.0",
     "html2canvas": "^1.4.1",
@@ -40,6 +41,7 @@
     "react-intersection-observer": "^9.16.0",
     "recharts": "^3.3.0",
     "resend": "^6.1.3",
+    "tailwind-merge": "^3.3.1",
     "twilio": "^5.10.3",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
