@@ -7,10 +7,10 @@ export interface AnalyticsEvent {
   event_name: string;
   user_id?: string;
   session_id: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   page_url?: string;
   referrer?: string;
-  device_info?: Record<string, any>;
+  device_info?: Record<string, unknown>;
 }
 
 /**

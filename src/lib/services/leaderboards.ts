@@ -118,7 +118,7 @@ async function calculateLeaderboard(
       username: profile.username,
       avatar_url: profile.avatar_url,
       rank: index + 1,
-      value: getMetricValue(entry, metric),
+      value: getMetricValue(entry as unknown as Record<string, unknown>, metric),
     };
   });
 }

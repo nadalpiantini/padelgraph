@@ -213,7 +213,7 @@ export async function logFeatureUsage(
   userId: string,
   feature: string,
   action: string = 'use',
-  metadata?: any
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   const supabase = await createClient();
 
