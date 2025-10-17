@@ -1,7 +1,8 @@
 /**
  * Twilio Service - WhatsApp and SMS Communication
- * To be implemented in Sprint 1
+ * Implemented in Sprint 1
  */
+import twilio from 'twilio';
 
 interface SendMessageParams {
   to: string;
@@ -16,33 +17,98 @@ interface TwilioResponse {
 }
 
 export class TwilioService {
-  // Configuration will be implemented in Sprint 1
+  private client: ReturnType<typeof twilio> | null = null;
+  private whatsappFrom: string;
+
   constructor() {
-    // Placeholder for future implementation
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    this.whatsappFrom = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+
+    if (accountSid && authToken) {
+      this.client = twilio(accountSid, authToken);
+    } else {
+      console.warn('[Twilio] Missing credentials - service disabled');
+    }
   }
 
   /**
-   * Send WhatsApp message
-   * @stub - To be implemented in Sprint 1
+   * Send WhatsApp message via Twilio
    */
   async sendWhatsApp(params: SendMessageParams): Promise<TwilioResponse> {
-    console.log('[Twilio] WhatsApp send stub called:', params);
-    return {
-      success: false,
-      error: 'Twilio WhatsApp not implemented yet',
-    };
+    if (!this.client) {
+      return {
+        success: false,
+        error: 'Twilio not configured',
+      };
+    }
+
+    try {
+      // Format phone number for WhatsApp
+      const to = params.to.startsWith('whatsapp:') ? params.to : `whatsapp:${params.to}`;
+      const from = params.from || this.whatsappFrom;
+
+      const message = await this.client.messages.create({
+        body: params.body,
+        from,
+        to,
+      });
+
+      console.log('[Twilio] WhatsApp sent:', message.sid);
+
+      return {
+        success: true,
+        messageId: message.sid,
+      };
+    } catch (error) {
+      console.error('[Twilio] WhatsApp error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 
   /**
-   * Send SMS message
-   * @stub - To be implemented in Sprint 1
+   * Send SMS message via Twilio
    */
   async sendSMS(params: SendMessageParams): Promise<TwilioResponse> {
-    console.log('[Twilio] SMS send stub called:', params);
-    return {
-      success: false,
-      error: 'Twilio SMS not implemented yet',
-    };
+    if (!this.client) {
+      return {
+        success: false,
+        error: 'Twilio not configured',
+      };
+    }
+
+    try {
+      const message = await this.client.messages.create({
+        body: params.body,
+        from: params.from || process.env.TWILIO_PHONE_FROM,
+        to: params.to,
+      });
+
+      console.log('[Twilio] SMS sent:', message.sid);
+
+      return {
+        success: true,
+        messageId: message.sid,
+      };
+    } catch (error) {
+      console.error('[Twilio] SMS error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Send WhatsApp with template (for future use)
+   */
+  async sendWhatsAppTemplate(params: SendMessageParams & { templateId?: string }): Promise<TwilioResponse> {
+    // For now, just send as regular message
+    // In future, integrate with WhatsApp Business API templates
+    return this.sendWhatsApp(params);
   }
 }
 

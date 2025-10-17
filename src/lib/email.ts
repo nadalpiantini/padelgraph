@@ -1,13 +1,15 @@
 /**
- * Email Service - Using Resend or Postmark
- * To be implemented in Sprint 1
+ * Email Service - Using Resend
+ * Implemented in Sprint 1
  */
+import { Resend } from 'resend';
 
 interface SendEmailParams {
   to: string | string[];
   subject: string;
   html: string;
   from?: string;
+  text?: string;
 }
 
 interface EmailResponse {
@@ -17,37 +19,135 @@ interface EmailResponse {
 }
 
 export class EmailService {
-  // Configuration will be implemented in Sprint 1
+  private client: Resend | null = null;
+  private defaultFrom: string;
+
   constructor() {
-    // Will use either Resend or Postmark based on env vars
-    // Placeholder for future implementation
+    const apiKey = process.env.RESEND_API_KEY;
+    this.defaultFrom = process.env.EMAIL_FROM || 'noreply@padelgraph.com';
+
+    if (apiKey) {
+      this.client = new Resend(apiKey);
+    } else {
+      console.warn('[Email] Resend API key not found - service disabled');
+    }
   }
 
   /**
-   * Send email
-   * @stub - To be implemented in Sprint 1
+   * Send email via Resend
    */
   async send(params: SendEmailParams): Promise<EmailResponse> {
-    console.log('[Email] Send stub called:', params);
-    return {
-      success: false,
-      error: 'Email service not implemented yet',
-    };
+    if (!this.client) {
+      return {
+        success: false,
+        error: 'Email service not configured',
+      };
+    }
+
+    try {
+      const result = await this.client.emails.send({
+        from: params.from || this.defaultFrom,
+        to: Array.isArray(params.to) ? params.to : [params.to],
+        subject: params.subject,
+        html: params.html,
+        ...(params.text && { text: params.text }),
+      });
+
+      if (result.error) {
+        console.error('[Email] Send error:', result.error);
+        return {
+          success: false,
+          error: result.error.message,
+        };
+      }
+
+      console.log('[Email] Sent successfully:', result.data?.id);
+
+      return {
+        success: true,
+        messageId: result.data?.id,
+      };
+    } catch (error) {
+      console.error('[Email] Unexpected error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 
   /**
-   * Send template email
-   * @stub - To be implemented in Sprint 1
+   * Send template email with variables
+   * For now, uses simple HTML template replacement
+   * In future, can integrate with React Email or proper templating
    */
   async sendTemplate(
     templateId: string,
-    params: Omit<SendEmailParams, 'html'> & { variables: Record<string, unknown> }
+    params: Omit<SendEmailParams, 'html' | 'subject'> & {
+      subject?: string;
+      variables: Record<string, unknown>;
+    }
   ): Promise<EmailResponse> {
-    console.log('[Email] Send template stub called:', templateId, params);
-    return {
-      success: false,
-      error: 'Email template service not implemented yet',
+    // Load template based on templateId
+    const template = this.getTemplate(templateId, params.variables);
+
+    if (!template) {
+      return {
+        success: false,
+        error: `Template ${templateId} not found`,
+      };
+    }
+
+    return this.send({
+      ...params,
+      html: template.html,
+      subject: template.subject || params.subject || 'PadelGraph Notification',
+    });
+  }
+
+  /**
+   * Get email template by ID
+   * This is a simple implementation - in production, load from files or DB
+   */
+  private getTemplate(
+    templateId: string,
+    variables: Record<string, unknown>
+  ): { html: string; subject: string } | null {
+    const templates: Record<string, (vars: Record<string, unknown>) => { html: string; subject: string }> = {
+      'welcome': (vars) => ({
+        subject: 'Welcome to PadelGraph! 🎾',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1>Welcome, ${vars.name || 'Player'}!</h1>
+            <p>Thanks for joining PadelGraph, the social network for padel players.</p>
+            <p>Get started by completing your profile and finding other players in your area.</p>
+            <a href="${vars.appUrl || 'https://padelgraph.com'}" style="display: inline-block; padding: 12px 24px; background: #22c55e; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px;">
+              Complete Profile
+            </a>
+          </div>
+        `,
+      }),
+      'booking-confirmation': (vars) => ({
+        subject: `Booking Confirmed - ${vars.courtName}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1>Booking Confirmed ✅</h1>
+            <p>Hi ${vars.userName},</p>
+            <p>Your booking has been confirmed:</p>
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Court:</strong> ${vars.courtName}</p>
+              <p><strong>Date:</strong> ${vars.date}</p>
+              <p><strong>Time:</strong> ${vars.time}</p>
+              <p><strong>Price:</strong> ${vars.price}</p>
+            </div>
+            <p>See you on the court! 🎾</p>
+          </div>
+        `,
+      }),
     };
+
+    const templateFn = templates[templateId];
+    return templateFn ? templateFn(variables) : null;
   }
 }
 
