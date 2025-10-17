@@ -29,8 +29,8 @@ export default function Hero({ t }: HeroProps) {
             <Image
               src="/images/branding/padelgraph_logo_01.png"
               alt="PadelGraph Logo"
-              width={200}
-              height={200}
+              width={600}
+              height={600}
               className="rounded-xl"
               priority
             />
@@ -61,14 +61,6 @@ export default function Hero({ t }: HeroProps) {
             >
               {t.cta1}
               <BarChart3 className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/auth"
-              className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-medium transition-all flex items-center gap-2"
-              aria-label="Join the padel community"
-            >
-              {t.cta2}
-              <Users className="w-5 h-5" aria-hidden="true" />
             </Link>
           </div>
         </div>

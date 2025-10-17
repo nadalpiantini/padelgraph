@@ -61,16 +61,16 @@
 
 ## 📋 Phase Breakdown
 
-### Phase 1: Stripe Integration (Foundation) 🏦
+### Phase 1: PayPal Integration (Foundation) 🏦
 
 **Goal**: Implement complete payment infrastructure
 
-#### 1.1 Stripe Setup & Configuration
-- [ ] Create Stripe account and get API keys
-- [ ] Configure Stripe webhook endpoints
-- [ ] Set up test mode and production environments
-- [ ] Implement Stripe client initialization
-- [ ] Add Stripe environment variables
+#### 1.1 PayPal Setup & Configuration
+- [ ] Create PayPal Developer account and get API credentials
+- [ ] Configure PayPal webhook endpoints (IPN/Webhooks)
+- [ ] Set up Sandbox and Production environments
+- [ ] Implement PayPal SDK client initialization
+- [ ] Add PayPal environment variables (CLIENT_ID, SECRET)
 
 #### 1.2 Subscription Plans Definition
 ```typescript
@@ -137,10 +137,11 @@ const plans = {
 CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(user_id),
-  stripe_customer_id TEXT NOT NULL,
-  stripe_subscription_id TEXT,
+  paypal_customer_id TEXT NOT NULL,
+  paypal_subscription_id TEXT,
+  paypal_plan_id TEXT NOT NULL,
   plan_id TEXT NOT NULL,
-  status TEXT NOT NULL, -- active, canceled, past_due, incomplete
+  status TEXT NOT NULL, -- active, canceled, suspended, past_due
   current_period_start TIMESTAMP WITH TIME ZONE,
   current_period_end TIMESTAMP WITH TIME ZONE,
   cancel_at_period_end BOOLEAN DEFAULT FALSE,
@@ -163,7 +164,8 @@ CREATE TABLE usage_logs (
 CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(user_id),
-  stripe_payment_intent_id TEXT NOT NULL,
+  paypal_payment_id TEXT NOT NULL,
+  paypal_order_id TEXT,
   amount INTEGER NOT NULL,
   currency TEXT NOT NULL,
   status TEXT NOT NULL,
@@ -178,13 +180,14 @@ CREATE INDEX idx_usage_logs_timestamp ON usage_logs(timestamp);
 ```
 
 #### 1.4 API Endpoints
-- [ ] `POST /api/stripe/create-checkout-session` - Initiate subscription
-- [ ] `POST /api/stripe/create-portal-session` - Manage subscription
-- [ ] `POST /api/stripe/webhook` - Handle Stripe events
+- [ ] `POST /api/paypal/create-subscription` - Initiate subscription
+- [ ] `POST /api/paypal/create-order` - Create one-time payment order
+- [ ] `POST /api/paypal/webhook` - Handle PayPal webhook events
 - [ ] `GET /api/subscriptions/current` - Get user's subscription
 - [ ] `GET /api/subscriptions/usage` - Get usage stats
 - [ ] `POST /api/subscriptions/cancel` - Cancel subscription
 - [ ] `POST /api/subscriptions/resume` - Resume canceled subscription
+- [ ] `GET /api/paypal/billing-agreements` - Get billing agreement details
 
 #### 1.5 Frontend Components
 - [ ] `PricingTable` component - Display plans
@@ -214,17 +217,17 @@ export async function checkUsageLimit(
 
 #### 1.7 Testing
 - [ ] Unit tests for payment logic
-- [ ] Integration tests with Stripe test mode
-- [ ] Webhook event handling tests
+- [ ] Integration tests with PayPal Sandbox
+- [ ] Webhook event handling tests (verify signature)
 - [ ] Usage limit enforcement tests
 - [ ] Subscription lifecycle tests
 
 **Deliverables**:
-- ✅ Complete Stripe integration
+- ✅ Complete PayPal integration
 - ✅ All payment flows working
 - ✅ Usage limits enforced
 - ✅ Billing dashboard functional
-- ✅ Webhook handling reliable
+- ✅ Webhook handling reliable (signature verification)
 
 ---
 
@@ -737,8 +740,8 @@ const experiments = [
 ## 📊 Risk Assessment
 
 ### High Risk
-- **Stripe Integration Complexity**: Webhook handling, edge cases
-  - *Mitigation*: Extensive testing, idempotency, error handling
+- **PayPal Integration Complexity**: Webhook signature verification, subscription lifecycle edge cases
+  - *Mitigation*: Extensive testing with Sandbox, idempotency keys, robust error handling
 
 - **Privacy Compliance**: GDPR, user data tracking
   - *Mitigation*: Cookie consent, data retention policies, audit trail
@@ -757,7 +760,7 @@ const experiments = [
 ## 🔗 Dependencies
 
 ### External Services
-- Stripe (payments)
+- PayPal (payments & subscriptions)
 - Google Analytics / Mixpanel (optional backup)
 - Resend / SendGrid (email)
 - Google Search Console
@@ -772,7 +775,7 @@ const experiments = [
 
 **Total Duration**: 4-6 weeks
 
-- Phase 1 (Stripe): 1-2 weeks
+- Phase 1 (PayPal): 1-2 weeks
 - Phase 2 (Analytics): 1 week
 - Phase 3 (SEO): 1-2 weeks
 - Phase 4 (KPIs): 1 week
@@ -780,7 +783,7 @@ const experiments = [
 
 ## 🎓 Learning Goals
 
-- Master Stripe integration patterns
+- Master PayPal Subscriptions API patterns
 - Understand funnel analysis
 - Learn SEO best practices
 - Implement growth hacking techniques

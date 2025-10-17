@@ -182,16 +182,16 @@ Después de completar el core product (Sprints 1, 2, 4), necesitamos:
 
 ---
 
-### 💳 **4. Stripe Production & 4-Tier Subscriptions**
+### 💳 **4. PayPal Production & 4-Tier Subscriptions**
 
 **User Story:** Como negocio, necesitamos activar pagos reales y gestionar subscripciones con 4 planes diferentes.
 
 **Tareas:**
-- [ ] Stripe: cambiar de test mode a production mode
-- [ ] Schema: tabla `subscription` (plan, status, period)
-- [ ] API: POST `/api/subscriptions/create` (Stripe checkout session)
-- [ ] API: POST `/api/subscriptions/portal` (billing portal)
-- [ ] API: POST `/api/stripe/webhook` (eventos: created, updated, cancelled, payment_failed)
+- [ ] PayPal: cambiar de Sandbox a Production mode
+- [ ] Schema: tabla `subscription` (plan, status, period, paypal IDs)
+- [ ] API: POST `/api/paypal/create-subscription` (PayPal subscription flow)
+- [ ] API: GET `/api/paypal/billing-agreements` (manage subscription)
+- [ ] API: POST `/api/paypal/webhook` (eventos: BILLING.SUBSCRIPTION.*, PAYMENT.SALE.*)
 - [ ] API: GET `/api/subscriptions/current`, GET `/api/subscriptions/usage`
 - [ ] Plans: Free, Pro (€9.99), Premium (€19.99), Club (€99.99)
 - [ ] Features gating: limitar features por plan (middleware)
@@ -296,12 +296,12 @@ export async function checkUsageLimit(
 ```
 
 **Acceptance Criteria:**
-- Stripe production keys configured en Vercel
+- PayPal production credentials configured en Vercel
 - Payment flow end-to-end funcional
 - Subscription auto-renews correctamente
 - Failed payment handling (retry logic + email)
-- Downgrade/upgrade flow smooth (prorated)
-- Webhook verification implemented (signature check)
+- Downgrade/upgrade flow smooth (PayPal prorating)
+- Webhook signature verification implemented
 - Tax calculation (EU VAT si aplica)
 - Usage limits enforced en todas las features
 
@@ -815,10 +815,11 @@ CREATE TABLE leaderboard (
 CREATE TABLE subscription (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
-  stripe_customer_id VARCHAR(100),
-  stripe_subscription_id VARCHAR(100) UNIQUE,
+  paypal_customer_id VARCHAR(100),
+  paypal_subscription_id VARCHAR(100) UNIQUE,
+  paypal_plan_id VARCHAR(100),
   plan VARCHAR(50) NOT NULL, -- free, pro, premium, club
-  status VARCHAR(50) NOT NULL, -- active, cancelled, past_due, trialing
+  status VARCHAR(50) NOT NULL, -- active, cancelled, suspended, past_due, trialing
   current_period_start TIMESTAMPTZ,
   current_period_end TIMESTAMPTZ,
   trial_end TIMESTAMPTZ,
@@ -1011,14 +1012,14 @@ GET    /api/leaderboards/[type]/position        - My position
 
 ### Subscriptions
 ```
-POST   /api/subscriptions/create                - Create subscription
+POST   /api/paypal/create-subscription          - Create PayPal subscription
 GET    /api/subscriptions/current               - My subscription
 PUT    /api/subscriptions/update                - Update subscription
 DELETE /api/subscriptions/cancel                - Cancel subscription
 POST   /api/subscriptions/reactivate            - Reactivate
-GET    /api/subscriptions/billing-portal        - Stripe portal URL
+GET    /api/paypal/billing-agreements           - PayPal billing agreement URL
 GET    /api/subscriptions/usage                 - Usage stats
-POST   /api/stripe/webhook                      - Stripe webhook
+POST   /api/paypal/webhook                      - PayPal webhook handler
 ```
 
 ### Coupons
@@ -1139,7 +1140,7 @@ GET    /api/admin/experiments/[id]/results      - Experiment results (admin)
 - **SQL Views**: Precalculated aggregations
 
 ### Payments
-- **Stripe SDK**: `@stripe/stripe-js`, `stripe`
+- **PayPal SDK**: `@paypal/paypal-server-sdk` (already installed)
 
 ### Email
 - **Resend**: Already integrated
@@ -1184,16 +1185,16 @@ GET    /api/admin/experiments/[id]/results      - Experiment results (admin)
 - [ ] Testing: stats accuracy, achievement triggers
 
 ### **Phase 2: Monetization (Days 6-10)**
-- [ ] Stripe production setup
+- [ ] PayPal production setup (credentials, webhook URLs)
 - [ ] Database: subscription, usage_log, coupon
 - [ ] Subscription APIs (create, update, cancel)
-- [ ] Stripe webhooks (subscription events)
+- [ ] PayPal webhooks (BILLING.SUBSCRIPTION.*, PAYMENT.SALE.*)
 - [ ] Usage limit enforcement (middleware)
-- [ ] Billing portal integration
+- [ ] Billing agreements integration
 - [ ] Coupons & trials system
 - [ ] Referral program
 - [ ] UI: Pricing page, billing portal
-- [ ] Testing: full payment flow
+- [ ] Testing: full payment flow with PayPal Sandbox
 
 ### **Phase 3: Business Intelligence (Days 11-14)**
 - [ ] Database: analytics_event, user_session, funnel_step, business_metric
@@ -1276,7 +1277,7 @@ GET    /api/admin/experiments/[id]/results      - Experiment results (admin)
 
 ### Critical Paths
 
-1. **Stripe Production:** MUST configure production keys antes de launch
+1. **PayPal Production:** MUST configure production credentials (CLIENT_ID, SECRET) y webhook URLs antes de launch
 2. **Stats Aggregation:** Daily cron job para performance
 3. **Email Deliverability:** Warm up Resend domain, monitor spam score
 4. **SEO:** SSR para public pages desde el inicio
@@ -1286,7 +1287,7 @@ GET    /api/admin/experiments/[id]/results      - Experiment results (admin)
 
 | Risk | Mitigation |
 |------|------------|
-| Stripe webhook failures | Retry logic + dead letter queue + idempotency |
+| PayPal webhook failures | Webhook signature verification + retry logic + idempotency |
 | Stats calculation slow | Precalculate daily, cache popular queries |
 | Email spam | Warm up domain, monitor deliverability, double opt-in |
 | SEO not ranking | Quality content, backlinks, local SEO |
@@ -1302,7 +1303,8 @@ GET    /api/admin/experiments/[id]/results      - Experiment results (admin)
 - [x] Database migrations applied
 - [x] TypeScript 0 errors
 - [x] Production deployment exitoso
-- [ ] Stripe account created (production mode)
+- [ ] PayPal Business account created (production credentials)
+- [ ] PayPal webhook URLs configured
 - [ ] Email domain warmed up (Resend)
 - [ ] Achievement badge designs (30+ iconos)
 
