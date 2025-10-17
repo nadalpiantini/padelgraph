@@ -185,7 +185,7 @@ export function generateKnockoutBracket(
  * @param manualOrder - Manual seed order (optional)
  * @returns Array of participant IDs in bracket position order
  */
-function seedParticipants(
+export function seedParticipants(
   participants: Participant[],
   bracketSize: number,
   method: SeedingMethod,
@@ -364,7 +364,7 @@ export function validateKnockoutBracket(bracket: KnockoutBracket): {
 /**
  * Check if number is power of 2
  */
-function isPowerOfTwo(n: number): boolean {
+export function isPowerOfTwo(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0;
 }
 

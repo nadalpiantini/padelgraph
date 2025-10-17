@@ -78,7 +78,7 @@ describe('Knockout Tournament Generator', () => {
       const seeded = seedParticipants(participants, 8, 'ranked');
 
       expect(seeded).toHaveLength(8);
-      expect(seeded.filter(p => p === null)).toHaveLength(2); // 2 BYEs
+      expect(seeded.filter((p: string) => p === null)).toHaveLength(2); // 2 BYEs
     });
 
     it('should seed randomly when method is random', () => {
@@ -86,7 +86,7 @@ describe('Knockout Tournament Generator', () => {
       const seeded = seedParticipants(participants, 8, 'random');
 
       expect(seeded).toHaveLength(8);
-      expect(seeded.every(p => p !== null)).toBe(true);
+      expect(seeded.every((p: string) => p !== null)).toBe(true);
     });
 
     it('should use custom seed order when provided', () => {
@@ -103,7 +103,7 @@ describe('Knockout Tournament Generator', () => {
     it('should identify bye positions correctly', () => {
       const participants = createMockParticipants(6);
       const bracket = generateKnockoutBracket(participants);
-      const byes = getByePlayersForKnockout(bracket);
+      const byes = getByePlayersForKnockout(participants, bracket.bracketSize);
 
       expect(byes.length).toBeGreaterThan(0);
       expect(bracket.totalByes).toBe(2); // 8 - 6 = 2 byes
@@ -112,7 +112,7 @@ describe('Knockout Tournament Generator', () => {
     it('should return empty array when no byes', () => {
       const participants = createMockParticipants(8);
       const bracket = generateKnockoutBracket(participants);
-      const byes = getByePlayersForKnockout(bracket);
+      const byes = getByePlayersForKnockout(participants, bracket.bracketSize);
 
       expect(byes).toHaveLength(0);
       expect(bracket.totalByes).toBe(0);
@@ -218,10 +218,10 @@ describe('Knockout Tournament Generator', () => {
       const participants = createMockParticipants(8);
       const bracket = generateDoubleEliminationBracket(participants);
 
-      expect(bracket.winnersBracket).toBeDefined();
-      expect(bracket.losersBracket).toBeDefined();
+      expect(bracket.winners).toBeDefined();
+      expect(bracket.losers).toBeDefined();
       expect(bracket.grandFinal).toBeDefined();
-      expect(bracket.winnersBracket.rounds).toHaveLength(3);
+      expect(bracket.winners.rounds).toHaveLength(3);
     });
 
     it('should have correct losers bracket size', () => {
@@ -229,15 +229,15 @@ describe('Knockout Tournament Generator', () => {
       const bracket = generateDoubleEliminationBracket(participants);
 
       // Losers bracket should accommodate all but 1 player
-      expect(bracket.losersBracket.rounds.length).toBeGreaterThan(0);
+      expect(bracket.losers.rounds.length).toBeGreaterThan(0);
     });
 
     it('should handle 16 participants in double elimination', () => {
       const participants = createMockParticipants(16);
       const bracket = generateDoubleEliminationBracket(participants);
 
-      expect(bracket.winnersBracket.bracketSize).toBe(16);
-      expect(bracket.losersBracket.rounds.length).toBeGreaterThan(0);
+      expect(bracket.winners.bracketSize).toBe(16);
+      expect(bracket.losers.rounds.length).toBeGreaterThan(0);
     });
 
     it('should throw error for insufficient participants', () => {
@@ -251,9 +251,9 @@ describe('Knockout Tournament Generator', () => {
     it('should validate a valid bracket', () => {
       const participants = createMockParticipants(8);
       const bracket = generateKnockoutBracket(participants);
-      const validation = validateKnockoutBracket(bracket, participants);
+      const validation = validateKnockoutBracket(bracket);
 
-      expect(validation.isValid).toBe(true);
+      expect(validation.valid).toBe(true);
       expect(validation.errors).toHaveLength(0);
     });
 
@@ -262,9 +262,9 @@ describe('Knockout Tournament Generator', () => {
       const bracket = generateKnockoutBracket(participants);
       bracket.bracketSize = 7; // Not power of 2
 
-      const validation = validateKnockoutBracket(bracket, participants);
+      const validation = validateKnockoutBracket(bracket);
 
-      expect(validation.isValid).toBe(false);
+      expect(validation.valid).toBe(false);
       expect(validation.errors.length).toBeGreaterThan(0);
     });
 
@@ -273,9 +273,9 @@ describe('Knockout Tournament Generator', () => {
       const bracket = generateKnockoutBracket(participants);
       bracket.rounds = bracket.rounds.slice(0, 1); // Remove rounds
 
-      const validation = validateKnockoutBracket(bracket, participants);
+      const validation = validateKnockoutBracket(bracket);
 
-      expect(validation.isValid).toBe(false);
+      expect(validation.valid).toBe(false);
     });
   });
 
@@ -283,20 +283,20 @@ describe('Knockout Tournament Generator', () => {
     it('should validate a valid double elimination bracket', () => {
       const participants = createMockParticipants(8);
       const bracket = generateDoubleEliminationBracket(participants);
-      const validation = validateDoubleEliminationBracket(bracket, participants);
+      const validation = validateDoubleEliminationBracket(bracket);
 
-      expect(validation.isValid).toBe(true);
+      expect(validation.valid).toBe(true);
       expect(validation.errors).toHaveLength(0);
     });
 
     it('should detect invalid winners bracket', () => {
       const participants = createMockParticipants(8);
       const bracket = generateDoubleEliminationBracket(participants);
-      bracket.winnersBracket.rounds = [];
+      bracket.winners.rounds = [];
 
-      const validation = validateDoubleEliminationBracket(bracket, participants);
+      const validation = validateDoubleEliminationBracket(bracket);
 
-      expect(validation.isValid).toBe(false);
+      expect(validation.valid).toBe(false);
       expect(validation.errors.length).toBeGreaterThan(0);
     });
   });
