@@ -1,15 +1,15 @@
-# 🏓 SPRINT 1 CHECKPOINT - Sesión 2
+# 🏓 SPRINT 1 CHECKPOINT - Sesión 3
 
 > **Última actualización:** 2025-10-16
 > **Branch:** `sprint-1-core`
-> **Progreso:** 4/7 Fases (57%)
-> **Commits:** 3 commits totales
+> **Progreso:** 5/7 Fases (71%)
+> **Commits:** 4 commits totales
 
 ---
 
 ## 🎯 Estado Actual
 
-### ✅ Fases Completadas (4/7)
+### ✅ Fases Completadas (5/7)
 
 #### **Fase 1: Setup y Branch** ✅
 - Branch `sprint-1-core` creado
@@ -80,17 +80,26 @@
 - `src/lib/storage.ts` (95 líneas)
 - `claudedocs/SUPABASE_STORAGE_SETUP.md` (doc)
 
-### 🔄 Fases Pendientes (3/7)
+#### **Fase 5: Reservas Simples** ✅
+**Implementado:**
+- ✅ Validación schemas (`src/lib/validations/booking.ts`)
+- ✅ `GET /api/courts` - Lista de canchas con filtros
+- ✅ `GET /api/courts/[id]` - Detalles de cancha + horarios
+- ✅ `GET /api/courts/[id]/availability` - Disponibilidad por fecha
+- ✅ `POST /api/bookings` - Crear reserva con cálculo de precio
+- ✅ `GET /api/bookings` - Mis reservas con filtros
+- ✅ Validación de conflictos (trigger DB automático)
 
-#### **Fase 5: Reservas Simples** ⏳ SIGUIENTE
-**Por implementar:**
-- [ ] `GET /api/courts` - Lista de canchas
-- [ ] `GET /api/courts/:id/availability` - Disponibilidad
-- [ ] `POST /api/bookings` - Crear reserva
-- [ ] `GET /api/bookings` - Mis reservas
-- [ ] Validación de conflictos de horarios
+**Archivos creados:**
+- `src/lib/validations/booking.ts` (70 líneas)
+- `src/app/api/courts/route.ts` (80 líneas)
+- `src/app/api/courts/[id]/route.ts` (75 líneas)
+- `src/app/api/courts/[id]/availability/route.ts` (165 líneas)
+- `src/app/api/bookings/route.ts` (205 líneas)
 
-#### **Fase 6: Admin Panel Clubs** ⏳
+### 🔄 Fases Pendientes (2/7)
+
+#### **Fase 6: Admin Panel Clubs** ⏳ SIGUIENTE
 **Por implementar:**
 - [ ] `GET /api/clubs/:id/admin` - Dashboard admin
 - [ ] `PUT /api/courts/:id` - Gestión de canchas
@@ -132,13 +141,24 @@
 
 ### Commit 3: Feed Social APIs
 ```
-[pendiente] - feat(sprint-1): implement feed social APIs and storage
+c2cc72c - feat(sprint-1): implement social feed APIs and storage system
 
 - Feed validations (Zod schemas)
 - Feed timeline API with pagination
 - Post creation, view, like, comment APIs
 - Supabase Storage helpers
 - Storage setup documentation
+```
+
+### Commit 4: Booking System
+```
+[pendiente] - feat(sprint-1): implement booking system APIs
+
+- Booking validations (courts, availability, bookings)
+- Courts listing and details APIs
+- Availability checking with conflict detection
+- Booking creation with automatic pricing
+- User bookings with filters
 ```
 
 ---
@@ -155,23 +175,28 @@
 ### Libraries
 - `src/lib/api-response.ts` (44 líneas)
 - `src/lib/validations/profile.ts` (38 líneas)
-- `src/lib/validations/feed.ts` (30 líneas) ✨ NEW
+- `src/lib/validations/feed.ts` (30 líneas)
+- `src/lib/validations/booking.ts` (70 líneas) ✨ NEW
 - `src/lib/twilio.ts` (115 líneas)
 - `src/lib/email.ts` (151 líneas)
-- `src/lib/storage.ts` (95 líneas) ✨ NEW
+- `src/lib/storage.ts` (95 líneas)
 
 ### API Routes
 - `src/app/api/profile/route.ts` (93 líneas)
 - `src/app/api/preferences/route.ts` (95 líneas)
 - `src/app/api/email/send/route.ts` (96 líneas)
 - `src/app/api/whatsapp/send/route.ts` (56 líneas)
-- `src/app/api/feed/route.ts` (100 líneas) ✨ NEW
-- `src/app/api/posts/route.ts` (75 líneas) ✨ NEW
-- `src/app/api/posts/[id]/route.ts` (95 líneas) ✨ NEW
-- `src/app/api/posts/[id]/like/route.ts` (115 líneas) ✨ NEW
-- `src/app/api/posts/[id]/comment/route.ts` (115 líneas) ✨ NEW
+- `src/app/api/feed/route.ts` (100 líneas)
+- `src/app/api/posts/route.ts` (75 líneas)
+- `src/app/api/posts/[id]/route.ts` (95 líneas)
+- `src/app/api/posts/[id]/like/route.ts` (115 líneas)
+- `src/app/api/posts/[id]/comment/route.ts` (115 líneas)
+- `src/app/api/courts/route.ts` (80 líneas) ✨ NEW
+- `src/app/api/courts/[id]/route.ts` (75 líneas) ✨ NEW
+- `src/app/api/courts/[id]/availability/route.ts` (165 líneas) ✨ NEW
+- `src/app/api/bookings/route.ts` (205 líneas) ✨ NEW
 
-**Total:** ~2,167 líneas de código nuevo
+**Total:** ~2,762 líneas de código nuevo
 
 ---
 
@@ -224,19 +249,19 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ### Opción 1: Contexto Completo
 ```
 "Continúa con el Sprint 1 de PadelGraph.
-Lee claudedocs/SPRINT_1_CHECKPOINT.md y sigue con la Fase 5: Reservas Simples.
+Lee claudedocs/SPRINT_1_CHECKPOINT.md y sigue con la Fase 6: Admin Panel.
 Branch: sprint-1-core"
 ```
 
 ### Opción 2: Comando Corto
 ```
-"Sprint 1 Fase 5"
+"Sprint 1 Fase 6"
 ```
 
 ### Opción 3: Contexto Específico
 ```
 "Retoma Sprint 1 desde el checkpoint.
-Implementa las APIs de reservas: courts, availability, bookings.
+Implementa las APIs de admin: gestión de courts, availability, dashboard.
 El schema ya está creado."
 ```
 
@@ -244,29 +269,29 @@ El schema ya está creado."
 
 ## 📋 Próxima Tarea Específica
 
-**Implementar Fase 5: Reservas Simples**
+**Implementar Fase 6: Admin Panel Clubs**
 
-1. **Crear validaciones** (`src/lib/validations/booking.ts`):
-   - `createCourtSchema`
-   - `createAvailabilitySchema`
-   - `createBookingSchema`
+1. **Crear validaciones admin** (si necesarias):
+   - Validar permisos de organización
+   - Schemas para actualización de courts/availability
 
-2. **Implementar APIs**:
-   - `GET /api/courts` - Lista de canchas
-   - `GET /api/courts/[id]` - Detalles de cancha
-   - `GET /api/courts/[id]/availability` - Disponibilidad
-   - `POST /api/bookings` - Crear reserva
-   - `GET /api/bookings` - Mis reservas
+2. **Implementar APIs Admin**:
+   - `POST /api/courts` - Crear cancha (admin)
+   - `PUT /api/courts/[id]` - Actualizar cancha
+   - `DELETE /api/courts/[id]` - Desactivar cancha
+   - `POST /api/availability` - Crear horarios
+   - `PUT /api/availability/[id]` - Actualizar horarios
+   - `GET /api/admin/dashboard` - Dashboard stats
 
-3. **Business Logic**:
-   - Validación de conflictos de horarios (trigger ya existe)
-   - Cálculo automático de precio
-   - Verificación de permisos
+3. **Permisos & Seguridad**:
+   - Verificar membresía de org (org_member)
+   - Verificar rol admin/owner
+   - RLS policies para operaciones admin
 
 4. **Testing**:
    - Verificar TypeScript
    - Build test
-   - Manual testing de endpoints
+   - Manual testing de permisos
 
 ---
 
@@ -290,10 +315,10 @@ npm run build             # debe compilar exitosamente ✅
 
 ## 📊 Métricas
 
-- **Progreso Sprint 1:** 57% (4/7 fases)
-- **APIs implementadas:** 11/16 (feed completo ✅)
-- **Líneas de código:** ~2,167 nuevas
-- **Commits:** 3 (pendiente commit de Fase 4)
+- **Progreso Sprint 1:** 71% (5/7 fases)
+- **APIs implementadas:** 16/21 (feed ✅, booking ✅)
+- **Líneas de código:** ~2,762 nuevas
+- **Commits:** 4 (pendiente commit de Fase 5)
 - **Coverage:** 0% (tests pendientes en Fase 7)
 - **TypeScript:** ✅ Sin errores
 - **Build:** ✅ Exitoso
@@ -313,4 +338,4 @@ npm run build             # debe compilar exitosamente ✅
 **¡Listo para continuar! 🚀**
 
 *Checkpoint actualizado: 2025-10-16*
-*Próxima sesión: Fase 5 - Reservas Simples*
+*Próxima sesión: Fase 6 - Admin Panel Clubs*
