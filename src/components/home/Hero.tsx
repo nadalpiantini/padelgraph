@@ -28,9 +28,9 @@ export default function Hero({ t }: HeroProps) {
             <Image
               src="/images/branding/padelgraph_logo_01.png"
               alt="PadelGraph Logo"
-              width={600}
-              height={600}
-              className="rounded-xl"
+              width={300}
+              height={300}
+              className="w-48 h-48 md:w-64 md:h-64 object-contain rounded-xl"
               priority
             />
           </div>
