@@ -1,346 +1,437 @@
 'use client';
 
-/**
- * Privacy Dashboard Component
- *
- * Granular privacy settings for location visibility, profile visibility,
- * and auto-matching with real-time preview and audit log.
- */
-
 import { useState, useEffect } from 'react';
-import { Shield, Eye, EyeOff, MapPin, Users, Activity, Save, CheckCircle } from 'lucide-react';
-
-interface PrivacySettings {
-  locationVisibility: 'public' | 'friends' | 'clubs_only' | 'private';
-  profileVisibility: 'public' | 'friends' | 'clubs_only' | 'private';
-  autoMatchEnabled: boolean;
-  showInDiscovery: boolean;
-  graphVisibility: 'public' | 'friends' | 'private';
-}
+import {
+  Shield,
+  Eye,
+  EyeOff,
+  MapPin,
+  User,
+  Users,
+  Radar,
+  MessageCircle,
+  Download,
+  History,
+  Info,
+  Check,
+} from 'lucide-react';
+import type {
+  PrivacySettings,
+  VisibilityLevel,
+  PrivacyPreview,
+  PrivacyAuditLog,
+} from '@/lib/privacy/types';
 
 interface PrivacyDashboardProps {
   userId: string;
-  className?: string;
+  t: {
+    title: string;
+    subtitle: string;
+    loading: string;
+    save: string;
+    saved: string;
+    locationVisibility: string;
+    profileVisibility: string;
+    graphVisibility: string;
+    autoMatch: string;
+    showInDiscovery: string;
+    visibilityLevels: {
+      public: string;
+      friends: string;
+      clubs_only: string;
+      private: string;
+    };
+    preview: {
+      title: string;
+      description: string;
+      visible: string;
+      hidden: string;
+    };
+    auditLog: {
+      title: string;
+      noLogs: string;
+      viewAll: string;
+    };
+    dataDownload: {
+      title: string;
+      description: string;
+      download: string;
+    };
+  };
 }
 
-const VISIBILITY_OPTIONS = [
-  { value: 'public', label: 'Public', description: 'Anyone can see' },
-  { value: 'friends', label: 'Friends', description: 'Only your friends' },
-  { value: 'clubs_only', label: 'Clubs Only', description: 'Only members of your clubs' },
-  { value: 'private', label: 'Private', description: 'Only you' },
-] as const;
-
-export function PrivacyDashboard({ userId, className = '' }: PrivacyDashboardProps) {
-  const [settings, setSettings] = useState<PrivacySettings>({
-    locationVisibility: 'clubs_only',
-    profileVisibility: 'public',
-    autoMatchEnabled: true,
-    showInDiscovery: true,
-    graphVisibility: 'friends',
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function PrivacyDashboard({ userId, t }: PrivacyDashboardProps) {
+  const [settings, setSettings] = useState<PrivacySettings | null>(null);
+  const [preview, setPreview] = useState<PrivacyPreview | null>(null);
+  const [auditLogs, setAuditLogs] = useState<PrivacyAuditLog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showAudit, setShowAudit] = useState(false);
 
   useEffect(() => {
-    async function fetchSettings() {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/privacy-settings');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch privacy settings');
-        }
-
-        const data = await response.json();
-        setSettings(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (userId) {
-      fetchSettings();
-    }
+    loadSettings();
+    loadAuditLogs();
   }, [userId]);
 
-  const handleSave = async () => {
+  const loadSettings = async () => {
     try {
-      setSaving(true);
-      setSaved(false);
-      setError(null);
-
-      const response = await fetch('/api/privacy-settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save privacy settings');
+      const response = await fetch('/api/privacy-settings');
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+        loadPreview(data);
       }
-
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+    } catch (error) {
+      console.error('Error loading privacy settings:', error);
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
+  const loadPreview = async (currentSettings: PrivacySettings) => {
+    try {
+      const response = await fetch('/api/privacy-settings/preview');
+      if (response.ok) {
+        const data = await response.json();
+        setPreview(data);
+      }
+    } catch (error) {
+      console.error('Error loading preview:', error);
+    }
+  };
+
+  const loadAuditLogs = async () => {
+    try {
+      const response = await fetch('/api/privacy-settings/audit?limit=5');
+      if (response.ok) {
+        const data = await response.json();
+        setAuditLogs(data.logs || []);
+      }
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!settings) return;
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch('/api/privacy-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_visibility: settings.location_visibility,
+          profile_visibility: settings.profile_visibility,
+          graph_visibility: settings.graph_visibility,
+          auto_match_enabled: settings.auto_match_enabled,
+          show_in_discovery: settings.show_in_discovery,
+        }),
+      });
+
+      if (response.ok) {
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 2000);
+        loadAuditLogs();
+      }
+    } catch (error) {
+      console.error('Error saving privacy settings:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const response = await fetch('/api/privacy-settings/data-export');
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `privacy-data-${userId}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading data:', error);
+    }
+  };
+
+  const visibilityLevels: VisibilityLevel[] = ['public', 'friends', 'clubs_only', 'private'];
+
+  const VisibilityToggle = ({
+    label,
+    value,
+    icon: Icon,
+    onChange,
+  }: {
+    label: string;
+    value: VisibilityLevel;
+    icon: React.ElementType;
+    onChange: (value: VisibilityLevel) => void;
+  }) => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-slate-300">
+        <Icon className="w-5 h-5" />
+        <span className="font-medium">{label}</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {visibilityLevels.map((level) => (
+          <button
+            key={level}
+            onClick={() => onChange(level)}
+            className={`px-4 py-2 rounded-lg border transition-colors text-sm font-medium ${
+              value === level
+                ? 'bg-indigo-600 border-indigo-500 text-white'
+                : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600'
+            }`}
+          >
+            {t.visibilityLevels[level]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (isLoading || !settings) {
     return (
-      <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
-        <div className="flex items-center justify-center h-64">
-          <div className="flex items-center gap-2 text-gray-500">
-            <Shield className="h-5 w-5 animate-pulse" />
-            <span>Loading privacy settings...</span>
-          </div>
+      <div className="w-full max-w-4xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <Shield className="w-6 h-6 text-indigo-400" />
+          <h2 className="text-2xl font-bold text-white">{t.title}</h2>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <span className="ml-3 text-slate-400">{t.loading}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow ${className}`}>
+    <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-emerald-600 px-6 py-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Shield className="h-5 w-5" />
-          Privacy & Visibility Settings
-        </h3>
+      <div className="flex items-center gap-3">
+        <Shield className="w-6 h-6 text-indigo-400" />
+        <div>
+          <h2 className="text-2xl font-bold text-white">{t.title}</h2>
+          <p className="text-sm text-slate-400">{t.subtitle}</p>
+        </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Location Visibility */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-emerald-600" />
-            <h4 className="font-semibold text-gray-900">Location Visibility</h4>
-          </div>
-          <p className="text-sm text-gray-600">
-            Control who can see your location and find you on the map
-          </p>
+      {/* Main Settings */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-6">
+        <VisibilityToggle
+          label={t.locationVisibility}
+          value={settings.location_visibility}
+          icon={MapPin}
+          onChange={(value) =>
+            setSettings({ ...settings, location_visibility: value })
+          }
+        />
 
-          <div className="grid grid-cols-2 gap-3">
-            {VISIBILITY_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() =>
-                  setSettings({ ...settings, locationVisibility: option.value })
-                }
-                className={`p-3 border-2 rounded-lg text-left transition ${
-                  settings.locationVisibility === option.value
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="font-medium text-gray-900">{option.label}</div>
-                <div className="text-xs text-gray-500 mt-1">{option.description}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <VisibilityToggle
+          label={t.profileVisibility}
+          value={settings.profile_visibility}
+          icon={User}
+          onChange={(value) =>
+            setSettings({ ...settings, profile_visibility: value })
+          }
+        />
 
-        <div className="border-t border-gray-200"></div>
+        <VisibilityToggle
+          label={t.graphVisibility}
+          value={settings.graph_visibility}
+          icon={Users}
+          onChange={(value) =>
+            setSettings({ ...settings, graph_visibility: value })
+          }
+        />
 
-        {/* Profile Visibility */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-emerald-600" />
-            <h4 className="font-semibold text-gray-900">Profile Visibility</h4>
-          </div>
-          <p className="text-sm text-gray-600">
-            Choose who can view your full profile information
-          </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            {VISIBILITY_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() =>
-                  setSettings({ ...settings, profileVisibility: option.value })
-                }
-                className={`p-3 border-2 rounded-lg text-left transition ${
-                  settings.profileVisibility === option.value
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="font-medium text-gray-900">{option.label}</div>
-                <div className="text-xs text-gray-500 mt-1">{option.description}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200"></div>
-
-        {/* Graph Visibility */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-emerald-600" />
-            <h4 className="font-semibold text-gray-900">Connection Graph Visibility</h4>
-          </div>
-          <p className="text-sm text-gray-600">
-            Control who can see your network connections
-          </p>
-
-          <div className="grid grid-cols-3 gap-3">
-            {VISIBILITY_OPTIONS.slice(0, 3).map((option) => (
-              <button
-                key={option.value}
-                onClick={() =>
-                  setSettings({ ...settings, graphVisibility: option.value as any })
-                }
-                className={`p-3 border-2 rounded-lg text-center transition ${
-                  settings.graphVisibility === option.value
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="font-medium text-gray-900">{option.label}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200"></div>
-
-        {/* Feature Toggles */}
-        <div className="space-y-4">
-          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-emerald-600" />
-            Discovery Features
-          </h4>
-
-          {/* Show in Discovery */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">Show in Discovery Feed</div>
-              <div className="text-sm text-gray-600 mt-1">
-                Appear in discovery feed and nearby searches
-              </div>
+        {/* Boolean Toggles */}
+        <div className="pt-4 border-t border-slate-700 space-y-4">
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-slate-400" />
+              <span className="text-slate-300">{t.autoMatch}</span>
             </div>
-            <button
-              onClick={() =>
-                setSettings({ ...settings, showInDiscovery: !settings.showInDiscovery })
-              }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                settings.showInDiscovery ? 'bg-emerald-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                  settings.showInDiscovery ? 'translate-x-6' : 'translate-x-1'
-                }`}
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={settings.auto_match_enabled}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    auto_match_enabled: e.target.checked,
+                  })
+                }
+                className="sr-only"
               />
-            </button>
-          </div>
-
-          {/* Auto-Match */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">Auto-Match Enabled</div>
-              <div className="text-sm text-gray-600 mt-1">
-                Automatically connect with compatible players (max 3/week)
-              </div>
-            </div>
-            <button
-              onClick={() =>
-                setSettings({ ...settings, autoMatchEnabled: !settings.autoMatchEnabled })
-              }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                settings.autoMatchEnabled ? 'bg-emerald-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                  settings.autoMatchEnabled ? 'translate-x-6' : 'translate-x-1'
+              <div
+                className={`w-11 h-6 rounded-full transition-colors ${
+                  settings.auto_match_enabled ? 'bg-indigo-600' : 'bg-slate-700'
                 }`}
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Preview Section */}
-        <div className="border-t border-gray-200 pt-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Privacy Preview</h4>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              {settings.locationVisibility === 'private' ? (
-                <EyeOff className="h-4 w-4 text-blue-600" />
-              ) : (
-                <Eye className="h-4 w-4 text-blue-600" />
-              )}
-              <span className="text-blue-900">
-                Your location is visible to:{' '}
-                <strong>
-                  {VISIBILITY_OPTIONS.find((o) => o.value === settings.locationVisibility)?.label}
-                </strong>
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              {settings.profileVisibility === 'private' ? (
-                <EyeOff className="h-4 w-4 text-blue-600" />
-              ) : (
-                <Eye className="h-4 w-4 text-blue-600" />
-              )}
-              <span className="text-blue-900">
-                Your profile is visible to:{' '}
-                <strong>
-                  {VISIBILITY_OPTIONS.find((o) => o.value === settings.profileVisibility)?.label}
-                </strong>
-              </span>
-            </div>
-            {!settings.showInDiscovery && (
-              <div className="flex items-center gap-2 text-sm">
-                <EyeOff className="h-4 w-4 text-blue-600" />
-                <span className="text-blue-900">
-                  You are <strong>hidden</strong> from discovery feeds
-                </span>
+              >
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                    settings.auto_match_enabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </label>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex items-center gap-2">
+              <Radar className="w-5 h-5 text-slate-400" />
+              <span className="text-slate-300">{t.showInDiscovery}</span>
+            </div>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={settings.show_in_discovery}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    show_in_discovery: e.target.checked,
+                  })
+                }
+                className="sr-only"
+              />
+              <div
+                className={`w-11 h-6 rounded-full transition-colors ${
+                  settings.show_in_discovery ? 'bg-indigo-600' : 'bg-slate-700'
+                }`}
+              >
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                    settings.show_in_discovery ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </div>
+          </label>
+        </div>
 
         {/* Save Button */}
-        <div className="flex items-center gap-3 pt-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {saving ? (
-              <>
-                <Activity className="h-5 w-5 animate-spin" />
-                Saving...
-              </>
-            ) : saved ? (
-              <>
-                <CheckCircle className="h-5 w-5" />
-                Saved!
-              </>
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          className={`w-full px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+            isSaved
+              ? 'bg-green-600 text-white'
+              : 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white'
+          }`}
+        >
+          {isSaved ? (
+            <>
+              <Check className="w-5 h-5" />
+              {t.saved}
+            </>
+          ) : (
+            <>{isSaving ? t.loading : t.save}</>
+          )}
+        </button>
+      </div>
+
+      {/* Preview */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowPreview(!showPreview)}
+          className="w-full p-6 flex items-center justify-between hover:bg-slate-700/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Eye className="w-5 h-5 text-indigo-400" />
+            <div className="text-left">
+              <h3 className="font-semibold text-white">{t.preview.title}</h3>
+              <p className="text-sm text-slate-400">{t.preview.description}</p>
+            </div>
+          </div>
+          {showPreview ? <EyeOff className="w-5 h-5 text-slate-400" /> : <Eye className="w-5 h-5 text-slate-400" />}
+        </button>
+
+        {showPreview && preview && (
+          <div className="p-6 pt-0 space-y-3">
+            <PreviewItem label={t.profileVisibility} visible={preview.profile_visible} />
+            <PreviewItem label={t.locationVisibility} visible={preview.location_visible} />
+            <PreviewItem label={t.graphVisibility} visible={preview.graph_visible} />
+            <PreviewItem label={t.showInDiscovery} visible={preview.discovery_visible} />
+          </div>
+        )}
+      </div>
+
+      {/* Audit Log */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowAudit(!showAudit)}
+          className="w-full p-6 flex items-center justify-between hover:bg-slate-700/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <History className="w-5 h-5 text-indigo-400" />
+            <h3 className="font-semibold text-white">{t.auditLog.title}</h3>
+          </div>
+          <span className="text-sm text-slate-400">{auditLogs.length} recent</span>
+        </button>
+
+        {showAudit && (
+          <div className="p-6 pt-0">
+            {auditLogs.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-4">{t.auditLog.noLogs}</p>
             ) : (
-              <>
-                <Save className="h-5 w-5" />
-                Save Privacy Settings
-              </>
+              <div className="space-y-2">
+                {auditLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className="p-3 bg-slate-900 rounded-lg border border-slate-700"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white">{log.action}</span>
+                      <span className="text-xs text-slate-500">
+                        {new Date(log.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </button>
+          </div>
+        )}
+      </div>
+
+      {/* Data Download */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <Download className="w-5 h-5 text-indigo-400 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-white mb-1">{t.dataDownload.title}</h3>
+            <p className="text-sm text-slate-400">{t.dataDownload.description}</p>
+          </div>
         </div>
+        <button
+          onClick={handleDownloadData}
+          className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          {t.dataDownload.download}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PreviewItem({ label, visible }: { label: string; visible: boolean }) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg">
+      <span className="text-sm text-slate-300">{label}</span>
+      <div className={`flex items-center gap-1 text-sm ${visible ? 'text-green-400' : 'text-slate-500'}`}>
+        {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+        <span>{visible ? 'Visible' : 'Hidden'}</span>
       </div>
     </div>
   );
