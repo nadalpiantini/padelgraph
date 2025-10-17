@@ -4,7 +4,7 @@
  * Integration tests for Travel Mode, Discovery, Graph, Recommendations, and Privacy endpoints.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Mock authenticated request helper
 const makeAuthRequest = async (

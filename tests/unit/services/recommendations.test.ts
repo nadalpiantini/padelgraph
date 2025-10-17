@@ -1,8 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type {
-  RecommendationInput,
-  RecommendationResult,
-} from '@/lib/services/recommendations';
 
 // Mock Supabase
 vi.mock('@/lib/supabase/server', () => ({
@@ -59,9 +55,6 @@ describe('Recommendations Engine', () => {
       });
 
       mockSupabase.rpc.mockResolvedValue({ count: 0, error: null });
-
-      // Import after mock setup
-      const { generateRecommendations } = await import('@/lib/services/recommendations');
 
       // Note: calculateUserSimilarity is internal, we test it via recommendPlayers
       // Expected score: same_skill (0.3) + same_city (0.2) = 0.5
@@ -453,17 +446,6 @@ describe('Recommendations Engine', () => {
   describe('saveRecommendations', () => {
     it('should save recommendations to database', async () => {
       mockSupabase.insert.mockResolvedValue({ data: null, error: null });
-
-      const recommendations: RecommendationResult[] = [
-        {
-          id: 'rec1',
-          type: 'player',
-          recommended_id: 'user2',
-          score: 0.8,
-          reason: 'Same skill level',
-          metadata: { display_name: 'Test Player' },
-        },
-      ];
 
       mockSupabase.select.mockReturnValueOnce({ data: [], error: null });
       mockSupabase.single.mockResolvedValueOnce({

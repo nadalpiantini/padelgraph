@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AutoMatchResult } from '@/lib/services/auto-match';
 
 // Mock Supabase
 vi.mock('@/lib/supabase/server', () => ({
@@ -41,8 +40,6 @@ describe('Auto-Match Service', () => {
       });
 
       mockSupabase.or.mockResolvedValue({ count: 0, error: null });
-
-      const { triggerAutoMatch } = await import('@/lib/services/auto-match');
 
       // Expected: same_skill (0.3) + same_city (0.25) = 0.55
     });
@@ -161,7 +158,7 @@ describe('Auto-Match Service', () => {
 
       const { triggerAutoMatch } = await import('@/lib/services/auto-match');
 
-      const results = await triggerAutoMatch('user1');
+      await triggerAutoMatch('user1');
       // Should proceed with auto-matching
     });
 
@@ -190,7 +187,7 @@ describe('Auto-Match Service', () => {
 
       const { triggerAutoMatch } = await import('@/lib/services/auto-match');
 
-      const results = await triggerAutoMatch('user1');
+      await triggerAutoMatch('user1');
       // Should proceed with auto-matching (defaults to enabled)
     });
   });
@@ -218,7 +215,7 @@ describe('Auto-Match Service', () => {
 
       const { triggerAutoMatch } = await import('@/lib/services/auto-match');
 
-      const results = await triggerAutoMatch('user1');
+      await triggerAutoMatch('user1');
       // Should proceed (2 < 3)
     });
 
@@ -326,8 +323,7 @@ describe('Auto-Match Service', () => {
 
       mockSupabase.insert.mockResolvedValue({ error: null });
 
-      // Message template should include reason
-      const expectedMessage = expect.stringContaining('Te gustaría jugar');
+      // Message template should include reason: "Te gustaría jugar"
     });
 
     it('should handle message sending failures gracefully', async () => {
