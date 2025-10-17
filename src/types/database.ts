@@ -206,7 +206,15 @@ export interface CreateAvailabilityRequest {
 // TOURNAMENT SYSTEM TYPES (Sprint 2)
 // ============================================================================
 
-export type TournamentType = 'americano' | 'mexicano';
+export type TournamentType = 
+  | 'americano' 
+  | 'mexicano' 
+  | 'round_robin' 
+  | 'knockout_single' 
+  | 'knockout_double' 
+  | 'swiss' 
+  | 'monrad' 
+  | 'compass';
 export type TournamentStatus = 'draft' | 'published' | 'in_progress' | 'completed' | 'cancelled';
 export type ParticipantStatus = 'registered' | 'checked_in' | 'no_show' | 'withdrawn';
 export type RoundStatus = 'pending' | 'in_progress' | 'completed';
@@ -300,7 +308,82 @@ export interface TournamentStanding {
   games_diff: number; // Generated column
   points: number;
   rank?: number;
+  // Sprint 3: Fair-Play fields
+  fair_play_points: number;
+  yellow_cards: number;
+  red_cards: number;
+  conduct_bonus: number;
   updated_at: string;
+}
+
+// ============================================================================
+// TOURNAMENT ADVANCED FORMATS (Sprint 3)
+// ============================================================================
+
+export type BracketType = 'main' | 'consolation' | 'losers' | 'third_place';
+export type FairPlayIncidentType = 
+  | 'yellow_card' 
+  | 'red_card' 
+  | 'code_violation' 
+  | 'time_violation' 
+  | 'unsportsmanlike_conduct' 
+  | 'equipment_abuse' 
+  | 'positive_conduct';
+
+export interface TournamentBracket {
+  id: string;
+  tournament_id: string;
+  bracket_type: BracketType;
+  round_number: number;
+  position: number;
+  match_id?: string;
+  winner_from_match_id?: string;
+  loser_from_match_id?: string;
+  created_at: string;
+}
+
+export interface TournamentGroup {
+  id: string;
+  tournament_id: string;
+  group_name: string;
+  group_number: number;
+  participant_ids: string[];
+  top_advance: number;
+  created_at: string;
+}
+
+export interface TournamentFairPlay {
+  id: string;
+  tournament_id: string;
+  user_id: string;
+  match_id?: string;
+  incident_type: FairPlayIncidentType;
+  description?: string;
+  severity: 1 | 2 | 3 | 4 | 5;
+  penalty_points: number;
+  bonus_points: number;
+  issued_by?: string;
+  issued_at: string;
+  created_at: string;
+}
+
+export interface TournamentFormatSettings {
+  // Round Robin
+  groups?: number;
+  top_per_group?: number;
+  playoffs?: boolean;
+  
+  // Knockout
+  seeding?: 'random' | 'ranked' | 'manual';
+  bronze_match?: boolean;
+  
+  // Swiss
+  rounds?: number;
+  pairing_method?: 'slide' | 'fold' | 'accelerated';
+  
+  // Monrad
+  initial_rounds?: number;
+  bracket_size?: number;
 }
 
 // ============================================================================
@@ -344,6 +427,25 @@ export interface CheckInRequest {
 export interface SubmitScoreRequest {
   team1_score: number;
   team2_score: number;
+}
+
+
+// Sprint 3: Fair-Play API Types
+export interface CreateFairPlayIncidentRequest {
+  user_id: string;
+  match_id?: string;
+  incident_type: FairPlayIncidentType;
+  description?: string;
+  severity: 1 | 2 | 3 | 4 | 5;
+  penalty_points?: number;
+  bonus_points?: number;
+}
+
+export interface UpdateFairPlayIncidentRequest {
+  description?: string;
+  severity?: 1 | 2 | 3 | 4 | 5;
+  penalty_points?: number;
+  bonus_points?: number;
 }
 
 export interface TournamentFilters {
@@ -392,6 +494,12 @@ export interface TournamentMatchWithDetails extends TournamentMatch {
 
 export interface TournamentStandingWithProfile extends TournamentStanding {
   profile: Pick<UserProfile, 'name' | 'avatar_url' | 'level'>;
+}
+
+// Sprint 3: Fair-Play Response Types
+export interface TournamentFairPlayWithProfile extends TournamentFairPlay {
+  user_profile: Pick<UserProfile, 'name' | 'avatar_url'>;
+  issuer_profile?: Pick<UserProfile, 'name' | 'avatar_url'>;
 }
 
 export interface RotationBoardData {
@@ -480,8 +588,23 @@ export interface Database {
       };
       tournament_standing: {
         Row: TournamentStanding;
-        Insert: Omit<TournamentStanding, 'id' | 'updated_at' | 'games_diff'>;
+        Insert: Omit<TournamentStanding, 'id' | 'updated_at' | 'games_diff' | 'fair_play_points' | 'yellow_cards' | 'red_cards' | 'conduct_bonus'>;
         Update: Partial<Omit<TournamentStanding, 'id' | 'updated_at' | 'games_diff'>>;
+      };
+      tournament_bracket: {
+        Row: TournamentBracket;
+        Insert: Omit<TournamentBracket, 'id' | 'created_at'>;
+        Update: Partial<Omit<TournamentBracket, 'id' | 'created_at'>>;
+      };
+      tournament_group: {
+        Row: TournamentGroup;
+        Insert: Omit<TournamentGroup, 'id' | 'created_at'>;
+        Update: Partial<Omit<TournamentGroup, 'id' | 'created_at'>>;
+      };
+      tournament_fair_play: {
+        Row: TournamentFairPlay;
+        Insert: Omit<TournamentFairPlay, 'id' | 'issued_at' | 'created_at'>;
+        Update: Partial<Omit<TournamentFairPlay, 'id' | 'issued_at' | 'created_at'>>;
       };
     };
     Views: Record<string, never>;
