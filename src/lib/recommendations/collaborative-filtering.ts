@@ -22,7 +22,7 @@ import type {
 /**
  * Calculate cosine similarity for vectors
  */
-function cosineSimilarity(vecA: number[], vecB: number[]): number {
+export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) return 0;
 
   let dotProduct = 0;
@@ -43,7 +43,7 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 /**
  * Calculate Jaccard similarity for sets
  */
-function jaccardSimilarity(setA: string[], setB: string[]): number {
+export function jaccardSimilarity(setA: string[], setB: string[]): number {
   if (setA.length === 0 && setB.length === 0) return 1;
   if (setA.length === 0 || setB.length === 0) return 0;
 
@@ -56,7 +56,7 @@ function jaccardSimilarity(setA: string[], setB: string[]): number {
 /**
  * Calculate skill similarity (0-1)
  */
-function skillSimilarity(userA: UserFeatures, userB: UserFeatures): number {
+export function skillSimilarity(userA: UserFeatures, userB: UserFeatures): number {
   // Use rating if available, fallback to level comparison
   if (userA.skill_rating !== undefined && userB.skill_rating !== undefined) {
     const diff = Math.abs(userA.skill_rating - userB.skill_rating);
@@ -77,7 +77,7 @@ function skillSimilarity(userA: UserFeatures, userB: UserFeatures): number {
  * Calculate location proximity (0-1)
  * Uses Haversine formula for distance
  */
-function locationProximity(userA: UserFeatures, userB: UserFeatures): number {
+export function locationProximity(userA: UserFeatures, userB: UserFeatures): number {
   if (!userA.location || !userB.location) {
     // Fallback to city comparison
     if (userA.city && userB.city) {
@@ -101,7 +101,7 @@ function locationProximity(userA: UserFeatures, userB: UserFeatures): number {
 /**
  * Haversine distance calculation (km)
  */
-function haversineDistance(
+export function haversineDistance(
   lat1: number,
   lon1: number,
   lat2: number,
@@ -122,14 +122,14 @@ function haversineDistance(
   return R * c;
 }
 
-function toRadians(degrees: number): number {
+export function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 
 /**
  * Calculate play style similarity (0-1)
  */
-function playStyleMatch(userA: UserFeatures, userB: UserFeatures): number {
+export function playStyleMatch(userA: UserFeatures, userB: UserFeatures): number {
   if (!userA.play_style || !userB.play_style) {
     return 0.5; // Unknown style
   }
@@ -154,7 +154,7 @@ function playStyleMatch(userA: UserFeatures, userB: UserFeatures): number {
 /**
  * Calculate schedule compatibility (0-1)
  */
-function scheduleCompatibility(userA: UserFeatures, userB: UserFeatures): number {
+export function scheduleCompatibility(userA: UserFeatures, userB: UserFeatures): number {
   // Time slot match
   let timeMatch = 0.5;
   if (userA.preferred_time_slot && userB.preferred_time_slot) {
@@ -173,7 +173,7 @@ function scheduleCompatibility(userA: UserFeatures, userB: UserFeatures): number
 /**
  * Calculate social overlap (0-1)
  */
-function socialOverlap(userA: UserFeatures, userB: UserFeatures): number {
+export function socialOverlap(userA: UserFeatures, userB: UserFeatures): number {
   // Club memberships overlap
   const clubMatch = jaccardSimilarity(userA.club_memberships, userB.club_memberships);
 
