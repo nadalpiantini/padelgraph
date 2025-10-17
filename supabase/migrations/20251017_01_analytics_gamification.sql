@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Player Statistics (aggregated)
 CREATE TABLE player_stats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
+  user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
 
   -- Time period
   period_type VARCHAR(20) NOT NULL, -- day, week, month, all_time
@@ -64,7 +64,7 @@ CREATE TABLE achievement (
 -- User Achievements
 CREATE TABLE user_achievement (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
+  user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
   achievement_id UUID REFERENCES achievement(id) ON DELETE CASCADE,
   progress INTEGER DEFAULT 0,
   is_unlocked BOOLEAN DEFAULT false,

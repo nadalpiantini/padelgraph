@@ -4,7 +4,7 @@
 -- Subscriptions
 CREATE TABLE subscription (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
+  user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
   paypal_customer_id VARCHAR(100),
   paypal_subscription_id VARCHAR(100) UNIQUE,
   paypal_plan_id VARCHAR(100),
@@ -26,7 +26,7 @@ CREATE TABLE subscription (
 -- Usage Tracking
 CREATE TABLE usage_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
+  user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
   feature VARCHAR(50) NOT NULL, -- tournament, auto_match, recommendation, travel_plan
   action VARCHAR(50) NOT NULL, -- create, view, use
   timestamp TIMESTAMPTZ DEFAULT NOW(),
@@ -48,7 +48,7 @@ CREATE TABLE coupon (
   valid_until TIMESTAMPTZ,
   applicable_plans VARCHAR(50)[],
   first_time_only BOOLEAN DEFAULT false,
-  referral_user_id UUID REFERENCES user_profile(user_id),
+  referral_user_id UUID REFERENCES user_profile(id),
   created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   is_active BOOLEAN DEFAULT true

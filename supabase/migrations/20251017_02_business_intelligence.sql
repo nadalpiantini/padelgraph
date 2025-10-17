@@ -5,7 +5,7 @@
 CREATE TABLE analytics_event (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_name VARCHAR(100) NOT NULL,
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE SET NULL,
+  user_id UUID REFERENCES user_profile(id) ON DELETE SET NULL,
   session_id VARCHAR(100) NOT NULL,
   timestamp TIMESTAMPTZ DEFAULT NOW(),
   properties JSONB,
@@ -18,7 +18,7 @@ CREATE TABLE analytics_event (
 CREATE TABLE user_session (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id VARCHAR(100) UNIQUE NOT NULL,
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE SET NULL,
+  user_id UUID REFERENCES user_profile(id) ON DELETE SET NULL,
   started_at TIMESTAMPTZ DEFAULT NOW(),
   ended_at TIMESTAMPTZ,
   page_views INTEGER DEFAULT 1,
@@ -36,7 +36,7 @@ CREATE TABLE funnel_step (
   funnel_name VARCHAR(50) NOT NULL,
   step_name VARCHAR(50) NOT NULL,
   step_order INTEGER NOT NULL,
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE SET NULL,
+  user_id UUID REFERENCES user_profile(id) ON DELETE SET NULL,
   session_id VARCHAR(100) NOT NULL,
   completed_at TIMESTAMPTZ DEFAULT NOW(),
   properties JSONB
@@ -88,7 +88,7 @@ CREATE TABLE experiment (
 CREATE TABLE experiment_assignment (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   experiment_id UUID REFERENCES experiment(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES user_profile(user_id) ON DELETE CASCADE,
+  user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
   variant VARCHAR(50) NOT NULL,
   assigned_at TIMESTAMPTZ DEFAULT NOW(),
   converted BOOLEAN DEFAULT false,
