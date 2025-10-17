@@ -3,20 +3,24 @@
  * Sprint 1 - Payment Integration
  */
 
-import { Client, OrdersController } from '@paypal/paypal-server-sdk';
+import {
+  Client,
+  OrdersController,
+  Environment,
+  CheckoutPaymentIntent,
+  OrderApplicationContextLandingPage,
+  OrderApplicationContextUserAction
+} from '@paypal/paypal-server-sdk';
 
 // PayPal Client Configuration
-const paypalClient = Client({
+const paypalClient = new Client({
   clientCredentialsAuthCredentials: {
     oAuthClientId: process.env.PAYPAL_CLIENT_ID || '',
     oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
   },
-  environment: (process.env.PAYPAL_MODE || 'sandbox') === 'sandbox' ? 'sandbox' : 'production',
-  logging: {
-    logLevel: 'info',
-    logRequest: { logBody: true },
-    logResponse: { logHeaders: true },
-  },
+  environment: (process.env.PAYPAL_MODE || 'sandbox') === 'sandbox'
+    ? Environment.Sandbox
+    : Environment.Production,
 });
 
 // Orders controller instance
@@ -96,7 +100,7 @@ export class PayPalService {
     try {
       const request = {
         body: {
-          intent: 'CAPTURE' as const,
+          intent: CheckoutPaymentIntent.Capture,
           purchaseUnits: [
             {
               amount: {
@@ -111,13 +115,13 @@ export class PayPalService {
             returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/bookings/success`,
             cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/bookings/cancel`,
             brandName: 'PadelGraph',
-            landingPage: 'NO_PREFERENCE' as const,
-            userAction: 'PAY_NOW' as const,
+            landingPage: OrderApplicationContextLandingPage.NoPreference,
+            userAction: OrderApplicationContextUserAction.PayNow,
           },
         },
       };
 
-      const { result } = await ordersController.ordersCreate(request);
+      const { result } = await ordersController.createOrder(request);
 
       if (!result || !result.id) {
         return {
@@ -155,7 +159,7 @@ export class PayPalService {
     }
 
     try {
-      const { result } = await ordersController.ordersCapture({
+      const { result } = await ordersController.captureOrder({
         id: params.orderId,
         prefer: 'return=representation',
       });
@@ -190,7 +194,7 @@ export class PayPalService {
    */
   async verifyWebhookSignature(
     headers: Record<string, string>,
-    _body: string
+    body: string
   ): Promise<boolean> {
     if (!this.isConfigured()) {
       return false;
@@ -204,6 +208,9 @@ export class PayPalService {
 
     try {
       // PayPal webhook verification would go here
+      // Body will be used for signature verification in production
+      console.log(`[PayPal] Webhook body length: ${body.length}`);
+
       // For now, basic validation
       const transmissionId = headers['paypal-transmission-id'];
       const transmissionTime = headers['paypal-transmission-time'];
