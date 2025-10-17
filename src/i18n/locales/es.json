@@ -22,5 +22,98 @@
     "email": "Correo",
     "password": "Contraseña",
     "signUp": "Registrarse"
+  },
+  "homepage": {
+    "nav": {
+      "features": "Características",
+      "rankings": "Rankings",
+      "howItWorks": "Cómo Funciona",
+      "login": "Iniciar Sesión",
+      "start": "Comenzar"
+    },
+    "hero": {
+      "badge": "PadelGraph",
+      "title": "La Red Social Definitiva para Jugadores de Pádel",
+      "subtitle": "Juega Mejor. Conecta Inteligentemente. Mejora Tu Juego.",
+      "description": "¿Te cuesta encontrar jugadores de tu nivel o seguir tu progreso? La mayoría de los entusiastas del pádel no tienen forma de medir su rendimiento, conectar con rivales o gestionar reservas de pistas—hasta ahora.",
+      "cta1": "Explorar Rankings",
+      "cta2": "Unirse a la Red"
+    },
+    "solution": {
+      "title": "PadelGraph es la Solución Todo en Uno",
+      "subtitle": "Ya seas casual o competitivo, este es tu centro de pádel"
+    },
+    "features": {
+      "rankings": {
+        "title": "Rankings en Tiempo Real",
+        "description": "Rankings individuales y de dobles actualizados en vivo. Sigue tu rendimiento y mira dónde te encuentras frente a la competencia."
+      },
+      "connect": {
+        "title": "Conecta por Nivel y Ubicación",
+        "description": "Encuentra jugadores de tu nivel de habilidad cerca. Conecta con rivales, reserva partidos y haz crecer tu red de pádel."
+      },
+      "social": {
+        "title": "Feed Social",
+        "description": "Comparte momentos destacados de partidos, fotos y videos. Sigue a tus jugadores y clubes favoritos para las últimas actualizaciones."
+      },
+      "management": {
+        "title": "Gestión de Clubes y Pistas",
+        "description": "Sistema de reservas integrado para clubes. Reserva pistas, gestiona disponibilidad y organiza tus sesiones de juego."
+      },
+      "tournaments": {
+        "title": "Torneos en Vivo",
+        "description": "Sigue torneos en tiempo real. Participa, sigue los marcadores y celebra victorias con la comunidad."
+      },
+      "analytics": {
+        "title": "Analítica de Rendimiento",
+        "description": "Estadísticas profundas y perspectivas. Comprende tus fortalezas, mejora tus debilidades y sube de nivel en tu juego."
+      }
+    },
+    "topPlayers": {
+      "title": "Mejores Jugadores de Esta Semana",
+      "subtitle": "Mira quién domina los rankings",
+      "viewAll": "Ver Todos los Rankings",
+      "level": {
+        "pro": "Pro",
+        "advanced": "Avanzado",
+        "intermediate": "Intermedio",
+        "beginner": "Principiante"
+      },
+      "points": "Puntos"
+    },
+    "howItWorks": {
+      "title": "Comienza en Minutos",
+      "subtitle": "Tres simples pasos para unirte a la comunidad",
+      "step1": {
+        "title": "Crea Tu Perfil",
+        "description": "Regístrate y establece tu nivel de habilidad, ubicación y preferencias de juego"
+      },
+      "step2": {
+        "title": "Conecta y Juega",
+        "description": "Encuentra jugadores, reserva pistas y comienza a competir en torneos"
+      },
+      "step3": {
+        "title": "Sigue Tu Progreso",
+        "description": "Observa cómo tu ranking sube mientras juegas más y mejoras tu juego"
+      }
+    },
+    "stats": {
+      "players": "Jugadores Activos",
+      "matches": "Partidos Jugados",
+      "clubs": "Clubes Asociados"
+    },
+    "cta": {
+      "title": "¿Listo para Mejorar Tu Juego de Pádel?",
+      "subtitle": "Únete a miles de jugadores mejorando su juego y creciendo su red con PadelGraph",
+      "button1": "Únete Gratis Hoy",
+      "button2": "Saber Más"
+    },
+    "footer": {
+      "terms": "Términos",
+      "privacy": "Privacidad",
+      "contact": "Contacto",
+      "docs": "Documentación",
+      "rights": "© 2025 PadelGraph. Todos los derechos reservados."
+    }
   }
 }

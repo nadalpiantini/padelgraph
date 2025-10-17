@@ -212,7 +212,7 @@ export function hasPlayedAgainst(
  */
 export function validateRoundRobinRound(
   matches: Match[],
-  participants: Participant[]
+  _participants: Participant[]
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   const playerAppearances = new Map<string, number>();

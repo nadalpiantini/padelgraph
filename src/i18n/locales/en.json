@@ -22,5 +22,98 @@
     "email": "Email",
     "password": "Password",
     "signUp": "Sign Up"
+  },
+  "homepage": {
+    "nav": {
+      "features": "Features",
+      "rankings": "Rankings",
+      "howItWorks": "How It Works",
+      "login": "Log In",
+      "start": "Get Started"
+    },
+    "hero": {
+      "badge": "PadelGraph",
+      "title": "The Ultimate Social Network for Padel Players",
+      "subtitle": "Play Better. Connect Smarter. Level Up Your Game.",
+      "description": "Struggling to find players at your level or track your progress? Most padel enthusiasts have no way to measure performance, connect with rivals, or manage court bookings—until now.",
+      "cta1": "Explore Rankings",
+      "cta2": "Join Network"
+    },
+    "solution": {
+      "title": "PadelGraph is the All-in-One Solution",
+      "subtitle": "Whether you're casual or competitive, this is your padel hub"
+    },
+    "features": {
+      "rankings": {
+        "title": "Real-Time Rankings",
+        "description": "Individual and doubles rankings updated live. Track your performance and see where you stand against the competition."
+      },
+      "connect": {
+        "title": "Connect by Level & Location",
+        "description": "Find players at your skill level nearby. Connect with rivals, book matches, and grow your padel network."
+      },
+      "social": {
+        "title": "Social Feed",
+        "description": "Share match highlights, photos, and videos. Follow your favorite players and clubs for the latest updates."
+      },
+      "management": {
+        "title": "Club & Court Management",
+        "description": "Integrated booking system for clubs. Reserve courts, manage availability, and organize your game sessions."
+      },
+      "tournaments": {
+        "title": "Live Tournaments",
+        "description": "Track tournaments in real-time. Participate, follow scores, and celebrate victories with the community."
+      },
+      "analytics": {
+        "title": "Performance Analytics",
+        "description": "Deep stats and insights. Understand your strengths, improve weaknesses, and level up your game."
+      }
+    },
+    "topPlayers": {
+      "title": "Top Players This Week",
+      "subtitle": "See who's dominating the rankings",
+      "viewAll": "View All Rankings",
+      "level": {
+        "pro": "Pro",
+        "advanced": "Advanced",
+        "intermediate": "Intermediate",
+        "beginner": "Beginner"
+      },
+      "points": "Points"
+    },
+    "howItWorks": {
+      "title": "Get Started in Minutes",
+      "subtitle": "Three simple steps to join the community",
+      "step1": {
+        "title": "Create Your Profile",
+        "description": "Sign up and set your skill level, location, and playing preferences"
+      },
+      "step2": {
+        "title": "Connect & Play",
+        "description": "Find players, book courts, and start competing in tournaments"
+      },
+      "step3": {
+        "title": "Track Your Progress",
+        "description": "Watch your ranking rise as you play more and improve your game"
+      }
+    },
+    "stats": {
+      "players": "Active Players",
+      "matches": "Matches Played",
+      "clubs": "Partner Clubs"
+    },
+    "cta": {
+      "title": "Ready to Level Up Your Padel Game?",
+      "subtitle": "Join thousands of players improving their game and growing their network with PadelGraph",
+      "button1": "Join Free Today",
+      "button2": "Learn More"
+    },
+    "footer": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact",
+      "docs": "Documentation",
+      "rights": "© 2025 PadelGraph. All rights reserved."
+    }
   }
 }

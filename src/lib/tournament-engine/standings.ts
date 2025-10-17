@@ -50,6 +50,10 @@ export function calculateStandings(
       games_lost: 0,
       games_diff: 0,
       points: 0,
+      fair_play_points: 0,
+      yellow_cards: 0,
+      red_cards: 0,
+      conduct_bonus: 0,
     });
   }
 
