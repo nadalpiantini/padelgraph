@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MatchSuggestions from '@/components/discovery/MatchSuggestions';
 import SearchFilters, { type DiscoveryFilters } from '@/components/discovery/SearchFilters';
 import DiscoveryFeed from '@/components/discovery/DiscoveryFeed';
+import DiscoveryMap from '@/components/discovery/DiscoveryMap';
 import { Users, Map, Activity, Sparkles } from 'lucide-react';
 
 /**
@@ -185,6 +186,28 @@ export default function DiscoverClient() {
       map: 'Map View',
       feed: 'Activity Feed',
     },
+    map: {
+      loading: 'Loading map...',
+      filters: 'Filters',
+      showPlayers: 'Show Players',
+      showClubs: 'Show Clubs',
+      showMatches: 'Show Matches',
+      radius: 'Radius',
+      level: 'Level',
+      minRating: 'Min Rating',
+      availableOnly: 'Available Only',
+      apply: 'Apply',
+      reset: 'Reset',
+      noLocation: 'Location not available',
+      player: 'Player',
+      club: 'Club',
+      match: 'Match',
+      distance: 'distance',
+      rating: 'Rating',
+      courts: 'courts',
+      liveNow: 'Live Now',
+      upcoming: 'Upcoming',
+    },
   };
 
   return (
@@ -245,13 +268,30 @@ export default function DiscoverClient() {
 
         {/* Map View Tab */}
         <TabsContent value="map" className="mt-0">
-          <div className="rounded-xl overflow-hidden border border-slate-700 h-[600px] bg-slate-900 flex items-center justify-center">
-            <p className="text-slate-400">Map view coming soon</p>
-            {/* <DiscoveryMap mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN} t={mapTranslations} /> */}
-          </div>
-          <p className="text-center text-slate-400 text-sm mt-4">
-            Map view shows players near your location
-          </p>
+          {process.env.NEXT_PUBLIC_MAPBOX_TOKEN ? (
+            <DiscoveryMap
+              mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+              t={t.map}
+            />
+          ) : (
+            <div className="rounded-xl overflow-hidden border border-slate-700 h-[600px] bg-slate-900 flex items-center justify-center">
+              <div className="text-center p-8">
+                <Map className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-400 mb-2">Map requires Mapbox token</p>
+                <p className="text-slate-500 text-sm">
+                  Add NEXT_PUBLIC_MAPBOX_TOKEN to .env.local
+                </p>
+                <a
+                  href="https://account.mapbox.com/access-tokens/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-400 hover:text-indigo-300 text-sm underline mt-2 inline-block"
+                >
+                  Get free Mapbox token →
+                </a>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         {/* Activity Feed Tab */}
