@@ -4,6 +4,7 @@
 // Displays ranked players with infinite scroll
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface LeaderboardEntry {
   user_id: string;
@@ -21,6 +22,7 @@ export function LeaderboardTable({
   type?: string;
   metric?: string;
 }) {
+  const t = useTranslations('leaderboard');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'week' | 'month' | 'all_time'>('all_time');
@@ -53,10 +55,10 @@ export function LeaderboardTable({
   }
 
   const metricLabels: Record<string, string> = {
-    elo_rating: 'ELO',
-    win_rate: 'Win Rate',
-    tournaments_won: 'Tournaments Won',
-    win_streak: 'Win Streak',
+    elo_rating: t('metrics.elo'),
+    win_rate: t('metrics.winRate'),
+    tournaments_won: t('metrics.tournamentsWon'),
+    win_streak: t('metrics.winStreak'),
   };
 
   return (
@@ -65,10 +67,10 @@ export function LeaderboardTable({
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">
-            {type.charAt(0).toUpperCase() + type.slice(1)} Leaderboard
+            {type.charAt(0).toUpperCase() + type.slice(1)} {t('titleSuffix')}
           </h2>
           <p className="text-sm text-gray-500">
-            {metricLabels[metric] || metric} Rankings
+            {metricLabels[metric] || metric} {t('subtitleSuffix')}
           </p>
         </div>
 
@@ -84,7 +86,7 @@ export function LeaderboardTable({
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {p === 'all_time' ? 'All Time' : p.charAt(0).toUpperCase() + p.slice(1)}
+              {t(`periods.${p}`)}
             </button>
           ))}
         </div>
@@ -96,17 +98,17 @@ export function LeaderboardTable({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rank
+                {t('tableHeaders.rank')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Player
+                {t('tableHeaders.player')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {metricLabels[metric] || metric}
               </th>
               {period !== 'all_time' && (
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Change
+                  {t('tableHeaders.change')}
                 </th>
               )}
             </tr>
@@ -187,7 +189,7 @@ export function LeaderboardTable({
 
       {entries.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No players in this leaderboard yet</p>
+          <p className="text-gray-500">{t('emptyState')}</p>
         </div>
       )}
     </div>

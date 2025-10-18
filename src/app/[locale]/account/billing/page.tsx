@@ -5,7 +5,8 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +61,7 @@ interface PaymentHistory {
 }
 
 export default function BillingPage() {
+  const t = useTranslations('account.billing');
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
@@ -116,8 +118,8 @@ export default function BillingPage() {
     } catch (error) {
       console.error('Error loading billing data:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load billing information',
+        title: t('toasts.error.title'),
+        description: t('toasts.error.loadingFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -128,7 +130,7 @@ export default function BillingPage() {
   async function handleCancelSubscription() {
     if (!subscription || subscription.status !== 'active') return;
 
-    if (!confirm('Are you sure you want to cancel your subscription? You will retain access until the end of the current billing period.')) {
+    if (!confirm(t('confirmations.cancelSubscription'))) {
       return;
     }
 
@@ -144,8 +146,8 @@ export default function BillingPage() {
 
       if (response.ok) {
         toast({
-          title: 'Subscription Cancelled',
-          description: 'Your subscription has been cancelled. You will retain access until the end of the billing period.',
+          title: t('toasts.subscriptionCancelled.title'),
+          description: t('toasts.subscriptionCancelled.message'),
         });
         await loadBillingData();
       } else {
@@ -153,8 +155,8 @@ export default function BillingPage() {
       }
     } catch (error) {
       toast({
-        title: 'Cancellation Failed',
-        description: 'Failed to cancel subscription. Please try again.',
+        title: t('toasts.cancellationFailed.title'),
+        description: t('toasts.cancellationFailed.message'),
         variant: 'destructive',
       });
     } finally {
@@ -174,8 +176,8 @@ export default function BillingPage() {
 
       if (response.ok) {
         toast({
-          title: 'Subscription Reactivated',
-          description: 'Your subscription has been reactivated successfully.',
+          title: t('toasts.subscriptionReactivated.title'),
+          description: t('toasts.subscriptionReactivated.message'),
         });
         await loadBillingData();
       } else {
@@ -183,8 +185,8 @@ export default function BillingPage() {
       }
     } catch (error) {
       toast({
-        title: 'Reactivation Failed',
-        description: 'Failed to reactivate subscription. Please try again.',
+        title: t('toasts.reactivationFailed.title'),
+        description: t('toasts.reactivationFailed.message'),
         variant: 'destructive',
       });
     } finally {
@@ -209,8 +211,8 @@ export default function BillingPage() {
       }
     } catch (error) {
       toast({
-        title: 'Download Failed',
-        description: 'Failed to download invoice',
+        title: t('toasts.downloadFailed.title'),
+        description: t('toasts.downloadFailed.message'),
         variant: 'destructive',
       });
     }
@@ -274,14 +276,14 @@ export default function BillingPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-8">Billing & Subscription</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Subscription Status */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Current Subscription</CardTitle>
-            <CardDescription>Manage your subscription and billing details</CardDescription>
+            <CardTitle>{t('currentSubscription.title')}</CardTitle>
+            <CardDescription>{t('currentSubscription.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             {subscription ? (
@@ -290,7 +292,7 @@ export default function BillingPage() {
                   <div className="flex items-center gap-3">
                     {getPlanIcon(subscription.plan)}
                     <div>
-                      <p className="text-lg font-semibold capitalize">{subscription.plan} Plan</p>
+                      <p className="text-lg font-semibold capitalize">{subscription.plan} {t('currentSubscription.planSuffix')}</p>
                       <p className="text-sm text-muted-foreground">
                         ${subscription.price_amount}/{subscription.currency}
                       </p>
@@ -299,7 +301,7 @@ export default function BillingPage() {
                   <Badge variant={getStatusColor(subscription.status)}>
                     <span className="flex items-center gap-1">
                       {getStatusIcon(subscription.status)}
-                      {subscription.status}
+                      {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1).replace('_', ' ')}
                     </span>
                   </Badge>
                 </div>
@@ -308,15 +310,15 @@ export default function BillingPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Current Period</p>
+                    <p className="text-sm text-muted-foreground">{t('currentSubscription.currentPeriod')}</p>
                     <p className="font-medium">
                       {formatDate(subscription.current_period_start)} - {formatDate(subscription.current_period_end)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Next Payment</p>
+                    <p className="text-sm text-muted-foreground">{t('currentSubscription.nextPayment')}</p>
                     <p className="font-medium">
-                      {subscription.cancel_at_period_end ? 'Cancelled' : formatDate(subscription.current_period_end)}
+                      {subscription.cancel_at_period_end ? t('currentSubscription.cancelled') : formatDate(subscription.current_period_end)}
                     </p>
                   </div>
                 </div>
@@ -326,8 +328,7 @@ export default function BillingPage() {
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-yellow-600" />
                       <p className="text-sm">
-                        Your subscription will end on {formatDate(subscription.current_period_end)}.
-                        You can reactivate anytime before then.
+                        {t('currentSubscription.cancellationWarning', { date: formatDate(subscription.current_period_end) })}
                       </p>
                     </div>
                   </div>
@@ -335,9 +336,9 @@ export default function BillingPage() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">You are currently on the Free plan</p>
+                <p className="text-muted-foreground mb-4">{t('currentSubscription.freePlanMessage')}</p>
                 <Button onClick={handleUpgrade}>
-                  Upgrade to Pro
+                  {t('currentSubscription.upgradeButton')}
                   <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
@@ -348,16 +349,16 @@ export default function BillingPage() {
               {subscription.status === 'active' && !subscription.cancel_at_period_end && (
                 <>
                   <Button onClick={handleUpgrade} variant="default">
-                    Change Plan
+                    {t('buttons.changePlan')}
                   </Button>
                   <Button onClick={handleCancelSubscription} variant="outline" disabled={cancelling}>
-                    {cancelling ? 'Cancelling...' : 'Cancel Subscription'}
+                    {cancelling ? t('buttons.cancelling') : t('buttons.cancelSubscription')}
                   </Button>
                 </>
               )}
               {subscription.cancel_at_period_end && (
                 <Button onClick={handleReactivateSubscription} disabled={reactivating}>
-                  {reactivating ? 'Reactivating...' : 'Reactivate Subscription'}
+                  {reactivating ? t('buttons.reactivating') : t('buttons.reactivateSubscription')}
                 </Button>
               )}
             </CardFooter>
@@ -367,15 +368,15 @@ export default function BillingPage() {
         {/* Usage Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle>Usage This Month</CardTitle>
-            <CardDescription>Track your feature usage</CardDescription>
+            <CardTitle>{t('usage.title')}</CardTitle>
+            <CardDescription>{t('usage.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             {usageStats ? (
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Tournaments</span>
+                    <span>{t('usage.tournaments')}</span>
                     <span>
                       {usageStats.tournaments.used}/{usageStats.tournaments.limit === -1 ? '∞' : usageStats.tournaments.limit}
                     </span>
@@ -388,7 +389,7 @@ export default function BillingPage() {
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Auto-Matches</span>
+                    <span>{t('usage.autoMatches')}</span>
                     <span>
                       {usageStats.auto_matches.used}/{usageStats.auto_matches.limit === -1 ? '∞' : usageStats.auto_matches.limit}
                     </span>
@@ -401,7 +402,7 @@ export default function BillingPage() {
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Recommendations</span>
+                    <span>{t('usage.recommendations')}</span>
                     <span>
                       {usageStats.recommendations.used}/{usageStats.recommendations.limit === -1 ? '∞' : usageStats.recommendations.limit}
                     </span>
@@ -414,7 +415,7 @@ export default function BillingPage() {
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Travel Plans</span>
+                    <span>{t('usage.travelPlans')}</span>
                     <span>
                       {usageStats.travel_plans.used}/{usageStats.travel_plans.limit === -1 ? '∞' : usageStats.travel_plans.limit}
                     </span>
@@ -428,11 +429,11 @@ export default function BillingPage() {
                 <Separator />
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Resets on {formatDate(usageStats.period.end.toISOString())}
+                  {t('usage.resetsOn', { date: formatDate(usageStats.period.end.toISOString()) })}
                 </p>
               </div>
             ) : (
-              <p className="text-center text-muted-foreground">No usage data available</p>
+              <p className="text-center text-muted-foreground">{t('usage.noUsageData')}</p>
             )}
           </CardContent>
         </Card>
@@ -441,8 +442,8 @@ export default function BillingPage() {
       {/* Payment History */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-          <CardDescription>Your recent transactions</CardDescription>
+          <CardTitle>{t('paymentHistory.title')}</CardTitle>
+          <CardDescription>{t('paymentHistory.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           {paymentHistory.length > 0 ? (
@@ -463,7 +464,7 @@ export default function BillingPage() {
                     <div className="text-right">
                       <p className="font-medium">${payment.amount}</p>
                       <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
-                        {payment.status}
+                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                       </Badge>
                     </div>
                     <Button
@@ -478,7 +479,7 @@ export default function BillingPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">No payment history available</p>
+            <p className="text-center text-muted-foreground py-8">{t('paymentHistory.noHistory')}</p>
           )}
         </CardContent>
       </Card>

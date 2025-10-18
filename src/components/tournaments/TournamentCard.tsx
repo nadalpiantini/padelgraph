@@ -5,7 +5,10 @@
  * Used in tournament list and dashboard views.
  */
 
-import Link from 'next/link';
+'use client';
+
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { Calendar, Users, MapPin, Trophy } from 'lucide-react';
 import type { Tournament, TournamentType } from '@/types/database';
 
@@ -34,41 +37,42 @@ const statusColors = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
-const typeLabels: Record<TournamentType, string> = {
-  americano: 'Americano',
-  mexicano: 'Mexicano',
-  round_robin: 'Round Robin',
-  knockout_single: 'Eliminación Simple',
-  knockout_double: 'Eliminación Doble',
-  swiss: 'Sistema Suizo',
-  monrad: 'Monrad',
-  compass: 'Compass Draw',
-};
-
 export function TournamentCard({ tournament }: TournamentCardProps) {
+  const t = useTranslations('tournaments');
+  const locale = useLocale();
   const startDate = new Date(tournament.starts_at);
   const now = new Date();
   const isUpcoming = startDate > now;
   const participantCount = tournament.participant_count || 0;
 
+  // Get type label with translation
+  const getTypeLabel = (type: TournamentType) => {
+    return t(`format.${type}`);
+  };
+
+  // Get status label with translation
+  const getStatusLabel = (status: string) => {
+    return t(`status.${status}`);
+  };
+
   // Determine CTA based on status
   const getCTA = () => {
     if (tournament.status === 'completed') {
-      return { label: 'Ver Resultados', variant: 'secondary' as const };
+      return { label: t('viewResults'), variant: 'secondary' as const };
     }
     if (tournament.status === 'in_progress') {
-      return { label: 'Ver Board', variant: 'primary' as const };
+      return { label: t('viewBoard'), variant: 'primary' as const };
     }
     if (tournament.user_status === 'registered') {
-      return { label: 'Check-in', variant: 'primary' as const };
+      return { label: t('checkIn'), variant: 'primary' as const };
     }
     if (tournament.user_status === 'checked_in') {
-      return { label: 'Ver Board', variant: 'primary' as const };
+      return { label: t('viewBoard'), variant: 'primary' as const };
     }
     if (participantCount >= tournament.max_participants) {
-      return { label: 'Lleno', variant: 'disabled' as const };
+      return { label: t('full'), variant: 'disabled' as const };
     }
-    return { label: 'Unirse', variant: 'primary' as const };
+    return { label: t('join'), variant: 'primary' as const };
   };
 
   const cta = getCTA();
@@ -90,10 +94,10 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
                 statusColors[tournament.status]
               }`}
             >
-              {tournament.status}
+              {getStatusLabel(tournament.status)}
             </span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-              {typeLabels[tournament.type]}
+              {getTypeLabel(tournament.type)}
             </span>
           </div>
         </div>
@@ -104,8 +108,8 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
       <div className="space-y-2 mb-4">
         <div className="flex items-center text-sm text-gray-600">
           <Calendar className="h-4 w-4 mr-2" />
-          {isUpcoming ? 'Empieza' : 'Empezó'}{' '}
-          {startDate.toLocaleDateString('es-ES', {
+          {isUpcoming ? t('starts') : t('started')}{' '}
+          {startDate.toLocaleDateString(locale, {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
@@ -116,7 +120,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <Users className="h-4 w-4 mr-2" />
-          {participantCount} / {tournament.max_participants} participantes
+          {participantCount} / {tournament.max_participants} {t('participants')}
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <MapPin className="h-4 w-4 mr-2" />

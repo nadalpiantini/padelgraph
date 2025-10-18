@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +79,7 @@ interface DashboardStats {
 export default function AdminSubscriptionsPage() {
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations('admin.subscriptions');
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptions, setSubscriptions] = useState<SubscriptionData[]>([]);
@@ -109,8 +111,8 @@ export default function AdminSubscriptionsPage() {
 
       if (profile?.role !== 'admin') {
         toast({
-          title: 'Access Denied',
-          description: 'You must be an admin to access this page',
+          title: t('toasts.accessDenied.title'),
+          description: t('toasts.accessDenied.message'),
           variant: 'destructive',
         });
         router.push('/');
@@ -123,8 +125,8 @@ export default function AdminSubscriptionsPage() {
     } catch (error) {
       console.error('Error loading admin data:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load subscription data',
+        title: t('toasts.error.title'),
+        description: t('toasts.error.loadingFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -199,8 +201,8 @@ export default function AdminSubscriptionsPage() {
 
       if (response.ok) {
         toast({
-          title: 'Sync Complete',
-          description: 'Subscriptions have been synced with PayPal',
+          title: t('toasts.syncComplete.title'),
+          description: t('toasts.syncComplete.message'),
         });
         await loadSubscriptions();
         await loadStats();
@@ -209,8 +211,8 @@ export default function AdminSubscriptionsPage() {
       }
     } catch (error) {
       toast({
-        title: 'Sync Failed',
-        description: 'Failed to sync subscriptions',
+        title: t('toasts.syncFailed.title'),
+        description: t('toasts.syncFailed.message'),
         variant: 'destructive',
       });
     } finally {
@@ -219,7 +221,7 @@ export default function AdminSubscriptionsPage() {
   }
 
   async function handleCancelSubscription(subscriptionId: string) {
-    if (!confirm('Are you sure you want to cancel this subscription?')) return;
+    if (!confirm(t('confirmations.cancelSubscription'))) return;
 
     try {
       const response = await fetch('/api/subscriptions/cancel', {
@@ -233,8 +235,8 @@ export default function AdminSubscriptionsPage() {
 
       if (response.ok) {
         toast({
-          title: 'Subscription Cancelled',
-          description: 'The subscription has been cancelled',
+          title: t('toasts.subscriptionCancelled.title'),
+          description: t('toasts.subscriptionCancelled.message'),
         });
         await loadSubscriptions();
       } else {
@@ -242,8 +244,8 @@ export default function AdminSubscriptionsPage() {
       }
     } catch (error) {
       toast({
-        title: 'Cancellation Failed',
-        description: 'Failed to cancel subscription',
+        title: t('toasts.cancellationFailed.title'),
+        description: t('toasts.cancellationFailed.message'),
         variant: 'destructive',
       });
     }
@@ -259,8 +261,8 @@ export default function AdminSubscriptionsPage() {
 
       if (response.ok) {
         toast({
-          title: 'Subscription Reactivated',
-          description: 'The subscription has been reactivated',
+          title: t('toasts.subscriptionReactivated.title'),
+          description: t('toasts.subscriptionReactivated.message'),
         });
         await loadSubscriptions();
       } else {
@@ -268,8 +270,8 @@ export default function AdminSubscriptionsPage() {
       }
     } catch (error) {
       toast({
-        title: 'Reactivation Failed',
-        description: 'Failed to reactivate subscription',
+        title: t('toasts.reactivationFailed.title'),
+        description: t('toasts.reactivationFailed.message'),
         variant: 'destructive',
       });
     }

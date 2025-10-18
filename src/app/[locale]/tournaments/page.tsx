@@ -5,7 +5,8 @@
  */
 
 import { Suspense } from 'react';
-import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
 import { TournamentCard } from '@/components/tournaments/TournamentCard';
 import { Trophy, Search } from 'lucide-react';
 import type { TournamentWithDetails } from '@/types/database';
@@ -31,6 +32,7 @@ interface PageProps {
 export default async function TournamentsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const tournaments = await getTournaments(params.filter);
+  const t = await getTranslations('tournaments');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -39,7 +41,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-6">
             <Trophy className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Torneos</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
           </div>
 
           {/* Filters */}
@@ -50,7 +52,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar torneos..."
+                  placeholder={t('searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -66,7 +68,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
                     : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                Próximos
+                {t('upcoming')}
               </Link>
               <Link
                 href="/tournaments?filter=in_progress"
@@ -76,7 +78,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
                     : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                En Progreso
+                {t('inProgress')}
               </Link>
               <Link
                 href="/tournaments?filter=completed"
@@ -86,7 +88,7 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
                     : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                Completados
+                {t('completed')}
               </Link>
             </div>
           </div>
@@ -117,12 +119,12 @@ export default async function TournamentsPage({ searchParams }: PageProps) {
             <div className="text-center py-12">
               <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No hay torneos disponibles
+                {t('noTournamentsAvailable')}
               </h3>
               <p className="text-gray-500">
                 {params.filter === 'completed'
-                  ? 'No se han completado torneos aún'
-                  : 'Vuelve pronto para ver nuevos torneos'}
+                  ? t('noCompletedTournaments')
+                  : t('checkBackSoon')}
               </p>
             </div>
           )}

@@ -4,31 +4,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Crown, Zap, Users, Star } from 'lucide-react';
+import { Check, Crown, Zap, Users, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { User } from '@supabase/supabase-js';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
-interface PlanFeature {
-  name: string;
-  included: boolean;
-  value?: string | number;
-}
-
 interface Plan {
   id: string;
-  name: string;
-  description: string;
   price: number;
   currency: string;
   interval: string;
   popular?: boolean;
-  features: PlanFeature[];
   paypalPlanId: string;
   color: string;
   icon: React.ReactNode;
@@ -37,29 +29,15 @@ interface Plan {
 const plans: Plan[] = [
   {
     id: 'free',
-    name: 'Free',
-    description: 'Perfect for casual players',
     price: 0,
     currency: 'USD',
     interval: 'month',
     paypalPlanId: '',
     color: 'border-gray-200',
     icon: <Users className="h-6 w-6" />,
-    features: [
-      { name: 'Tournament Creation', included: true, value: '2/month' },
-      { name: 'Auto-Match', included: true, value: '5/month' },
-      { name: 'Player Recommendations', included: true, value: '10/month' },
-      { name: 'Travel Plans', included: true, value: '1/month' },
-      { name: 'Advanced Analytics', included: false },
-      { name: 'Achievement System', included: true },
-      { name: 'Leaderboards', included: true },
-      { name: 'Ad-Free Experience', included: false },
-    ],
   },
   {
     id: 'pro',
-    name: 'Pro',
-    description: 'For serious padel enthusiasts',
     price: 9.99,
     currency: 'USD',
     interval: 'month',
@@ -67,58 +45,73 @@ const plans: Plan[] = [
     paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_PRO || '',
     color: 'border-blue-500',
     icon: <Zap className="h-6 w-6 text-blue-500" />,
-    features: [
-      { name: 'Tournament Creation', included: true, value: 'Unlimited' },
-      { name: 'Auto-Match', included: true, value: '50/month' },
-      { name: 'Player Recommendations', included: true, value: 'Unlimited' },
-      { name: 'Travel Plans', included: true, value: '10/month' },
-      { name: 'Advanced Analytics', included: true },
-      { name: 'Achievement System', included: true },
-      { name: 'Leaderboards', included: true },
-      { name: 'Ad-Free Experience', included: true },
-    ],
   },
   {
     id: 'dual',
-    name: 'Dual',
-    description: 'Perfect for couples & families',
     price: 15.00,
     currency: 'USD',
     interval: 'month',
     paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_DUAL || '',
     color: 'border-pink-500',
     icon: <Users className="h-6 w-6 text-pink-500" />,
-    features: [
-      { name: 'All Pro Features', included: true },
-      { name: 'Family Invitations (2 Users)', included: true },
-      { name: 'Unlimited Auto-Match', included: true },
-      { name: 'Unlimited Travel Plans', included: true },
-      { name: 'Priority Support', included: true },
-      { name: 'Shared Analytics Dashboard', included: true },
-    ],
   },
   {
     id: 'premium',
-    name: 'Premium',
-    description: 'For professional players',
     price: 15.00,
     currency: 'USD',
     interval: 'month',
     paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM || '',
     color: 'border-purple-500',
     icon: <Crown className="h-6 w-6 text-purple-500" />,
-    features: [
-      { name: 'All Pro Features', included: true },
-      { name: 'Unlimited Auto-Match', included: true },
-      { name: 'Unlimited Travel Plans', included: true },
-      { name: 'Priority Support', included: true },
-      { name: 'Custom Tournament Branding', included: true },
-      { name: 'API Access', included: true },
-    ],
   },
 ];
 
+// Feature keys for each plan (stable keys for translation)
+const planFeatures = {
+  free: [
+    'tournamentCreation',
+    'autoMatch',
+    'playerRecommendations',
+    'travelPlans',
+    'rankings',
+    'socialFeed',
+    'courtBooking',
+    'achievements',
+  ],
+  pro: [
+    'tournamentCreation',
+    'autoMatch',
+    'playerRecommendations',
+    'travelPlans',
+    'advancedAnalytics',
+    'prioritySupport',
+    'customProfile',
+    'videoHighlights',
+    'earlyAccess',
+  ],
+  dual: [
+    'twoAccounts',
+    'tournamentCreation',
+    'autoMatch',
+    'sharedAnalytics',
+    'doublesPairTracking',
+    'familySavings',
+  ],
+  premium: [
+    'tournamentCreation',
+    'autoMatch',
+    'playerRecommendations',
+    'travelPlans',
+    'dedicatedSupport',
+    'coachingInsights',
+    'videoAnalysis',
+    'tournamentHistory',
+    'apiAccess',
+  ],
+} as const;
+
 export default function PricingPage() {
+  const t = useTranslations('pricing');
   const router = useRouter();
   const supabase = createClient();
   const analytics = useAnalytics();
@@ -169,16 +162,16 @@ export default function PricingPage() {
 
     if (plan.id === 'free') {
       toast({
-        title: 'Free Plan',
-        description: 'You are already on the free plan',
+        title: t('toasts.freePlan.title'),
+        description: t('toasts.freePlan.message'),
       });
       return;
     }
 
     if (plan.id === currentPlan) {
       toast({
-        title: 'Current Plan',
-        description: 'You are already subscribed to this plan',
+        title: t('toasts.currentPlan.title'),
+        description: t('toasts.currentPlan.message'),
       });
       return;
     }
@@ -212,8 +205,8 @@ export default function PricingPage() {
     } catch (error) {
       console.error('Subscription error:', error);
       toast({
-        title: 'Subscription Failed',
-        description: 'Failed to create subscription. Please try again.',
+        title: t('toasts.subscriptionFailed.title'),
+        description: t('toasts.subscriptionFailed.message'),
         variant: 'destructive',
       });
     } finally {
@@ -230,10 +223,9 @@ export default function PricingPage() {
       <div className="container mx-auto py-16 px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Choose Your Perfect Plan</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('title')}</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Unlock the full potential of PadelGraph with our premium features.
-            Start with Free and upgrade anytime.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -250,14 +242,14 @@ export default function PricingPage() {
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                     <Star className="h-3 w-3 mr-1" />
-                    Most Popular
+                    {t('badges.mostPopular')}
                   </Badge>
                 </div>
               )}
 
               {plan.id === currentPlan && (
                 <div className="absolute -top-3 right-4">
-                  <Badge variant="default">Current Plan</Badge>
+                  <Badge variant="default">{t('badges.currentPlan')}</Badge>
                 </div>
               )}
 
@@ -266,29 +258,24 @@ export default function PricingPage() {
                   {plan.icon}
                   <div className="text-right">
                     <div className="text-3xl font-bold">
-                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                      {plan.price === 0 ? t('plans.free.name') : `$${plan.price}`}
                     </div>
                     {plan.price > 0 && (
                       <div className="text-sm text-muted-foreground">/{plan.interval}</div>
                     )}
                   </div>
                 </div>
-                <CardTitle>{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardTitle>{t(`plans.${plan.id}.name`)}</CardTitle>
+                <CardDescription>{t(`plans.${plan.id}.description`)}</CardDescription>
               </CardHeader>
 
               <CardContent>
                 <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      {feature.included ? (
-                        <Check className="h-5 w-5 text-green-500 mt-0.5" />
-                      ) : (
-                        <X className="h-5 w-5 text-gray-400 mt-0.5" />
-                      )}
-                      <span className={`text-sm ${!feature.included ? 'text-muted-foreground' : ''}`}>
-                        <span className="font-medium">{feature.name}</span>
-                        {feature.value && <span className="text-muted-foreground"> - {feature.value}</span>}
+                  {planFeatures[plan.id as keyof typeof planFeatures].map((featureKey) => (
+                    <li key={featureKey} className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-500 mt-0.5" />
+                      <span className="text-sm">
+                        {t(`plans.${plan.id}.features.${featureKey}`)}
                       </span>
                     </li>
                   ))}
@@ -302,7 +289,7 @@ export default function PricingPage() {
                     variant="outline"
                     onClick={handleManageSubscription}
                   >
-                    Manage Subscription
+                    {t('buttons.manageSubscription')}
                   </Button>
                 ) : (
                   <Button
@@ -312,13 +299,13 @@ export default function PricingPage() {
                     disabled={loadingPlan === plan.id}
                   >
                     {loadingPlan === plan.id ? (
-                      'Processing...'
+                      t('buttons.processing')
                     ) : plan.price === 0 ? (
-                      'Get Started'
+                      t('buttons.getStarted')
                     ) : plan.id < currentPlan ? (
-                      'Downgrade'
+                      t('buttons.downgrade')
                     ) : (
-                      'Upgrade'
+                      t('buttons.upgrade')
                     )}
                   </Button>
                 )}
@@ -329,55 +316,20 @@ export default function PricingPage() {
 
         {/* FAQ Section */}
         <div className="mt-16 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">{t('faq.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Can I change plans anytime?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately,
-                  while downgrades apply at the end of your current billing period.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">What payment methods do you accept?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  We accept all major credit cards, PayPal, and bank transfers through our secure
-                  PayPal payment processing system.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Is there a free trial?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Our Free plan lets you try core features without any time limit. You can upgrade
-                  to access premium features when you&apos;re ready.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Can I cancel my subscription?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Yes, you can cancel your subscription at any time from your account settings.
-                  You&apos;ll retain access until the end of your billing period.
-                </p>
-              </CardContent>
-            </Card>
+            {[0, 1, 2, 3].map((index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{t(`faq.questions.${index}.question`)}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {t(`faq.questions.${index}.answer`)}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

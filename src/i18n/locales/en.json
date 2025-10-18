@@ -100,6 +100,13 @@
       "swiss": "Swiss System",
       "monrad": "Monrad",
       "compass": "Compass Draw"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
     }
   },
   "rankings": {
@@ -429,6 +436,22 @@
         "syncFailed": {
           "title": "Sync Failed",
           "message": "Failed to sync subscriptions"
+        },
+        "subscriptionCancelled": {
+          "title": "Subscription Cancelled",
+          "message": "The subscription has been cancelled"
+        },
+        "cancellationFailed": {
+          "title": "Cancellation Failed",
+          "message": "Failed to cancel subscription"
+        },
+        "subscriptionReactivated": {
+          "title": "Subscription Reactivated",
+          "message": "The subscription has been reactivated"
+        },
+        "reactivationFailed": {
+          "title": "Reactivation Failed",
+          "message": "Failed to reactivate subscription"
         }
       }
     }

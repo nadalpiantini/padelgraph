@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { User, Settings, LogOut, Menu, X, Bell, ChevronDown } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface Profile {
   id: string;
@@ -19,6 +21,7 @@ interface DashboardNavigationProps {
 }
 
 export default function DashboardNavigation({ user, profile }: DashboardNavigationProps) {
+  const t = useTranslations('navigation');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const router = useRouter();
@@ -55,30 +58,33 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
               href="/dashboard"
               className="text-slate-300 hover:text-white transition-colors"
             >
-              Dashboard
+              {t('dashboard')}
             </Link>
             <Link
               href="/tournaments"
               className="text-slate-300 hover:text-white transition-colors"
             >
-              Tournaments
+              {t('tournaments')}
             </Link>
             <Link
               href="/rankings"
               className="text-slate-300 hover:text-white transition-colors"
             >
-              Rankings
+              {t('rankings')}
             </Link>
             <Link
               href="/players"
               className="text-slate-300 hover:text-white transition-colors"
             >
-              Players
+              {t('players')}
             </Link>
           </div>
 
           {/* User Actions */}
           <div className="flex items-center gap-4">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Notifications */}
             <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
@@ -120,14 +126,14 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                         className="flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
                       >
                         <User className="w-4 h-4" />
-                        Profile
+                        {t('profile')}
                       </Link>
                       <Link
                         href="/settings"
                         className="flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
                       >
                         <Settings className="w-4 h-4" />
-                        Settings
+                        {t('settings')}
                       </Link>
                       {profile?.is_admin && (
                         <Link
@@ -135,7 +141,7 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                           className="flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
                         >
                           <Settings className="w-4 h-4" />
-                          Admin
+                          {t('admin')}
                         </Link>
                       )}
                       <button
@@ -143,7 +149,7 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                         className="flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg transition-colors w-full text-left"
                       >
                         <LogOut className="w-4 h-4" />
-                        Logout
+                        {t('logout')}
                       </button>
                     </div>
                   </div>
@@ -171,28 +177,28 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
               className="block text-slate-300 hover:text-white transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Dashboard
+              {t('dashboard')}
             </Link>
             <Link
               href="/tournaments"
               className="block text-slate-300 hover:text-white transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Tournaments
+              {t('tournaments')}
             </Link>
             <Link
               href="/rankings"
               className="block text-slate-300 hover:text-white transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Rankings
+              {t('rankings')}
             </Link>
             <Link
               href="/players"
               className="block text-slate-300 hover:text-white transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Players
+              {t('players')}
             </Link>
 
             <div className="pt-3 border-t border-slate-800">
@@ -214,7 +220,7 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <User className="w-4 h-4" />
-                Profile
+                {t('profile')}
               </Link>
               <Link
                 href="/settings"
@@ -222,7 +228,7 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Settings className="w-4 h-4" />
-                Settings
+                {t('settings')}
               </Link>
               {profile?.is_admin && (
                 <Link
@@ -231,7 +237,7 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="w-4 h-4" />
-                  Admin
+                  {t('admin')}
                 </Link>
               )}
               <button
@@ -239,8 +245,13 @@ export default function DashboardNavigation({ user, profile }: DashboardNavigati
                 className="flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors w-full text-left"
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t('logout')}
               </button>
+
+              {/* Language Switcher in Mobile Menu */}
+              <div className="pt-3 border-t border-slate-800 mt-3">
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -65,6 +66,7 @@ interface CohortData {
 }
 
 export default function AdminAnalyticsPage() {
+  const t = useTranslations('admin.analytics');
   const [kpis, setKpis] = useState<BusinessKPIs | null>(null);
   const [cohorts, setCohorts] = useState<CohortData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +126,7 @@ export default function AdminAnalyticsPage() {
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 flex items-center gap-4">
             <AlertCircle className="w-6 h-6 text-red-500" />
             <div>
-              <h2 className="font-semibold text-red-500">Error Loading Analytics</h2>
+              <h2 className="font-semibold text-red-500">{t('errors.loadingFailed')}</h2>
               <p className="text-slate-400">{error}</p>
             </div>
           </div>
@@ -138,9 +140,9 @@ export default function AdminAnalyticsPage() {
   // Prepare retention chart data
   const retentionChartData = cohorts.map((cohort) => ({
     cohort: cohort.cohort,
-    'Day 1': cohort.day_1,
-    'Day 7': cohort.day_7,
-    'Day 30': cohort.day_30,
+    [t('chartLabels.day1')]: cohort.day_1,
+    [t('chartLabels.day7')]: cohort.day_7,
+    [t('chartLabels.day30')]: cohort.day_30,
   }));
 
   // Prepare feature adoption data
@@ -155,8 +157,8 @@ export default function AdminAnalyticsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold">Analytics Dashboard</h1>
-            <p className="text-slate-400 mt-2">Business intelligence and key metrics</p>
+            <h1 className="text-4xl font-bold">{t('title')}</h1>
+            <p className="text-slate-400 mt-2">{t('subtitle')}</p>
           </div>
 
           {/* Period Selector */}
@@ -171,9 +173,9 @@ export default function AdminAnalyticsPage() {
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                {p === '7d' && 'Last 7 Days'}
-                {p === '30d' && 'Last 30 Days'}
-                {p === '90d' && 'Last 90 Days'}
+                {p === '7d' && t('periods.last7Days')}
+                {p === '30d' && t('periods.last30Days')}
+                {p === '90d' && t('periods.last90Days')}
               </button>
             ))}
           </div>
@@ -183,7 +185,7 @@ export default function AdminAnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* MRR */}
           <KPICard
-            title="Monthly Recurring Revenue"
+            title={t('kpis.mrr.title')}
             value={`€${kpis.mrr.toFixed(2)}`}
             change={kpis.user_growth_rate}
             icon={<DollarSign className="w-6 h-6" />}
@@ -192,15 +194,15 @@ export default function AdminAnalyticsPage() {
 
           {/* DAU */}
           <KPICard
-            title="Daily Active Users"
+            title={t('kpis.dau.title')}
             value={kpis.active_users.dau.toString()}
             icon={<Users className="w-6 h-6" />}
-            subtitle={`MAU: ${kpis.active_users.mau}`}
+            subtitle={t('kpis.dau.mau', { count: kpis.active_users.mau })}
           />
 
           {/* Churn Rate */}
           <KPICard
-            title="Churn Rate"
+            title={t('kpis.churnRate.title')}
             value={`${kpis.churn_rate.toFixed(2)}%`}
             change={-kpis.churn_rate}
             icon={<TrendingDown className="w-6 h-6" />}
@@ -209,7 +211,7 @@ export default function AdminAnalyticsPage() {
 
           {/* D7 Retention */}
           <KPICard
-            title="Day 7 Retention"
+            title={t('kpis.retention.title')}
             value={`${kpis.day_7_retention.toFixed(1)}%`}
             icon={<Target className="w-6 h-6" />}
             trend={kpis.day_7_retention > 40 ? 'up' : 'neutral'}

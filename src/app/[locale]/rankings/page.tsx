@@ -1,4 +1,5 @@
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import type { Metadata } from 'next';
@@ -57,6 +58,7 @@ function getLevelColor(level: string) {
 
 export default async function RankingsPage() {
   const players: Player[] = await getRankings();
+  const t = await getTranslations('rankings');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
@@ -77,7 +79,7 @@ export default async function RankingsPage() {
             href="/auth"
             className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-medium transition-all"
           >
-            Join Network
+            {t('cta.button')}
           </Link>
         </div>
       </header>
@@ -87,13 +89,13 @@ export default async function RankingsPage() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-4">
             <TrendingUp className="w-4 h-4 text-indigo-400" />
-            <span className="text-sm text-indigo-300">Live Rankings</span>
+            <span className="text-sm text-indigo-300">{t('liveBadge')}</span>
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            Player Rankings
+            {t('title')}
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            See where you stand among the best padel players
+            {t('subtitle')}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export default async function RankingsPage() {
         {players.length === 0 ? (
           <div className="text-center py-20">
             <Trophy className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <p className="text-slate-400">No rankings available yet</p>
+            <p className="text-slate-400">{t('noRankings')}</p>
           </div>
         ) : (
           <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden">
@@ -110,25 +112,25 @@ export default async function RankingsPage() {
                 <thead className="bg-slate-900/50 border-b border-slate-700/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-medium text-slate-300">
-                      Rank
+                      {t('rank')}
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-slate-300">
-                      Player
+                      {t('player')}
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-slate-300">
-                      Level
+                      {t('level')}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-medium text-slate-300">
-                      Points
+                      {t('points')}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-medium text-slate-300">
-                      Rating
+                      {t('rating')}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-medium text-slate-300">
-                      Matches
+                      {t('matches')}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-medium text-slate-300">
-                      Win Rate
+                      {t('winRate')}
                     </th>
                   </tr>
                 </thead>
@@ -186,7 +188,7 @@ export default async function RankingsPage() {
                           <span
                             className={`px-3 py-1 text-xs font-medium rounded-full border capitalize ${getLevelColor(player.skill_level)}`}
                           >
-                            {player.skill_level}
+                            {t(`levels.${player.skill_level}`)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center font-semibold">
@@ -224,15 +226,15 @@ export default async function RankingsPage() {
         <div className="mt-12 text-center">
           <div className="inline-block bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/20 rounded-2xl p-8">
             <Trophy className="w-12 h-12 mx-auto mb-4 text-indigo-400" />
-            <h2 className="text-2xl font-bold mb-4">Want to be on the leaderboard?</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('cta.heading')}</h2>
             <p className="text-slate-400 mb-6 max-w-md mx-auto">
-              Join PadelGraph and start competing with players at your level
+              {t('cta.text')}
             </p>
             <Link
               href="/auth?mode=signup"
               className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/25"
             >
-              Join Free Today
+              {t('cta.button')}
               <Trophy className="w-5 h-5" />
             </Link>
           </div>
