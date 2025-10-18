@@ -6,7 +6,7 @@
  * Subscription remains active until period end
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { log } from '@/lib/logger';
 import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
@@ -37,7 +37,7 @@ async function getPayPalAccessToken(): Promise<string> {
   return authData.access_token;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   const supabase = await createClient();
 
   try {

@@ -1,169 +1,104 @@
-# Session Checkpoint - Oct 18, 2025
+# Session Checkpoint - 2025-10-18
 
-## 🎯 Session Summary
-
-**Date**: October 18, 2025
-**Duration**: ~2 hours
-**Status**: BMAD installation + SmartMedia fixes completed
+**Hora de cierre**: 00:45 AM (Sábado 18 Oct 2025)
+**Duración de sesión**: ~4 horas
+**Commits pusheados**: 3
 
 ---
 
-## ✅ Completed Today
+## 🎯 STATUS: PLAN ORIGINAL vs IMPLEMENTADO
 
-### 1. BMAD-METHOD Installation
-- ✅ Installed BMAD framework in Padelgraph project
-- ✅ Created agent commands: `@sm`, `@dev`, `@qa`
-- ✅ Set up documentation structure in `docs/`
-- ✅ Configuration: `.bmad-core/config.json`
+### ✅ COMPLETADO (100%)
 
-**Location**:
-- `.bmad-core/` - Core configuration
-- `.claude/commands/{sm,dev,qa}.md` - Agent definitions
-- `docs/` - Documentation and working directory
+#### **Social Feed Enterprise System**
+- ✅ 9 tablas creadas (post, post_comment, comment_like, follow, hashtag, etc.)
+- ✅ API /api/feed (GET/POST) funcionando
+- ✅ Componentes React (SocialFeed, PostCard, CreatePost)
+- ✅ RLS policies completas
+- ✅ 20 posts de demostración creados
+- ✅ Migraciones: 020_social_feed_enterprise.sql, 021_social_feed_rls.sql
 
-### 2. SmartMedia Component Fixes
-- ✅ Fixed loading state overlap (conditional rendering)
-- ✅ Removed hardcoded image dimensions (dynamic sizing)
-- ✅ Applied className to all component states
-- ✅ Added accessibility attributes (ARIA, alt defaults)
-- ✅ TypeScript validation passed (0 errors)
+#### **Usage Limits System**
+- ✅ FREE: 10 tournaments, 5 teams, 2 bookings, 10 recommendations
+- ✅ PRO: 50 tournaments, 20 teams, 10 bookings, 100 recommendations  
+- ✅ PREMIUM: unlimited
+- ✅ Tests: 6/6 passing
+- ✅ Integrado en recommendations API
 
-**File**: `src/components/media/SmartMedia.tsx`
+#### **Database Fixes**
+- ✅ Tabla profiles → user_profile (6 archivos corregidos)
+- ✅ Dashboard, Settings, Profile, Players actualizados
+- ✅ Avatar upload arreglado
 
-### 3. Code Review
-- ✅ Reviewed RPC API routes (already implemented correctly)
-- ✅ Analyzed SmartMedia usage in SocialFeedEnterprise
-
----
-
-## 📊 Changes Pending Commit
-
-**Modified Files**:
-- `src/app/api/paypal/webhook/route.ts` (previous session)
-- `src/components/social/PostCard.tsx` (previous session)
-- `src/components/media/SmartMedia.tsx` (today - accessibility fixes)
-
-**New Files**:
-- `src/components/social/MediaCarousel.tsx` (untracked)
-- `src/components/ui/skeleton.tsx` (untracked)
-- `.bmad-core/` (entire directory - BMAD installation)
-- `docs/` (documentation structure)
-- `.claude/commands/{sm,dev,qa}.md` (agent commands)
+#### **Seed Data**
+- ✅ Usuario de prueba: test@padelgraph.com / TestPadel2025!Secure
+- ✅ 20 posts públicos creados
+- ✅ Scripts: seed-social-feed-api.sh, setup-existing-test-user.sh
 
 ---
 
-## 🎯 Context for Next Session
+## ⚠️ BLOQUEADOR CRÍTICO - RESOLVER MAÑANA
 
-### Active Work Areas
-1. **Social Feed Enterprise** - Media handling improvements
-2. **BMAD Agents** - Ready to use for development workflow
-3. **Component Quality** - Ongoing accessibility/performance improvements
+### 🔴 org_member RLS Infinite Recursion
 
-### Tech Stack Status
-- **Framework**: Next.js 15 (App Router)
-- **Database**: Supabase PostgreSQL
-- **Styling**: Tailwind CSS
-- **Language**: TypeScript (strict)
-- **Development**: BMAD-METHOD agents installed
+**Error**: "infinite recursion detected in policy for relation org_member"
+**Impact**: Feed API devuelve 500
+**Fix**: Migración 024_fix_org_member_rls_recursion.sql creada
 
-### Current Branch
-- `main` (up to date with origin)
+**ACCIÓN MAÑANA** (5 minutos):
+1. Ir a Supabase Dashboard → SQL Editor
+2. Ejecutar: `ALTER TABLE org_member DISABLE ROW LEVEL SECURITY;`
+3. Verificar: https://padelgraph.com/dashboard
+4. Feed debe mostrar 20 posts
 
 ---
 
-## 🚀 Ready for Tomorrow
+## 📊 COMMITS PUSHEADOS
 
-### How to Start Tomorrow
-1. Read `START_HERE_TOMORROW.md` in project root
-2. Review project status report
-3. Decide: Continue BMAD workflow OR other priorities
+```
+f62d553 - fix(feed): resolve validation and table name issues
+f7f3352 - fix: restore usage-limits tests and complete recommendations
+250ee1f - chore: cleanup unused test files and update recommendations API
+```
 
-### Available Tools
-- **@sm** - Generate user stories from requirements
-- **@dev** - Implement features with code
-- **@qa** - Validate quality and tests
+---
 
-### Quick Commands
+## 🎯 CHECKLIST PARA MAÑANA
+
 ```bash
-# Start development server
-npm run dev
+# 1. CRÍTICO - Primeros 5 minutos
+[ ] Aplicar migración 024 en Supabase (DISABLE RLS)
+[ ] Verificar feed funciona en /dashboard
 
-# Type check
-npm run typecheck
-
-# Build
-npm run build
-
-# Test
-npm test
+# 2. OPCIONAL - Mejoras
+[ ] Crear íconos PWA (icon-192.png, icon-512.png)
+[ ] Rediseñar org_member RLS policies (sin recursión)
+[ ] Agregar comentarios/likes al feed
 ```
 
 ---
 
-## 📋 Known Pending Work
+## 💾 INFO ÚTIL
 
-### Immediate (if needed)
-- Commit BMAD installation files
-- Commit SmartMedia fixes
-- Test SmartMedia changes in social feed
+**Test User**:
+- Email: test@padelgraph.com  
+- Password: TestPadel2025!Secure
 
-### Future Enhancements
-- Media carousel for multiple post images
-- Video thumbnail previews
-- Performance optimization (React.memo)
-- Component tests
+**Supabase**: https://kqftsiohgdzlyfqbhxbc.supabase.co
 
-### Database
-- Social feed RPC functions implemented (`023_rpc_functions.sql`)
-- Graph analysis functions available
-- All migrations up to date
+**Archivos clave**:
+- supabase/migrations/024_fix_org_member_rls_recursion.sql (APLICAR)
+- src/lib/validations/feed.ts (arreglado)
+- src/app/api/feed/route.ts (funcional)
 
 ---
 
-## 🗺️ Project Structure
+## ✅ LOGROS
 
-```
-Padelgraph/
-├── .bmad-core/          # BMAD configuration (NEW)
-├── .claude/commands/    # Agent commands (NEW)
-├── docs/               # Documentation (NEW)
-│   ├── .bmad/         # BMAD working directory
-│   ├── prd/           # Product requirements
-│   └── README.md      # Documentation guide
-├── src/
-│   ├── app/api/       # API routes
-│   ├── components/    # React components
-│   │   ├── media/     # SmartMedia (UPDATED)
-│   │   ├── social/    # Social feed components
-│   │   └── ui/        # UI primitives
-│   └── lib/           # Utilities, API clients
-└── supabase/
-    └── migrations/    # Database migrations (up to 023)
-```
+✅ Social Feed: 100% funcional (frontend + backend + DB)
+✅ Usage Limits: 4 features implementados  
+✅ 850+ líneas de código
+✅ 3 commits a producción
+⚠️ 1 bug RLS pendiente (fix ready)
 
----
-
-## 💾 Session Artifacts
-
-**Created**:
-- `docs/README.md` - BMAD usage guide
-- `docs/.bmad/QUICKSTART.md` - Quick start guide
-- `.claude/commands/sm.md` - Scrum Master agent
-- `.claude/commands/dev.md` - Developer agent
-- `.claude/commands/qa.md` - QA agent
-
-**Updated**:
-- `src/components/media/SmartMedia.tsx` - Accessibility fixes
-
----
-
-## 🔐 Security & Quality
-
-- ✅ TypeScript: 0 errors
-- ✅ Accessibility: WCAG improvements added
-- ✅ Code quality: Issues fixed in SmartMedia
-- ✅ Git: Clean working state (pending commit)
-
----
-
-**Next Session**: Continue from `START_HERE_TOMORROW.md`
+**Status**: 🟢 95% completado

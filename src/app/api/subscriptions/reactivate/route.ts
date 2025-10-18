@@ -5,38 +5,16 @@
  * Allows users to reactivate a cancelled subscription before period end
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { log } from '@/lib/logger';
 import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
 
-// PayPal API configuration
-const PAYPAL_API_BASE =
-  process.env.NODE_ENV === 'production'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
+// Note: PayPal "cancel" doesn't immediately terminate the subscription
+// It just prevents auto-renewal at period end. To reactivate, we simply
+// remove the cancel_at_period_end flag in our database - no PayPal API call needed.
 
-async function getPayPalAccessToken(): Promise<string> {
-  const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(
-        `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
-      ).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
-
-  if (!authResponse.ok) {
-    throw new Error('Failed to get PayPal access token');
-  }
-
-  const authData = await authResponse.json();
-  return authData.access_token;
-}
-
-export async function POST(request: NextRequest) {
+export async function POST() {
   const supabase = await createClient();
 
   try {
@@ -84,6 +62,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Note: PayPal doesn't have a "reactivate" API for cancelled subscriptions
+    // that are still active. The cancellation is just a flag that prevents renewal.
+    // We simply remove the cancel_at_period_end flag in our database.
+    // If the subscription is actually suspended/cancelled in PayPal,
+    // user needs to create a new subscription.
 
     // Update local database - remove cancellation flag
     const { error: updateError } = await supabase
