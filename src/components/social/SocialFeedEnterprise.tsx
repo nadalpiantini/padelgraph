@@ -31,7 +31,10 @@ function StoriesBar() {
 
   useEffect(() => {
     socialAPI.stories.list().then(({ data }) => {
-      if (data) setStories((data as any).stories_by_user || data || []);
+      if (data) {
+        const storiesData = (data as any).stories_by_user || data;
+        setStories(Array.isArray(storiesData) ? storiesData : []);
+      }
     });
   }, []);
 
@@ -217,7 +220,7 @@ function PostCard({ post, onChanged }: { post: any; onChanged: () => void }) {
         </div>
       </div>
 
-      {post.media_urls && post.media_urls.length > 0 && (
+      {Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
         <SmartMedia src={post.media_urls[0]} className="w-full" />
       )}
 
@@ -265,7 +268,7 @@ export function SocialFeedEnterprise() {
   const loadFeed = useCallback(async () => {
     setLoading(true);
     const { data } = await socialAPI.feed.list();
-    if (data) setFeed(data);
+    if (data && Array.isArray(data)) setFeed(data);
     setLoading(false);
   }, []);
 
@@ -279,7 +282,7 @@ export function SocialFeedEnterprise() {
 
     // Load initial notifications
     socialAPI.notifications.list().then(({ data }) => {
-      if (data) setNotifications(data);
+      if (data && Array.isArray(data)) setNotifications(data);
     });
 
     // Subscribe to new notifications

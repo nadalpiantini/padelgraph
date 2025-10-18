@@ -124,7 +124,7 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
       </div>
 
       {/* Media */}
-      {post.media_urls && post.media_urls.length > 0 && (
+      {Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
         <MediaCarousel
           mediaUrls={post.media_urls}
           alt={`Post by ${post.author?.name || post.author?.username}`}

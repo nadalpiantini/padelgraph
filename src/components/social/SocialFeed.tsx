@@ -63,7 +63,8 @@ export default function SocialFeed({
       if (response.ok) {
         const data = await response.json();
 
-        setPosts((prev) => reset ? data.posts : [...prev, ...data.posts]);
+        const newPosts = Array.isArray(data.posts) ? data.posts : [];
+        setPosts((prev) => reset ? newPosts : [...prev, ...newPosts]);
         setHasMore(data.hasMore);
         setCursor(data.nextCursor);
       } else {
