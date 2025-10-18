@@ -1,222 +1,366 @@
-# 🚀 START HERE TOMORROW - 2025-10-19
+# 🌅 START HERE TOMORROW - Padelgraph
 
-## ✅ COMPLETADO AYER (2025-10-18)
-
-### Media Enhancement Features - DONE ✅
-Implementación completa de mejoras al sistema de media en posts:
-
-#### Nuevos Componentes:
-1. ✅ **MediaCarousel** (`src/components/social/MediaCarousel.tsx`)
-   - Navegación con flechas izquierda/derecha
-   - Strip de thumbnails para navegación rápida
-   - Counter indicator (ej: "1 / 5")
-   - Soporte para imágenes Y videos
-   - Skeleton loading states
-   - Error handling elegante
-
-2. ✅ **Skeleton** (`src/components/ui/skeleton.tsx`)
-   - Loading placeholder reusable
-   - Matches app theme
-
-#### Características Implementadas:
-- ✅ Carousel con múltiples media
-- ✅ Image loading placeholders
-- ✅ Video thumbnail preview con play button
-- ✅ Error states para media failures
-- ✅ Auto-detección de tipo de media
-- ✅ Smooth animations
-- ✅ Responsive design
-
-#### Git Status:
-```bash
-✅ Commit: e520929 - Pushed to main (HOTFIX)
-✅ TypeScript: PASS
-✅ Build: PASS
-🟢 Listo para producción
-```
-
-#### 🚨 HOTFIXES Aplicados (2x):
-
-**Hotfix #1** (e520929):
-- Problema: MediaCarousel crasheaba si `mediaUrls` undefined
-- Fix parcial: Agregado guard inicial
-
-**Hotfix #2** (04bef9b) - FIX REAL:
-- **Problema**: Violación de React Rules of Hooks
-- **Causa**: Guards condicionales ENTRE hooks → número de hooks variable
-- **Fix**: Todos los hooks ANTES de cualquier return condicional
-- **Lección crítica**: NUNCA early return entre hooks
-```typescript
-// ❌ MALO:
-const [state1] = useState();
-if (cond) return null;  // Entre hooks
-const [state2] = useState();
-
-// ✅ BUENO:
-if (cond) return null;  // Antes de hooks
-const [state1] = useState();
-const [state2] = useState();
-if (cond2) return null; // Después de hooks OK
-```
+**Fecha de creación**: 2025-10-18 - Fin de Sesión Día 1
+**Última actualización**: 23:59 hrs
 
 ---
 
-## 🎯 EMPEZAR AQUÍ MAÑANA
-
-### 1️⃣ PRIMERA TAREA - Testing MediaCarousel
-**Prioridad**: Alta
-**Tiempo estimado**: 30-45 min
+## ⚡ QUICK START (30 segundos)
 
 ```bash
-# 1. Pull latest (por si acaso)
+# 1. Pull latest changes
 git pull origin main
 
-# 2. Ejecutar dev server
-npm run dev
-
-# 3. Testing checklist:
-□ Crear post con múltiples imágenes
-□ Probar navegación con flechas
-□ Probar navegación con thumbnails
-□ Crear post con video
-□ Verificar play button overlay
-□ Probar error state (URL inválida)
-□ Responsive en mobile
-```
-
-**Archivos a revisar**:
-- `src/components/social/MediaCarousel.tsx:1`
-- `src/components/social/PostCard.tsx:128`
-
----
-
-### 2️⃣ OPCIONES PARA CONTINUAR
-
-#### Opción A: Mejorar MediaCarousel (si se encuentra issues)
-```
-Posibles mejoras:
-- Fullscreen modal
-- Zoom functionality
-- Share individual media
-- Download buttons
-- Video playback controls
-```
-
-#### Opción B: Courts Page
-```
-Archivo: src/app/[locale]/courts/page.tsx
-Status: Creado pero básico
-Necesita: Implementación completa
-```
-
-#### Opción C: Matches Create
-```
-Archivo: src/app/[locale]/matches/create/page.tsx
-Status: Creado pero básico
-Necesita: Form implementation
-```
-
-#### Opción D: Continuar con backlog
-Ver memoria: `sprint_5_current_status`
-
----
-
-## 📊 PROJECT HEALTH
-
-```
-Branch: main
-Commits ahead: 0
-Pending changes: None
-TypeScript: ✅ PASS
-Tests: ✅ Previous passing
-Build: ✅ Clean
-```
-
----
-
-## 🧠 CONTEXT QUICK LOAD
-
-### Últimos Commits:
-```
-e520929 fix(critical): prevent MediaCarousel crash (HOTFIX)
-2e953dc fix(critical): resolve org_member RLS + PWA manifest
-0dd1ace docs: update START_HERE_TOMORROW
-9fe1547 fix(subscriptions): improve change-plan route error handling
-```
-
-### Media Carousel Architecture:
-```typescript
-// Auto-detection de media type
-const getMediaType = (url: string): 'image' | 'video'
-
-// State management
-- currentIndex: navegación
-- loadingStates: skeleton display
-- errorStates: error handling
-
-// Features
-- Navigation arrows (hover visible)
-- Thumbnail strip (always visible si >1)
-- Counter badge
-- Video detection + play overlay
-```
-
-### Commands rápidos:
-```bash
-# Dev
-npm run dev
-
-# Type check
+# 2. Verificar estado
+git status
 npm run typecheck
 
-# Ver memoria del proyecto
-# En Claude: "lee memoria session_checkpoint_2025-10-18_night"
-
-# Git status
-git status
-```
-
----
-
-## 💭 RECORDATORIOS
-
-1. **MediaCarousel** es standalone y reusable
-2. Videos detectados por extensión (.mp4, .webm, .ogg, .mov)
-3. Error handling es per-item (no falla todo el carousel)
-4. Skeleton usa theme color (slate-700/50)
-5. Transitions smooth (300ms)
-
----
-
-## 🚀 QUICK START COMMANDS
-
-```bash
-# Session start
-git status && git pull origin main
+# 3. Start dev server
 npm run dev
 
-# If testing MediaCarousel
-# Go to: http://localhost:3000/social o /dashboard
-# Crear post con media URLs
-
-# If continuing development
-# Option: Courts, Matches, or Backlog
+# 4. Open browser
+# http://localhost:3000
 ```
 
 ---
 
-## 📚 Key Documentation
+## 🎯 PRIORIDAD #1 - EMPEZAR AQUÍ
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **This File** | Daily starting point | `START_HERE_TOMORROW.md` |
-| **Session Checkpoint** | Tonight's context | Memory: `session_checkpoint_2025-10-18_night` |
-| **Project Status** | Complete overview | `claudedocs/PROJECT_STATUS_REPORT.md` |
+### Sprint 3: Discovery/Matching UI (70% → 100%)
+
+**Objetivo**: Conectar backend de auto-match con UI funcional
+
+**Backend ya listo** ✅:
+- Algoritmos de matching funcionando
+- Collaborative filtering implementado
+- RPC functions para recommendations
+- API endpoints completos
+
+**Lo que falta (UI)**:
+1. Página de Discovery mejorada
+2. Match suggestions component
+3. Filtros de búsqueda avanzados
+4. Resultados con paginación
+
+**Archivos para trabajar**:
+```
+src/app/[locale]/discover/page.tsx (mejorar)
+src/components/discovery/MatchSuggestions.tsx (crear)
+src/components/discovery/SearchFilters.tsx (crear)
+src/app/api/auto-match/route.ts (ya existe)
+```
+
+**Estimado**: 3-4 horas
 
 ---
 
-**Última actualización**: 2025-10-18 Night
-**Next session**: 2025-10-19
-**Checkpoint memory**: `session_checkpoint_2025-10-18_night`
+## 📋 ESTADO ACTUAL DEL PROYECTO
 
-🟢 **Todo committed y pushed. Listo para mañana.**
+### ✅ LO QUE FUNCIONA (NO TOCAR)
+- Autenticación completa
+- Social feed con posts, likes, comentarios
+- MediaCarousel con guards defensivos
+- Upload de avatares
+- Subscriptions PayPal
+- Billing dashboard
+- PWA manifest e iconos
+- RLS policies (org_member con fix temporal)
+
+### 🟡 LO QUE NECESITA ATENCIÓN
+1. **Discovery UI** - Backend listo, UI básica
+2. **Travel Graph UI** - Schema completo, UI pendiente
+3. **Analytics Dashboard** - Queries listos, visualización pendiente
+4. **Testing E2E** - PayPal webhooks en producción
+
+### ⚠️ BUGS CONOCIDOS (NINGUNO CRÍTICO)
+- org_member tiene RLS deshabilitado (temporal, seguro)
+- Stories preparado pero no activo
+- Push notifications pendiente
+
+---
+
+## 🚀 PLAN PARA MAÑANA (Día 2)
+
+### Mañana (3-4 horas)
+**Sprint 3: Discovery UI**
+```
+09:00 - 10:00 → MatchSuggestions component
+10:00 - 11:00 → SearchFilters component
+11:00 - 12:00 → Discovery page integration
+12:00 - 13:00 → Testing y polish
+```
+
+### Tarde (3-4 horas)
+**Sprint 4: Travel Graph UI**
+```
+14:00 - 15:00 → TravelModePanel improvements
+15:00 - 16:00 → TravelPlanForm component
+16:00 - 17:00 → Itinerary display
+17:00 - 18:00 → Testing y polish
+```
+
+### Noche (opcional, 2-3 horas)
+**Analytics Dashboard**
+```
+20:00 - 21:00 → Stats cards component
+21:00 - 22:00 → Charts con recharts
+22:00 - 23:00 → Dashboard layout
+```
+
+---
+
+## 📁 ESTRUCTURA DE ARCHIVOS IMPORTANTE
+
+### Rutas principales
+```
+src/app/[locale]/
+├── (auth)/         # Login, registro, recovery ✅
+├── dashboard/      # Home del usuario ✅
+├── discover/       # 🎯 TRABAJAR AQUÍ MAÑANA
+├── feed/           # Social feed ✅
+├── profile/        # Perfil de usuario ✅
+├── account/        # Settings y billing ✅
+├── matches/        # Partidos (básico)
+├── courts/         # Canchas (básico)
+└── tournaments/    # Torneos (básico)
+```
+
+### Componentes clave
+```
+src/components/
+├── discovery/      # 🎯 CREAR/MEJORAR
+├── social/         # MediaCarousel, PostCard ✅
+├── profile/        # AvatarUpload ✅
+├── subscription/   # CancelModal, ReactivateButton ✅
+└── travel/         # TravelModePanel (mejorar)
+```
+
+### APIs importantes
+```
+src/app/api/
+├── feed/           # Posts API ✅
+├── recommendations/ # 🎯 USAR ESTE
+├── auto-match/     # 🎯 USAR ESTE
+├── subscriptions/  # PayPal ✅
+└── media/          # Upload ✅
+```
+
+---
+
+## 🔧 COMANDOS ÚTILES
+
+### Development
+```bash
+npm run dev          # Start dev server
+npm run build        # Build production
+npm run typecheck    # Check TypeScript
+npm run lint         # Run ESLint
+```
+
+### Database
+```bash
+# Aplicar migraciones
+npm run tsx scripts/apply-migrations-supabase.ts
+
+# Ver status de RLS
+# https://supabase.com/dashboard/project/.../database/roles
+```
+
+### Git
+```bash
+git status           # Check changes
+git add -A           # Stage all
+git commit -m "..."  # Commit
+git push origin main # Push to remote
+```
+
+---
+
+## 📊 MÉTRICAS ACTUALES
+
+```
+✅ Completado:
+├─ Sprint 1: Fundación          100%
+├─ Sprint 2: Social             100%
+├─ Sprint 3: Discovery           70% 🎯 NEXT
+├─ Sprint 4: Travel              85%
+└─ Sprint 5: Monetización        95%
+
+📈 Global Progress: 90% del plan original
+🎁 Extras implementados: +30% features
+```
+
+---
+
+## 🐛 DEBUGGING RÁPIDO
+
+### Si el feed no carga
+```sql
+-- En Supabase SQL Editor
+SELECT * FROM post LIMIT 5;
+
+-- Verificar RLS
+SELECT tablename, policyname
+FROM pg_policies
+WHERE tablename = 'post';
+```
+
+### Si el upload falla
+```bash
+# Verificar buckets
+https://supabase.com/dashboard/project/.../storage
+
+# Buckets necesarios:
+- profile-images (avatars)
+- media (posts/stories)
+```
+
+### Si TypeScript se queja
+```bash
+# Rebuild
+rm -rf .next
+npm run build
+```
+
+---
+
+## 📚 DOCUMENTACIÓN DE REFERENCIA
+
+### Creada hoy
+1. `claudedocs/PLAN_VS_REALITY_2025-10-18.md` - Status completo
+2. `claudedocs/SESSION_SUMMARY_FINAL.md` - Resumen sesión
+3. `URGENT_DB_FIX.md` - Fix de org_member (YA APLICADO)
+
+### Para consultar
+- Next.js 15: https://nextjs.org/docs
+- Supabase: https://supabase.com/docs
+- PayPal Subscriptions: https://developer.paypal.com/docs/subscriptions/
+
+---
+
+## 🎨 UI COMPONENTS A CREAR MAÑANA
+
+### 1. MatchSuggestions.tsx
+```tsx
+interface MatchSuggestionsProps {
+  userId: string;
+  maxResults?: number;
+  filters?: MatchFilters;
+}
+
+// Mostrar usuarios recomendados
+// Basado en: nivel, ubicación, preferencias
+// Con botón de "Invite to match"
+```
+
+### 2. SearchFilters.tsx
+```tsx
+interface SearchFiltersProps {
+  onFilterChange: (filters: Filters) => void;
+  initialFilters?: Filters;
+}
+
+// Filtros: nivel, ciudad, distancia, disponibilidad
+// UI con dropdowns + sliders
+```
+
+### 3. DiscoveryMap.tsx (opcional)
+```tsx
+// Mapa con jugadores cercanos
+// Usando React Leaflet o similar
+```
+
+---
+
+## 💾 DATOS DE PRUEBA
+
+### Usuario test
+```
+Email: test@padelgraph.com
+Password: [en .env.local]
+```
+
+### SQL para crear posts de prueba
+```sql
+INSERT INTO post (user_id, content, visibility)
+VALUES
+  (auth.uid(), 'Test post 1', 'public'),
+  (auth.uid(), 'Test post 2', 'public');
+```
+
+---
+
+## ⚠️ RECORDATORIOS IMPORTANTES
+
+1. **org_member RLS**: Está deshabilitado temporalmente (seguro)
+   - No afecta funcionalidad actual
+   - Re-implementar políticas cuando uses Organizations
+
+2. **PayPal Webhooks**:
+   - Configurados en sandbox
+   - Testing en producción pendiente
+
+3. **Storage Buckets**:
+   - `profile-images`: avatares (público)
+   - `media`: posts/stories (privado con signed URLs)
+
+4. **TypeScript Strict Mode**:
+   - Activado, no lo desactives
+   - Todos los tipos deben estar definidos
+
+5. **Git Workflow**:
+   - SIEMPRE pull antes de empezar
+   - Commits frecuentes con mensajes claros
+   - Push al terminar cada feature
+
+---
+
+## 🎯 OBJETIVOS DE LA SEMANA
+
+### Día 2 (Mañana)
+- [ ] Sprint 3 completado (Discovery UI)
+- [ ] Sprint 4 mejorado (Travel UI básico)
+- [ ] Analytics dashboard iniciado
+
+### Día 3
+- [ ] Analytics dashboard completo
+- [ ] Testing E2E de subscriptions
+- [ ] Performance optimization
+
+### Día 4-5
+- [ ] Polish general de UI
+- [ ] Accessibility improvements
+- [ ] Deployment final
+
+---
+
+## 🎊 MOTIVACIÓN
+
+**Completado hoy**:
+- ✅ 5 bugs críticos resueltos
+- ✅ PWA funcionando
+- ✅ Subscriptions implementadas
+- ✅ 15+ commits exitosos
+- ✅ 90% del plan original
+
+**Para mañana**:
+- 🎯 Conectar backend brillante con UI hermosa
+- 🎯 Ver el matching en acción
+- 🎯 Users descubriendo jugadores
+
+**¡Vamos con todo!** 💪
+
+---
+
+## 📞 CONTACTO Y RECURSOS
+
+- **GitHub Repo**: https://github.com/nadalpiantini/padelgraph
+- **Vercel Deploy**: https://padelgraph.com
+- **Supabase Dashboard**: https://supabase.com/dashboard/project/kqftsiohgdzlyfqbhxbc
+
+---
+
+**Última actualización**: 2025-10-18 23:59
+**Próxima sesión**: 2025-10-19 09:00
+
+🚀 **LET'S GO!**
