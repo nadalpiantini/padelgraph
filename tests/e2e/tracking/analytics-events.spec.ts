@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { navigateAndWait } from '../helpers/navigation';
-import { TIMEOUTS } from '../helpers/env';
 
 /**
  * Analytics Event Tracking E2E Tests

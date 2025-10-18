@@ -13,6 +13,7 @@ const PAYPAL_API_BASE =
 // PayPal Plan ID mapping
 const PAYPAL_PLAN_IDS = {
   pro: process.env.PAYPAL_PRO_PLAN_ID!,
+  dual: process.env.PAYPAL_DUAL_PLAN_ID!,
   premium: process.env.PAYPAL_PREMIUM_PLAN_ID!,
   club: process.env.PAYPAL_CLUB_PLAN_ID!,
 };
@@ -21,7 +22,8 @@ const PAYPAL_PLAN_IDS = {
 const PLAN_HIERARCHY = {
   free: 0,
   pro: 1,
-  premium: 2,
+  dual: 2, // Dual = $15 (2 users)
+  premium: 2, // Premium = $15 (1 user with pro features)
   club: 3,
 };
 
@@ -43,9 +45,9 @@ export async function POST(request: NextRequest) {
     const { new_plan, immediate = false } = body;
 
     // Validate new plan
-    if (!new_plan || !['pro', 'premium', 'club'].includes(new_plan)) {
+    if (!new_plan || !['pro', 'dual', 'premium', 'club'].includes(new_plan)) {
       return NextResponse.json(
-        { error: 'Invalid plan specified. Must be pro, premium, or club.' },
+        { error: 'Invalid plan specified. Must be pro, dual, premium, or club.' },
         { status: 400 }
       );
     }
@@ -151,8 +153,12 @@ export async function POST(request: NextRequest) {
                 pricing_scheme: {
                   version: 1,
                   fixed_price: {
-                    currency_code: 'EUR',
-                    value: new_plan === 'pro' ? '9.00' : new_plan === 'premium' ? '19.00' : '49.00',
+                    currency_code: 'USD',
+                    value:
+                      new_plan === 'pro' ? '9.99' :
+                      new_plan === 'dual' ? '15.00' :
+                      new_plan === 'premium' ? '15.00' :
+                      '49.00', // club
                   },
                 },
               },

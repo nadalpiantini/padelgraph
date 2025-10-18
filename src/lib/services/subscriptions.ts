@@ -9,7 +9,7 @@ export interface Subscription {
   paypal_customer_id: string | null;
   paypal_subscription_id: string | null;
   paypal_plan_id: string | null;
-  plan: 'free' | 'pro' | 'premium' | 'club';
+  plan: 'free' | 'pro' | 'dual' | 'premium' | 'club';
   status: 'active' | 'cancelled' | 'suspended' | 'past_due' | 'trialing';
   current_period_start: Date | null;
   current_period_end: Date | null;
@@ -35,28 +35,43 @@ export interface PlanLimits {
   adFree?: boolean;
   customBranding?: boolean;
   apiAccess?: boolean;
+  maxUsers?: number; // For Dual and Club plans
 }
 
 const PLAN_LIMITS: Record<string, PlanLimits> = {
   free: {
     tournaments: 2,
-    autoMatch: 3,
+    autoMatch: 5,
     recommendations: 10,
     travelPlans: 1,
     analytics: false,
     achievements: true,
     leaderboards: true,
+    maxUsers: 1,
   },
   pro: {
     tournaments: 'unlimited',
-    autoMatch: 20,
-    recommendations: 100,
+    autoMatch: 50,
+    recommendations: 'unlimited',
     travelPlans: 10,
+    analytics: true,
+    achievements: true,
+    leaderboards: true,
+    prioritySupport: false,
+    adFree: true,
+    maxUsers: 1,
+  },
+  dual: {
+    tournaments: 'unlimited',
+    autoMatch: 'unlimited',
+    recommendations: 'unlimited',
+    travelPlans: 'unlimited',
     analytics: true,
     achievements: true,
     leaderboards: true,
     prioritySupport: true,
     adFree: true,
+    maxUsers: 2, // Family/couple plan - 2 users
   },
   premium: {
     tournaments: 'unlimited',
@@ -70,6 +85,7 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     adFree: true,
     customBranding: true,
     apiAccess: true,
+    maxUsers: 1,
   },
   club: {
     tournaments: 'unlimited',
@@ -83,6 +99,7 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
     adFree: true,
     customBranding: true,
     apiAccess: true,
+    maxUsers: 50, // Multi-user for clubs/organizations
   },
 };
 
@@ -251,12 +268,13 @@ export async function syncPayPalSubscription(
 
   // Map PayPal plan ID to internal plan
   const planMap: Record<string, string> = {
-    'P-PRO': 'pro',
-    'P-PREMIUM': 'premium',
-    'P-CLUB': 'club',
+    'P-8DF61561CK131203HNDZLZVQ': 'pro',
+    'P-3R001407AKS44845TNDZLY7': 'dual',
+    'P-88023967WE506663ENDZN2QQ': 'premium',
+    'P-1EVQ6856ST196634TNDZN46A': 'club',
   };
 
-  const plan = planMap[paypalData.plan_id] || 'pro';
+  const plan = planMap[paypalData.plan_id] || 'free';
 
   // Map PayPal status to internal status
   const statusMap: Record<string, string> = {

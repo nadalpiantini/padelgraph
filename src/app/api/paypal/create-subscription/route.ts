@@ -10,9 +10,10 @@ const PAYPAL_API_BASE =
     : 'https://api-m.sandbox.paypal.com';
 
 const PAYPAL_PLAN_IDS = {
-  pro: process.env.PAYPAL_PRO_PLAN_ID || 'P-PRO',
-  premium: process.env.PAYPAL_PREMIUM_PLAN_ID || 'P-PREMIUM',
-  club: process.env.PAYPAL_CLUB_PLAN_ID || 'P-CLUB',
+  pro: process.env.PAYPAL_PRO_PLAN_ID || '',
+  dual: process.env.PAYPAL_DUAL_PLAN_ID || '',
+  premium: process.env.PAYPAL_PREMIUM_PLAN_ID || '',
+  club: process.env.PAYPAL_CLUB_PLAN_ID || '',
 };
 
 export async function POST(request: NextRequest) {
@@ -32,11 +33,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { plan_id } = body;
 
-    if (!['pro', 'premium', 'club'].includes(plan_id)) {
+    // Validate plan (free, pro, dual, premium, club)
+    if (!['pro', 'dual', 'premium', 'club'].includes(plan_id)) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
     const paypalPlanId = PAYPAL_PLAN_IDS[plan_id as keyof typeof PAYPAL_PLAN_IDS];
+
+    if (!paypalPlanId) {
+      return NextResponse.json(
+        { error: 'Plan not configured' },
+        { status: 500 }
+      );
+    }
 
     // Get PayPal access token
     const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
