@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { syncPayPalSubscription } from '@/lib/services/subscriptions';
 import { createClient } from '@/lib/supabase/server';
 import { log } from '@/lib/logger';
+import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
 
 // PayPal Webhook Resource Types
 interface PayPalSubscriptionResource {
@@ -23,23 +24,90 @@ interface PayPalPaymentResource {
 }
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  let eventId: string | undefined;
+
   try {
     const body = await request.text();
     const parsedBody = JSON.parse(body);
 
-    // Verify PayPal webhook signature
-    const isValid = await verifyWebhookSignature(request, body);
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid webhook signature' },
-        { status: 401 }
-      );
-    }
-
+    // Extract event metadata
+    eventId = parsedBody.id;
     const eventType = parsedBody.event_type;
     const resource = parsedBody.resource;
+    const resourceId = resource?.id;
 
-    log.info('PayPal webhook received', { eventType });
+    // Extract webhook headers for logging
+    const headers = {
+      transmissionId: request.headers.get('paypal-transmission-id'),
+      transmissionTime: request.headers.get('paypal-transmission-time'),
+      certUrl: request.headers.get('paypal-cert-url'),
+      transmissionSig: request.headers.get('paypal-transmission-sig'),
+      authAlgo: request.headers.get('paypal-auth-algo'),
+    };
+
+    log.info('PayPal webhook received', { eventId, eventType, resourceId });
+
+    // 1. IDEMPOTENCY CHECK: Try to insert event (will fail if duplicate)
+    const { error: insertError } = await supabase
+      .from('paypal_webhook_event')
+      .insert({
+        id: eventId,
+        transmission_id: headers.transmissionId,
+        webhook_id: process.env.PAYPAL_WEBHOOK_ID,
+        event_type: eventType,
+        resource_id: resourceId,
+        resource_type: resourceId?.startsWith('I-') ? 'subscription' : 'payment',
+        signature_verified: false,
+        processed: false,
+        status: 'received',
+        payload: parsedBody,
+        headers,
+      });
+
+    if (insertError) {
+      // Duplicate event - idempotency skip
+      if (insertError.code === '23505') {
+        log.info('Duplicate webhook event - skipping', { eventId });
+        return NextResponse.json({ success: true, deduped: true }, { status: 200 });
+      }
+
+      // Other database error - log but continue processing
+      log.error('Failed to log webhook event', { error: insertError, eventId });
+    }
+
+    // 2. SIGNATURE VERIFICATION
+    const isValid = await verifyWebhookSignature(request, body);
+
+    // Update signature verification status
+    if (eventId) {
+      await supabase
+        .from('paypal_webhook_event')
+        .update({ signature_verified: isValid })
+        .eq('id', eventId);
+    }
+
+    if (!isValid) {
+      if (eventId) {
+        await supabase
+          .from('paypal_webhook_event')
+          .update({
+            status: 'failed',
+            error_message: 'Invalid webhook signature',
+          })
+          .eq('id', eventId);
+      }
+
+      return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
+    }
+
+    // 3. MARK AS PROCESSING
+    if (eventId) {
+      await supabase
+        .from('paypal_webhook_event')
+        .update({ status: 'processing' })
+        .eq('id', eventId);
+    }
 
     // Handle different event types
     switch (eventType) {
@@ -79,9 +147,33 @@ export async function POST(request: NextRequest) {
         log.warn('Unhandled PayPal event type', { eventType });
     }
 
-    return NextResponse.json({ received: true });
+    // 4. MARK AS PROCESSED
+    if (eventId) {
+      await supabase
+        .from('paypal_webhook_event')
+        .update({
+          processed: true,
+          status: 'processed',
+          processed_at: new Date().toISOString(),
+        })
+        .eq('id', eventId);
+    }
+
+    return NextResponse.json({ success: true, processed: true });
   } catch (error) {
-    log.error('Error processing PayPal webhook', { error });
+    log.error('Error processing PayPal webhook', { error, eventId });
+
+    // Mark event as failed
+    if (eventId) {
+      await supabase
+        .from('paypal_webhook_event')
+        .update({
+          status: 'failed',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+        })
+        .eq('id', eventId);
+    }
+
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
@@ -208,17 +300,79 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
     return;
   }
 
-  await syncPayPalSubscription(user.user_id, {
-    subscription_id: subscriptionResource.id,
-    plan_id: subscriptionResource.plan_id,
-    status: subscriptionResource.status,
-    billing_info: subscriptionResource.billing_info as {
-      next_billing_time: string;
-      last_payment: { amount: { value: string; currency_code: string } };
-    },
-  });
+  const billingInfo = subscriptionResource.billing_info as {
+    next_billing_time?: string;
+    last_payment?: { amount: { value: string; currency_code: string } };
+  } | undefined;
+
+  // Only use syncPayPalSubscription if we have complete billing info
+  if (billingInfo?.next_billing_time && billingInfo?.last_payment) {
+    await syncPayPalSubscription(user.user_id, {
+      subscription_id: subscriptionResource.id,
+      plan_id: subscriptionResource.plan_id,
+      status: subscriptionResource.status,
+      billing_info: {
+        next_billing_time: billingInfo.next_billing_time,
+        last_payment: billingInfo.last_payment,
+      },
+    });
+  } else {
+    // Manual update if billing info incomplete
+    const planMap: Record<string, string> = {
+      'P-8DF61561CK131203HNDZLZVQ': 'pro',
+      'P-3R001407AKS44845TNDZLY7': 'dual',
+      'P-88023967WE506663ENDZN2QQ': 'premium',
+      'P-1EVQ6856ST196634TNDZN46A': 'club',
+    };
+
+    await supabase.from('subscription').upsert(
+      {
+        user_id: user.user_id,
+        paypal_subscription_id: subscriptionResource.id,
+        paypal_plan_id: subscriptionResource.plan_id,
+        plan: planMap[subscriptionResource.plan_id] || 'pro',
+        status: 'active',
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
+  }
 
   log.info('Subscription activated', { userId: user.user_id, subscriptionId: subscriptionResource.id });
+
+  // Send activation email
+  const { data: profile } = await supabase
+    .from('user_profile')
+    .select('name, email, preferred_language')
+    .eq('user_id', user.user_id)
+    .single();
+
+  if (profile?.email) {
+    const locale = await getUserLocale(user.user_id);
+    const nextBillingDate = billingInfo?.next_billing_time
+      ? new Date(billingInfo.next_billing_time).toLocaleDateString(
+          locale === 'es' ? 'es-ES' : 'en-US'
+        )
+      : 'TBD';
+
+    // Get subscription plan from database
+    const { data: subscriptionData } = await supabase
+      .from('subscription')
+      .select('plan')
+      .eq('paypal_subscription_id', subscriptionResource.id)
+      .single();
+
+    await sendPayPalNotification(
+      'subscriptionActivated',
+      profile.email,
+      {
+        name: profile.name || 'PadelGraph Player',
+        plan: subscriptionData?.plan || 'Pro',
+        nextBillingDate,
+      },
+      locale
+    );
+  }
 }
 
 async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
@@ -252,6 +406,28 @@ async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
     .eq('user_id', subscription.user_id);
 
   log.info('Subscription cancelled', { userId: subscription.user_id });
+
+  // Send cancellation email
+  const { data: profile } = await supabase
+    .from('user_profile')
+    .select('name, email')
+    .eq('user_id', subscription.user_id)
+    .single();
+
+  if (profile?.email) {
+    const locale = await getUserLocale(subscription.user_id);
+    const expiryDate = new Date().toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US');
+
+    await sendPayPalNotification(
+      'subscriptionCancelled',
+      profile.email,
+      {
+        name: profile.name || 'PadelGraph Player',
+        expiryDate,
+      },
+      locale
+    );
+  }
 }
 
 async function handlePaymentCompleted(resource: unknown): Promise<void> {
@@ -286,6 +462,30 @@ async function handlePaymentFailed(resource: unknown): Promise<void> {
     .eq('paypal_subscription_id', paymentResource.billing_agreement_id);
 
   log.warn('Payment failed', { userId: subscription.user_id, paymentId: paymentResource.id });
+
+  // Send payment failed email with retry information
+  const { data: profile } = await supabase
+    .from('user_profile')
+    .select('name, email')
+    .eq('user_id', subscription.user_id)
+    .single();
+
+  if (profile?.email) {
+    const locale = await getUserLocale(subscription.user_id);
+    const retryDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      locale === 'es' ? 'es-ES' : 'en-US'
+    );
+
+    await sendPayPalNotification(
+      'paymentFailed',
+      profile.email,
+      {
+        name: profile.name || 'PadelGraph Player',
+        retryDate,
+      },
+      locale
+    );
+  }
 }
 
 async function handleSubscriptionUpdated(resource: unknown): Promise<void> {
@@ -343,6 +543,26 @@ async function handleSubscriptionSuspended(resource: unknown): Promise<void> {
     .eq('paypal_subscription_id', subscriptionResource.id);
 
   log.warn('Subscription suspended', { userId: subscription.user_id });
+
+  // Send suspension email
+  const { data: profile } = await supabase
+    .from('user_profile')
+    .select('name, email')
+    .eq('user_id', subscription.user_id)
+    .single();
+
+  if (profile?.email) {
+    const locale = await getUserLocale(subscription.user_id);
+
+    await sendPayPalNotification(
+      'subscriptionSuspended',
+      profile.email,
+      {
+        name: profile.name || 'PadelGraph Player',
+      },
+      locale
+    );
+  }
 }
 
 async function handleSubscriptionExpired(resource: unknown): Promise<void> {
@@ -376,6 +596,26 @@ async function handleSubscriptionExpired(resource: unknown): Promise<void> {
     .eq('user_id', subscription.user_id);
 
   log.info('Subscription expired, user downgraded to free', { userId: subscription.user_id });
+
+  // Send expiration email
+  const { data: profile } = await supabase
+    .from('user_profile')
+    .select('name, email')
+    .eq('user_id', subscription.user_id)
+    .single();
+
+  if (profile?.email) {
+    const locale = await getUserLocale(subscription.user_id);
+
+    await sendPayPalNotification(
+      'subscriptionExpired',
+      profile.email,
+      {
+        name: profile.name || 'PadelGraph Player',
+      },
+      locale
+    );
+  }
 }
 
 async function handlePaymentRefunded(resource: unknown): Promise<void> {
