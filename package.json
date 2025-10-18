@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "csv-stringify": "^6.6.0",
     "d3": "^7.9.0",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.23.24",
     "hls.js": "^1.6.13",
     "html2canvas": "^1.4.1",

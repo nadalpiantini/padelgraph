@@ -13,7 +13,7 @@ import {
   tournamentQuerySchema,
 } from '@/lib/validations/tournament';
 import { notifyTournamentPublished } from '@/lib/notifications/tournament';
-import { recordFeatureUsage, UsageLimitError, enforceUsageLimitWithAdminBypass } from '@/lib/middleware/usage-limiter';
+import { canCreateTournament, incrementUsage } from '@/lib/middleware/usage-limits';
 
 /**
  * GET /api/tournaments
@@ -126,14 +126,19 @@ export async function POST(request: NextRequest) {
       return ApiResponse.error('Unauthorized', 401);
     }
 
-    // Check usage limit for tournament creation (admin override enabled)
-    try {
-      await enforceUsageLimitWithAdminBypass(user.id, 'tournament');
-    } catch (error) {
-      if (error instanceof UsageLimitError) {
-        return ApiResponse.error(error.message, 403);
-      }
-      throw error;
+    // Check usage limit for tournament creation
+    const limitCheck = await canCreateTournament(user.id);
+    if (!limitCheck.allowed) {
+      return ApiResponse.error(
+        limitCheck.error || 'Tournament creation limit exceeded. Upgrade your plan to continue.',
+        {
+          remaining: limitCheck.remaining,
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          upgrade_url: '/pricing',
+        },
+        403
+      );
     }
 
     // Parse and validate request body
@@ -172,7 +177,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Record successful usage
-    await recordFeatureUsage(user.id, 'tournament', 'create', {
+    await incrementUsage(user.id, 'tournament_created', {
       tournament_id: tournament.id,
       tournament_name: tournament.name,
     });

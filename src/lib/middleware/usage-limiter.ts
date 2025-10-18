@@ -1,8 +1,15 @@
 // Sprint 5 Phase 3: Usage Limit Enforcement Middleware
 // Prevents users from exceeding their plan limits
+// UPDATED: Now uses the new usage-limits.ts system (Task #6-7)
 
-import { checkUsageLimit, logFeatureUsage, getUserSubscription } from '@/lib/services/subscriptions';
 import { NextResponse } from 'next/server';
+import {
+  canCreateTournament,
+  canCreateTeam,
+  canCreateBooking,
+  incrementUsage,
+} from '@/lib/middleware/usage-limits';
+import { getUserSubscription } from '@/lib/services/subscriptions';
 
 /**
  * Custom error for usage limit exceeded
@@ -78,7 +85,7 @@ export async function hasAdminOverride(userId: string): Promise<boolean> {
  */
 export async function enforceUsageLimit(
   userId: string,
-  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan' | 'team' | 'booking',
   adminBypass: boolean = false
 ): Promise<NextResponse | null> {
   // Check admin bypass if enabled
@@ -90,7 +97,27 @@ export async function enforceUsageLimit(
     }
   }
 
-  const { allowed, remaining, limit } = await checkUsageLimit(userId, feature);
+  // Map old feature names to new check functions
+  let limitCheck;
+  if (feature === 'tournament') {
+    limitCheck = await canCreateTournament(userId);
+  } else if (feature === 'team') {
+    limitCheck = await canCreateTeam(userId);
+  } else if (feature === 'booking') {
+    limitCheck = await canCreateBooking(userId);
+  } else {
+    // For backward compatibility with old features (auto_match, recommendation, travel_plan)
+    // These still use the old checkUsageLimit from subscriptions.ts
+    const { checkUsageLimit } = await import('@/lib/services/subscriptions');
+    limitCheck = await checkUsageLimit(userId, feature);
+  }
+
+  const { allowed, remaining, limit } = limitCheck;
+
+  // Calculate current usage (explicit number type)
+  const currentUsage: number = ('current' in limitCheck && typeof limitCheck.current === 'number')
+    ? limitCheck.current
+    : (limit - remaining);
 
   if (!allowed) {
     // Get user's subscription to include plan name in error
@@ -99,7 +126,7 @@ export async function enforceUsageLimit(
 
     const error = new UsageLimitError(
       feature,
-      limit - remaining,
+      currentUsage,
       limit,
       plan
     );
@@ -117,7 +144,7 @@ export async function enforceUsageLimit(
  */
 export async function withUsageLimit(
   userId: string,
-  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan' | 'team' | 'booking',
   operation: () => Promise<unknown>,
   metadata?: Record<string, unknown>
 ): Promise<unknown> {
@@ -131,7 +158,7 @@ export async function withUsageLimit(
   const result = await operation();
 
   // Log usage after successful operation
-  await logFeatureUsage(userId, feature, 'create', metadata);
+  await recordFeatureUsage(userId, feature, 'create', metadata);
 
   return result;
 }
@@ -142,20 +169,36 @@ export async function withUsageLimit(
  */
 export async function enforceUsageLimitWithAdminBypass(
   userId: string,
-  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan'
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan' | 'team' | 'booking'
 ): Promise<NextResponse | null> {
   return enforceUsageLimit(userId, feature, true);
 }
 
 /**
- * Record feature usage (wrapper for logFeatureUsage)
+ * Record feature usage (wrapper for incrementUsage from new system)
  * Exported for backward compatibility with existing code
  */
 export async function recordFeatureUsage(
   userId: string,
-  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan',
+  feature: 'tournament' | 'auto_match' | 'recommendation' | 'travel_plan' | 'team' | 'booking',
   action: string = 'create',
   metadata?: Record<string, unknown>
 ): Promise<void> {
-  await logFeatureUsage(userId, feature, action, metadata);
+  // Map old feature names to new feature types
+  const featureMap: Record<string, 'tournament_created' | 'team_created' | 'booking_created'> = {
+    tournament: 'tournament_created',
+    team: 'team_created',
+    booking: 'booking_created',
+  };
+
+  const newFeature = featureMap[feature];
+
+  if (newFeature) {
+    // Use new system
+    await incrementUsage(userId, newFeature, metadata);
+  } else {
+    // For backward compatibility with old features (auto_match, recommendation, travel_plan)
+    const { logFeatureUsage } = await import('@/lib/services/subscriptions');
+    await logFeatureUsage(userId, feature, action, metadata);
+  }
 }
