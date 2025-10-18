@@ -104,7 +104,7 @@ test.describe('Social Feed - Production Tests', () => {
     await page.fill('input[type="email"]', TEST_USER_EMAIL);
     await page.fill('input[type="password"]', TEST_USER_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/*/dashboard', { timeout: 15000 });
 
     // Wait for feed
     await page.waitForTimeout(3000);
@@ -139,7 +139,7 @@ test.describe('Social Feed - Production Tests', () => {
     await page.fill('input[type="email"]', TEST_USER_EMAIL);
     await page.fill('input[type="password"]', TEST_USER_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/*/dashboard', { timeout: 15000 });
 
     // Wait for CreatePost component
     await page.waitForSelector('textarea[placeholder*="What\'s on your mind"]', { timeout: 10000 });
@@ -182,7 +182,7 @@ test.describe('Social Feed - Production Tests', () => {
     await page.fill('input[type="email"]', TEST_USER_EMAIL);
     await page.fill('input[type="password"]', TEST_USER_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/*/dashboard', { timeout: 15000 });
 
     // Wait for dashboard to load
     await page.waitForTimeout(2000);

@@ -1,4 +1,4 @@
-import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
+import { Trophy, Medal, Award, TrendingUp, ChevronLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
@@ -64,23 +64,34 @@ export default async function RankingsPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Header */}
       <header className="border-b border-slate-800/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/images/branding/padelgraph_logo_01.png"
-              alt="PadelGraph Logo"
-              width={100}
-              height={100}
-              className="rounded-xl"
-              priority
-            />
-          </Link>
-          <Link
-            href="/auth"
-            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-medium transition-all"
-          >
-            {t('cta.button')}
-          </Link>
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/images/branding/padelgraph_logo_01.png"
+                alt="PadelGraph Logo"
+                width={100}
+                height={100}
+                className="rounded-xl"
+                priority
+              />
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+              </Link>
+              <Link
+                href="/auth"
+                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-medium transition-all"
+              >
+                {t('cta.button')}
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
