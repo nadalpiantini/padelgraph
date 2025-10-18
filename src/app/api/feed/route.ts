@@ -60,6 +60,7 @@ export async function GET(request: Request) {
         author:user_profile!user_id (
           id,
           name,
+          username,
           avatar_url,
           level
         )
@@ -102,6 +103,14 @@ export async function GET(request: Request) {
       console.error('[Feed API] Error fetching feed:', postsError);
       return serverErrorResponse('Failed to fetch feed', postsError);
     }
+
+    // Debug logging
+    console.log('[Feed API] Query result:', {
+      user_id: user.id,
+      postsCount: posts?.length || 0,
+      filters: { user_id, org_id, cursor },
+      hasData: !!posts,
+    });
 
     // Normalize posts: ensure media_urls is always an array, never null
     const normalizedPosts = (posts || []).map(post => ({
@@ -163,6 +172,7 @@ export async function POST(request: Request) {
         author:user_profile!user_id (
           id,
           name,
+          username,
           avatar_url,
           level
         )
@@ -174,6 +184,14 @@ export async function POST(request: Request) {
       console.error('[Feed API] Error creating post:', createError);
       return serverErrorResponse('Failed to create post', createError);
     }
+
+    // Debug logging
+    console.log('[Feed API] Post created successfully:', {
+      post_id: post.id,
+      user_id: post.user_id,
+      visibility: post.visibility,
+      has_author: !!post.author,
+    });
 
     return successResponse(
       { post },
