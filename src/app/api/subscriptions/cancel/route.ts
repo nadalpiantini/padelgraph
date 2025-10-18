@@ -1,129 +1,186 @@
 /**
- * Cancel Subscription Endpoint
+ * Cancel Subscription API
  * POST /api/subscriptions/cancel
  *
- * Allows users to cancel their active PayPal subscription
- * Subscription remains active until end of billing period
+ * Allows users to cancel their PayPal subscription
+ * Subscription remains active until period end
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { paypalClient } from '@/lib/services/paypal-client';
-import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
 import { log } from '@/lib/logger';
+import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
+
+// PayPal API configuration
+const PAYPAL_API_BASE =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
+
+async function getPayPalAccessToken(): Promise<string> {
+  const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
+      ).toString('base64')}`,
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!authResponse.ok) {
+    throw new Error('Failed to get PayPal access token');
+  }
+
+  const authData = await authResponse.json();
+  return authData.access_token;
+}
 
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    // 1. Authenticate user
+  try {
+    // Get authenticated user
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Get user's active subscription
+    // Get user's active subscription
     const { data: subscription, error: subError } = await supabase
       .from('subscription')
       .select('*')
       .eq('user_id', user.id)
-      .eq('status', 'active')
       .single();
 
     if (subError || !subscription) {
-      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'No active subscription found' },
+        { status: 404 }
+      );
     }
 
-    if (!subscription.paypal_subscription_id) {
+    if (subscription.status === 'cancelled' || subscription.status === 'expired') {
       return NextResponse.json(
-        { error: 'Subscription not linked to PayPal' },
+        { error: 'Subscription is already cancelled' },
         { status: 400 }
       );
     }
 
-    // 3. Parse optional request body for cancellation reason
-    let cancellationReason = 'User requested cancellation via web app';
-    try {
-      const body = await request.json();
-      if (body.reason) {
-        cancellationReason = body.reason;
-      }
-    } catch {
-      // No body or invalid JSON - use default reason
+    if (!subscription.paypal_subscription_id) {
+      return NextResponse.json(
+        { error: 'No PayPal subscription ID found' },
+        { status: 400 }
+      );
     }
 
-    log.info('Cancelling subscription', {
-      userId: user.id,
-      subscriptionId: subscription.paypal_subscription_id,
-      reason: cancellationReason,
-    });
+    // Get PayPal access token
+    const accessToken = await getPayPalAccessToken();
 
-    // 4. Call PayPal API to cancel subscription
-    await paypalClient.cancelSubscription(subscription.paypal_subscription_id, cancellationReason);
+    // Cancel subscription via PayPal API
+    const cancelResponse = await fetch(
+      `${PAYPAL_API_BASE}/v1/billing/subscriptions/${subscription.paypal_subscription_id}/cancel`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          reason: 'User requested cancellation',
+        }),
+      }
+    );
 
-    // 5. Update local database
-    // Set cancel_at_period_end=true (subscription stays active until period ends)
-    // PayPal webhook will handle final status change to 'cancelled'
+    if (!cancelResponse.ok) {
+      const errorData = await cancelResponse.json();
+      log.error('PayPal subscription cancellation failed', {
+        error: errorData,
+        userId: user.id,
+        subscriptionId: subscription.paypal_subscription_id,
+      });
+      return NextResponse.json(
+        { error: 'Failed to cancel subscription with PayPal' },
+        { status: 500 }
+      );
+    }
+
+    // Update local database - set cancel_at_period_end flag
     const { error: updateError } = await supabase
       .from('subscription')
       .update({
         cancel_at_period_end: true,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', subscription.id);
+      .eq('user_id', user.id);
 
     if (updateError) {
-      log.error('Failed to update subscription in database', { error: updateError });
-      throw new Error('Database update failed');
-    }
-
-    // 6. Get user profile for email notification
-    const { data: profile } = await supabase
-      .from('user_profile')
-      .select('name, email, preferred_language')
-      .eq('user_id', user.id)
-      .single();
-
-    // 7. Send cancellation confirmation email
-    if (profile?.email) {
-      const locale = await getUserLocale(user.id);
-      const expiryDate = subscription.current_period_end
-        ? new Date(subscription.current_period_end).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US')
-        : 'End of billing period';
-
-      await sendPayPalNotification(
-        'subscriptionCancelled',
-        profile.email,
-        {
-          name: profile.name || 'PadelGraph Player',
-          expiryDate,
-        },
-        locale
+      log.error('Failed to update subscription', {
+        error: updateError,
+        userId: user.id,
+      });
+      return NextResponse.json(
+        { error: 'Failed to update subscription' },
+        { status: 500 }
       );
     }
 
-    log.info('Subscription cancelled successfully', {
+    log.info('Subscription cancellation requested', {
       userId: user.id,
       subscriptionId: subscription.paypal_subscription_id,
-      expiresAt: subscription.current_period_end,
     });
+
+    // Send cancellation confirmation email
+    try {
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('name, email')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile?.email) {
+        const locale = await getUserLocale(user.id);
+
+        // Calculate period end date
+        const periodEnd = subscription.current_period_end
+          ? new Date(subscription.current_period_end).toLocaleDateString(
+              locale === 'es' ? 'es-ES' : 'en-US'
+            )
+          : 'end of billing period';
+
+        await sendPayPalNotification(
+          'subscriptionCancelled',
+          profile.email,
+          {
+            name: profile.name || 'PadelGraph Player',
+            expiryDate: periodEnd,
+          },
+          locale
+        );
+      }
+    } catch (emailError) {
+      log.error('Failed to send cancellation email', {
+        error: emailError,
+        userId: user.id,
+      });
+      // Email failure shouldn't fail the cancellation
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Subscription cancelled. Access remains active until end of billing period.',
-      expiresAt: subscription.current_period_end,
+      message: 'Subscription cancelled successfully',
+      cancel_at_period_end: true,
+      period_end: subscription.current_period_end,
     });
   } catch (error) {
     log.error('Error cancelling subscription', { error });
-
     return NextResponse.json(
-      {
-        error: 'Failed to cancel subscription',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
