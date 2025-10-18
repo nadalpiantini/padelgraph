@@ -75,6 +75,10 @@ CREATE INDEX IF NOT EXISTS idx_paypal_event_failed
 
 ALTER TABLE paypal_webhook_event ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Service role full access" ON paypal_webhook_event;
+DROP POLICY IF EXISTS "Admins can view webhook logs" ON paypal_webhook_event;
+
 -- Service role has full access (for webhook handler)
 CREATE POLICY "Service role full access" ON paypal_webhook_event
   FOR ALL
