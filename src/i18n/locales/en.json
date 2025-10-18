@@ -768,6 +768,27 @@
       "noConnection": "No connection found or same user selected",
       "inviteToPlay": "Invite to Play",
       "inviteSent": "Invitation sent"
+    },
+    "travel": {
+      "title": "Travel Mode",
+      "subtitle": "Find padel matches while traveling",
+      "destination": "Destination",
+      "destinationPlaceholder": "City name",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "preferences": "Preferences",
+      "level": "Skill Level",
+      "format": "Match Format",
+      "save": "Save Plan",
+      "cancel": "Cancel",
+      "suggestions": "Suggested Matches & Clubs",
+      "noSuggestions": "No suggestions yet. We'll find matches when your dates are closer!",
+      "travelModeActive": "Travel Mode Active:",
+      "errors": {
+        "destination": "Please enter a destination city",
+        "dates": "Please select start and end dates",
+        "invalidDates": "End date must be after start date"
+      }
     }
   }
 }

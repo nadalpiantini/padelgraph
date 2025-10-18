@@ -168,7 +168,7 @@ export default function MatchSuggestions({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="bg-slate-800 border-slate-700">
+            <Card key={i} className="bg-slate-800 border-slate-700" data-testid="match-skeleton">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4 mb-4">
                   <Skeleton className="w-16 h-16 rounded-full" />
@@ -196,7 +196,7 @@ export default function MatchSuggestions({
           <h2 className="text-2xl font-bold text-white">{t.title}</h2>
           <p className="text-slate-400 mt-1">{t.subtitle}</p>
         </div>
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-slate-800 border-slate-700" data-testid="empty-matches">
           <CardContent className="py-20 text-center">
             <User className="w-16 h-16 text-slate-600 mx-auto mb-4" />
             <p className="text-slate-400 text-lg">{t.noMatches}</p>
@@ -221,7 +221,7 @@ export default function MatchSuggestions({
       </div>
 
       {/* Match Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="match-suggestions">
         {matches.map((match) => {
           const skillLevel = match.metadata.skill_level || 5;
           const matchScore = Math.round(match.score * 100);
@@ -231,12 +231,14 @@ export default function MatchSuggestions({
             <Card
               key={match.id}
               className="bg-slate-800 border-slate-700 hover:border-indigo-500/50 transition-all group"
+              data-testid="match-card"
+              data-match-id={match.id}
             >
               <CardContent className="p-6">
                 {/* User Info */}
                 <div className="flex items-start gap-4 mb-4">
                   {/* Avatar */}
-                  <div className="relative">
+                  <div className="relative" data-testid="user-avatar">
                     {match.metadata.avatar_url ? (
                       <img
                         src={match.metadata.avatar_url}
@@ -250,7 +252,10 @@ export default function MatchSuggestions({
                     )}
                     {/* Match Score Badge */}
                     <div className="absolute -bottom-1 -right-1 bg-slate-900 rounded-full p-1">
-                      <div className={`w-6 h-6 rounded-full ${getMatchScoreColor(matchScore)} flex items-center justify-center text-xs font-bold text-white`}>
+                      <div
+                        className={`w-6 h-6 rounded-full ${getMatchScoreColor(matchScore)} flex items-center justify-center text-xs font-bold text-white`}
+                        data-testid="match-score"
+                      >
                         {matchScore}
                       </div>
                     </div>
@@ -258,7 +263,7 @@ export default function MatchSuggestions({
 
                   {/* Name & Location */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-white truncate">
+                    <h3 className="text-lg font-semibold text-white truncate" data-testid="player-name">
                       {match.metadata.name}
                     </h3>
                     {match.metadata.location && (
@@ -292,6 +297,7 @@ export default function MatchSuggestions({
                     <Badge
                       variant="outline"
                       className={`${getSkillLevelColor(skillLevel)} border`}
+                      data-testid="skill-level"
                     >
                       {skillLevel}/10 • {getSkillLevelLabel(skillLevel)}
                     </Badge>
@@ -325,6 +331,7 @@ export default function MatchSuggestions({
                   disabled={isInvited}
                   className="w-full"
                   variant={isInvited ? "secondary" : "default"}
+                  data-testid="invite-button"
                 >
                   {isInvited ? (
                     <>

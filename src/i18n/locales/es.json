@@ -768,6 +768,27 @@
       "noConnection": "No hay conexión o mismo usuario seleccionado",
       "inviteToPlay": "Invitar a Jugar",
       "inviteSent": "Invitación enviada"
+    },
+    "travel": {
+      "title": "Modo Viaje",
+      "subtitle": "Encuentra partidos de pádel mientras viajas",
+      "destination": "Destino",
+      "destinationPlaceholder": "Nombre de la ciudad",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "preferences": "Preferencias",
+      "level": "Nivel de Habilidad",
+      "format": "Formato de Partido",
+      "save": "Guardar Plan",
+      "cancel": "Cancelar",
+      "suggestions": "Partidos y Clubes Sugeridos",
+      "noSuggestions": "Aún no hay sugerencias. ¡Encontraremos partidos cuando tus fechas estén más cerca!",
+      "travelModeActive": "Modo Viaje Activo:",
+      "errors": {
+        "destination": "Por favor ingresa una ciudad de destino",
+        "dates": "Por favor selecciona fechas de inicio y fin",
+        "invalidDates": "La fecha de fin debe ser posterior a la fecha de inicio"
+      }
     }
   }
 }
