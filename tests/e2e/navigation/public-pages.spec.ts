@@ -19,7 +19,7 @@ test.describe('Public Pages Navigation', () => {
   test('should load about page', async ({ page }) => {
     await navigateAndWait(page, '/about');
 
-    await expect(page.locator('h1, h2')).toBeVisible({ timeout: TIMEOUTS.MEDIUM });
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: TIMEOUTS.MEDIUM });
   });
 
   test('should load rankings page', async ({ page }) => {
