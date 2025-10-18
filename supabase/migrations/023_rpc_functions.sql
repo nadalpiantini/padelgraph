@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION padelgraph_people_you_may_play(
 ) RETURNS TABLE (
   id UUID,
   name TEXT,
-  username TEXT,
+  email TEXT,
   city TEXT,
   level NUMERIC,
   distance_km NUMERIC,
@@ -87,7 +87,7 @@ CREATE OR REPLACE FUNCTION padelgraph_people_you_may_play(
     SELECT DISTINCT follower_id AS id FROM follow WHERE following_id IN (SELECT id FROM f1)
   ),
   candidates AS (
-    SELECT up.id, up.name, up.username, up.city, up.level, up.lat, up.lng
+    SELECT up.id, up.name, up.email, up.city, up.level, up.lat, up.lng
     FROM user_profile up
     WHERE up.id <> p_user
       AND (p_city IS NULL OR up.city = p_city)
@@ -97,7 +97,7 @@ CREATE OR REPLACE FUNCTION padelgraph_people_you_may_play(
     SELECT
       c.id,
       c.name,
-      c.username,
+      c.email,
       c.city,
       c.level,
       CASE
