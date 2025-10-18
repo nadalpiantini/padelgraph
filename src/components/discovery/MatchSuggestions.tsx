@@ -304,7 +304,7 @@ export default function MatchSuggestions({
                   </div>
 
                   {/* Compatible Factors */}
-                  {match.metadata.compatible_factors && match.metadata.compatible_factors.length > 0 && (
+                  {Array.isArray(match.metadata.compatible_factors) && match.metadata.compatible_factors.length > 0 && (
                     <div className="flex items-start gap-2">
                       <Sparkles className="w-4 h-4 text-slate-400 mt-0.5" />
                       <div className="flex-1">
