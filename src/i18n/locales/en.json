@@ -73,6 +73,80 @@
     "noUpcomingMatches": "No upcoming matches",
     "scheduleMatch": "Schedule a Match"
   },
+  "profile": {
+    "rankingPoints": "Ranking Points",
+    "matches": "Matches",
+    "winRate": "Win Rate",
+    "streak": "Streak",
+    "memberSince": "Member since {date}",
+    "recentActivity": "Recent Activity",
+    "noActivityYet": "No activity yet",
+    "startPlayingToSeeActivity": "Start playing to see your activity here",
+    "achievements": "Achievements",
+    "noAchievementsYet": "No achievements yet",
+    "earnAchievementsByPlaying": "Earn achievements by playing matches and tournaments"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "description": "Manage your account settings and preferences",
+      "email": "Email Address",
+      "username": "Username",
+      "name": "Full Name",
+      "bio": "Bio",
+      "location": "Location",
+      "saveChanges": "Save Changes",
+      "saving": "Saving..."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage how you receive notifications",
+      "emailNotifications": "Email Notifications",
+      "matchReminders": "Match Reminders",
+      "tournamentUpdates": "Tournament Updates",
+      "socialActivity": "Social Activity",
+      "rankings": "Rankings Changes"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Customize your experience",
+      "language": "Language",
+      "timezone": "Timezone",
+      "skillLevel": "Skill Level",
+      "playingHand": "Playing Hand",
+      "preferredPosition": "Preferred Position"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Control your privacy settings",
+      "profileVisibility": "Profile Visibility",
+      "showStats": "Show Statistics",
+      "showLocation": "Show Location",
+      "allowMessages": "Allow Direct Messages"
+    },
+    "toasts": {
+      "settingsSaved": {
+        "title": "Settings Saved",
+        "message": "Your settings have been updated successfully"
+      },
+      "saveFailed": {
+        "title": "Save Failed",
+        "message": "Failed to save settings. Please try again."
+      }
+    }
+  },
+  "players": {
+    "title": "Players",
+    "subtitle": "Find and connect with padel players",
+    "searchPlaceholder": "Search players by name or username...",
+    "filterByLevel": "Filter by level",
+    "filterByLocation": "Filter by location",
+    "allLevels": "All Levels",
+    "noPlayersFound": "No players found",
+    "tryAdjustingFilters": "Try adjusting your filters",
+    "viewProfile": "View Profile"
+  },
   "tournaments": {
     "title": "Tournaments",
     "searchPlaceholder": "Search tournaments...",

@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -89,11 +89,7 @@ export default function AdminSubscriptionsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [syncing, setSyncing] = useState(false);
 
-  useEffect(() => {
-    checkAdminAndLoadData();
-  }, []);
-
-  async function checkAdminAndLoadData() {
+  const checkAdminAndLoadData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -132,7 +128,11 @@ export default function AdminSubscriptionsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [supabase, router, toast, t]);
+
+  useEffect(() => {
+    checkAdminAndLoadData();
+  }, [checkAdminAndLoadData]);
 
   async function loadSubscriptions() {
     const { data, error } = await supabase

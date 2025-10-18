@@ -4,7 +4,6 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import DashboardNavigation from '@/components/dashboard/DashboardNavigation';
 import {
-  User,
   Trophy,
   Calendar,
   MapPin,

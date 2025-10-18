@@ -73,6 +73,80 @@
     "noUpcomingMatches": "Sin partidos próximos",
     "scheduleMatch": "Programar un Partido"
   },
+  "profile": {
+    "rankingPoints": "Puntos de Ranking",
+    "matches": "Partidos",
+    "winRate": "% Victoria",
+    "streak": "Racha",
+    "memberSince": "Miembro desde {date}",
+    "recentActivity": "Actividad Reciente",
+    "noActivityYet": "Sin actividad aún",
+    "startPlayingToSeeActivity": "Comienza a jugar para ver tu actividad aquí",
+    "achievements": "Logros",
+    "noAchievementsYet": "Sin logros aún",
+    "earnAchievementsByPlaying": "Gana logros jugando partidos y torneos"
+  },
+  "settings": {
+    "title": "Configuración",
+    "account": {
+      "title": "Cuenta",
+      "description": "Gestiona la configuración y preferencias de tu cuenta",
+      "email": "Correo Electrónico",
+      "username": "Nombre de Usuario",
+      "name": "Nombre Completo",
+      "bio": "Biografía",
+      "location": "Ubicación",
+      "saveChanges": "Guardar Cambios",
+      "saving": "Guardando..."
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Gestiona cómo recibes notificaciones",
+      "emailNotifications": "Notificaciones por Email",
+      "matchReminders": "Recordatorios de Partidos",
+      "tournamentUpdates": "Actualizaciones de Torneos",
+      "socialActivity": "Actividad Social",
+      "rankings": "Cambios de Rankings"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "description": "Personaliza tu experiencia",
+      "language": "Idioma",
+      "timezone": "Zona Horaria",
+      "skillLevel": "Nivel de Habilidad",
+      "playingHand": "Mano de Juego",
+      "preferredPosition": "Posición Preferida"
+    },
+    "privacy": {
+      "title": "Privacidad",
+      "description": "Controla tus ajustes de privacidad",
+      "profileVisibility": "Visibilidad del Perfil",
+      "showStats": "Mostrar Estadísticas",
+      "showLocation": "Mostrar Ubicación",
+      "allowMessages": "Permitir Mensajes Directos"
+    },
+    "toasts": {
+      "settingsSaved": {
+        "title": "Configuración Guardada",
+        "message": "Tu configuración se ha actualizado correctamente"
+      },
+      "saveFailed": {
+        "title": "Error al Guardar",
+        "message": "Error al guardar la configuración. Por favor, inténtalo de nuevo."
+      }
+    }
+  },
+  "players": {
+    "title": "Jugadores",
+    "subtitle": "Encuentra y conecta con jugadores de pádel",
+    "searchPlaceholder": "Buscar jugadores por nombre o usuario...",
+    "filterByLevel": "Filtrar por nivel",
+    "filterByLocation": "Filtrar por ubicación",
+    "allLevels": "Todos los Niveles",
+    "noPlayersFound": "No se encontraron jugadores",
+    "tryAdjustingFilters": "Prueba ajustar tus filtros",
+    "viewProfile": "Ver Perfil"
+  },
   "tournaments": {
     "title": "Torneos",
     "searchPlaceholder": "Buscar torneos...",

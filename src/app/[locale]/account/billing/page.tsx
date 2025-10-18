@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
@@ -71,11 +71,7 @@ export default function BillingPage() {
   const [cancelling, setCancelling] = useState(false);
   const [reactivating, setReactivating] = useState(false);
 
-  useEffect(() => {
-    loadBillingData();
-  }, []);
-
-  async function loadBillingData() {
+  const loadBillingData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -125,7 +121,11 @@ export default function BillingPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [supabase, router, toast, t]);
+
+  useEffect(() => {
+    loadBillingData();
+  }, [loadBillingData]);
 
   async function handleCancelSubscription() {
     if (!subscription || subscription.status !== 'active') return;
@@ -153,7 +153,7 @@ export default function BillingPage() {
       } else {
         throw new Error('Cancellation failed');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('toasts.cancellationFailed.title'),
         description: t('toasts.cancellationFailed.message'),
@@ -183,7 +183,7 @@ export default function BillingPage() {
       } else {
         throw new Error('Reactivation failed');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('toasts.reactivationFailed.title'),
         description: t('toasts.reactivationFailed.message'),
@@ -209,7 +209,7 @@ export default function BillingPage() {
         a.download = `invoice_${paymentId}.pdf`;
         a.click();
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('toasts.downloadFailed.title'),
         description: t('toasts.downloadFailed.message'),
