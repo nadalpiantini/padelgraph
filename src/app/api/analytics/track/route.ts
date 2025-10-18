@@ -8,7 +8,17 @@ import { trackEvent } from '@/lib/services/analytics-events';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Parse JSON with explicit error handling
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
 
     const { event_name, user_id, session_id, properties, page_url, referrer, device_info } = body;
 

@@ -48,8 +48,8 @@ export default function AuthPage({
         if (error) throw error;
 
         if (data.session) {
-          // Session established - redirect using i18n-aware router
-          router.push('/');
+          // Session established - redirect to dashboard
+          router.push('/dashboard');
           // Force page refresh to update auth state
           router.refresh();
         }

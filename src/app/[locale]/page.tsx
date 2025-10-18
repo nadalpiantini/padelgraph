@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 import Navigation from '@/components/home/Navigation';
 import Hero from '@/components/home/Hero';
@@ -45,6 +47,15 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   await params; // Consume params to satisfy Next.js
+
+  // Check if user is authenticated
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // If user is authenticated, redirect to dashboard
+  if (user) {
+    redirect('/dashboard');
+  }
 
   const t = await getTranslations('homepage');
 

@@ -190,7 +190,7 @@ export default async function RankingsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center font-semibold">
-                          {player.rank_points.toLocaleString()}
+                          {player.rank_points?.toLocaleString() || 0}
                         </td>
                         <td className="px-6 py-4 text-center text-slate-300">
                           {player.elo_rating}
