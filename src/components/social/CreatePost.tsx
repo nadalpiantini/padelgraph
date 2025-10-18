@@ -130,14 +130,25 @@ export default function CreatePost({ user, onPostCreated }: CreatePostProps) {
         <div className="flex items-center justify-between pt-3 border-t border-slate-700/50">
           <div className="flex items-center gap-2">
             {/* Image Upload Button */}
-            <button
-              type="button"
-              className="p-2 text-slate-400 hover:bg-slate-700/50 rounded-lg transition-colors"
-              title="Add photos"
-              disabled={isSubmitting}
-            >
+            <label className="p-2 text-slate-400 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer">
               <ImageIcon className="w-5 h-5" />
-            </button>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                className="hidden"
+                disabled={isSubmitting}
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (files.length === 0) return;
+
+                  // TODO: Implement actual file upload via /api/media/sign
+                  // For now, create object URLs for preview
+                  const urls = files.map(file => URL.createObjectURL(file));
+                  setMediaUrls([...mediaUrls, ...urls]);
+                }}
+              />
+            </label>
 
             {/* Visibility Selector */}
             <div className="relative">

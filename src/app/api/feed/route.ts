@@ -163,7 +163,6 @@ export async function POST(request: Request) {
         author:user_profile!user_id (
           id,
           name,
-          username,
           avatar_url,
           level
         )
