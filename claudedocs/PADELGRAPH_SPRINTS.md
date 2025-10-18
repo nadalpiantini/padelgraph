@@ -178,34 +178,36 @@
 **Commits:** 1 commit (context) | Último: `1c3ca03`
 **Context:** `claudedocs/SPRINT_5_CONTEXT.md` (1,322 líneas)
 
-**Objetivos (9 Main Features):**
-- [ ] **Player Analytics & Stats Dashboard**
-  - ELO rating system, win/loss ratios, match history
-  - Recharts visualizations, time-based filtering
-- [ ] **Achievements & Badges System**
-  - 30+ achievements across 6 categories
-  - XP points system, level progression, badge gallery
-- [ ] **Leaderboards & Rankings**
-  - 8 leaderboard types (ELO, wins, fair-play, city, club, etc.)
-  - Real-time WebSocket updates, filters & pagination
-- [ ] **Stripe Production & 4-Tier Subscriptions**
-  - Free / Pro (€9.99) / Premium (€19.99) / Club (€99.99)
-  - Usage limits, subscription management, billing portal
-- [ ] **Trials, Coupons & Referral Program**
-  - 14-day free trial, coupon system, referral rewards
-  - Viral growth engine, promo campaigns
-- [ ] **Business Analytics & KPI Dashboard**
-  - DAU/MAU tracking, MRR/ARR metrics, churn analysis
-  - Cohort retention, funnel analysis, LTV calculation
-- [ ] **SEO & Public Pages**
-  - SSR landing pages, Schema.org markup, sitemap
-  - Core Web Vitals optimization, social media cards
-- [ ] **Automated Email Campaigns**
-  - 5-email onboarding sequence, re-engagement campaigns
-  - Resend + React Email templates
-- [ ] **A/B Testing & Growth Experiments**
-  - Experiment framework, statistical significance testing
-  - Multi-variant testing, conversion optimization
+**Epics (5 Epics con 22 User Stories):**
+
+**Epic 1: PayPal Integration** (12 stories, 35-45h, CRITICAL)
+- [ ] PayPal SDK configuration and setup
+- [ ] Database schema (subscriptions, payments, usage_logs, webhooks)
+- [ ] Subscription APIs (create, cancel, resume, current)
+- [ ] Webhook handler with signature verification
+- [ ] Usage limits middleware
+- [ ] Pricing table UI + Billing dashboard UI
+- [ ] Payment history component
+- [ ] E2E testing
+
+**Epic 2: Analytics Engine** (5 stories, 20-25h, HIGH)
+- [ ] Analytics database (events, sessions, funnels)
+- [ ] Client-side tracking SDK
+- [ ] Funnel tracking system
+- [ ] Analytics dashboard UI
+- [ ] Real-time features and APIs
+
+**Epic 3: SEO & Public Pages** (2 stories, 18-23h, HIGH)
+- [ ] SEO landing page with Schema.org markup
+- [ ] Sitemap, public pages, Core Web Vitals optimization
+
+**Epic 4: Business KPIs** (2 stories, 14-17h, MEDIUM)
+- [ ] KPI calculations (DAU/MAU, MRR/ARR, churn, LTV)
+- [ ] Executive dashboard with cohort analysis
+
+**Epic 5: Growth Features** (2 stories, 18-22h, MEDIUM)
+- [ ] Referral program database and logic
+- [ ] Email campaigns, A/B testing, viral loops
 
 **Technical Scope:**
 - 13 new database tables (player_stats, achievement, subscription, analytics_event, etc.)
@@ -214,7 +216,9 @@
 - 5-phase implementation plan (Database → APIs → Intelligence → UI → Testing)
 
 **Dependencies:** Sprint 1 (auth, profiles), Sprint 2 (tournaments), Sprint 4 (social graph)
-**Handoff Notes:** Context document ready. 4-tier subscription model designed. Ready for implementation.
+**BMAD Stories:** ✅ 22 user stories generated in `docs/stories/` (2025-10-18)
+**Handoff Package:** `docs/BMAD_READY_TO_DEV.md` + `docs/BMAD_SPRINT_5_HANDOFF.md`
+**Handoff Notes:** BMAD formal workflow complete. 22 production-ready stories with full implementation context. 5 epics defined. Architecture docs created. Ready for @dev to start with Story 1.1.
 
 ---
 
