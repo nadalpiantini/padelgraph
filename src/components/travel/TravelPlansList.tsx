@@ -9,14 +9,15 @@ interface TravelPlansListProps {
   userId: string;
   onCreateNew?: () => void;
   onEditPlan?: (plan: TravelPlan) => void;
+  onViewItinerary?: (plan: TravelPlan) => void;
 }
 
 type FilterStatus = 'all' | 'active' | 'completed' | 'cancelled';
 
 export default function TravelPlansList({
-  userId,
   onCreateNew,
   onEditPlan,
+  onViewItinerary,
 }: TravelPlansListProps) {
   const [plans, setPlans] = useState<TravelPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,6 +178,7 @@ export default function TravelPlansList({
               plan={plan}
               onEdit={onEditPlan}
               onCancel={handleCancelPlan}
+              onViewItinerary={onViewItinerary}
             />
           ))}
         </div>

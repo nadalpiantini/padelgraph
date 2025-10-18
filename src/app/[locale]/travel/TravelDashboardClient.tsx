@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TravelPlansList from '@/components/travel/TravelPlansList';
 import TravelModePanel from '@/components/travel/TravelModePanel';
-import type { TravelPlan } from '@/lib/travel/types';
+import TravelItinerary from '@/components/travel/TravelItinerary';
+import type { TravelPlan, TravelSuggestion } from '@/lib/travel/types';
 
 interface TravelDashboardClientProps {
   userId: string;
@@ -13,25 +14,53 @@ interface TravelDashboardClientProps {
 
 export default function TravelDashboardClient({
   userId,
-  profile,
   translations,
 }: TravelDashboardClientProps) {
   const [showCreatePanel, setShowCreatePanel] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<TravelPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<TravelPlan | null>(null);
+  const [suggestions, setSuggestions] = useState<TravelSuggestion[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  // Load suggestions when a plan is selected
+  useEffect(() => {
+    if (selectedPlan?.id) {
+      loadSuggestions(selectedPlan.id);
+    }
+  }, [selectedPlan]);
+
+  const loadSuggestions = async (planId: string) => {
+    setLoadingSuggestions(true);
+    try {
+      const response = await fetch(`/api/travel-plans/${planId}/suggestions`);
+      if (response.ok) {
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
+      }
+    } catch (err) {
+      console.error('Error loading suggestions:', err);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
 
   const handleCreateNew = () => {
-    setEditingPlan(null);
+    setSelectedPlan(null);
     setShowCreatePanel(true);
   };
 
   const handleEditPlan = (plan: TravelPlan) => {
-    setEditingPlan(plan);
+    setSelectedPlan(plan);
     setShowCreatePanel(true);
+  };
+
+  const handleViewItinerary = (plan: TravelPlan) => {
+    setSelectedPlan(plan);
+    setShowCreatePanel(false);
   };
 
   const handleClosePanel = () => {
     setShowCreatePanel(false);
-    setEditingPlan(null);
+    setSelectedPlan(null);
     // Trigger refresh of plans list
     window.location.reload();
   };
@@ -58,11 +87,37 @@ export default function TravelDashboardClient({
           </div>
         )}
 
+        {/* Itinerary View */}
+        {selectedPlan && !showCreatePanel && (
+          <div className="mb-8">
+            <TravelItinerary
+              plan={selectedPlan}
+              suggestions={suggestions}
+              t={{
+                itinerary: 'Itinerary',
+                day: 'Day',
+                addEvent: 'Add Event',
+                noEvents: 'No events planned for this day',
+                suggestions: 'Suggestions',
+                morning: 'Morning',
+                afternoon: 'Afternoon',
+                evening: 'Evening',
+                clubVisit: 'Club Visit',
+                match: 'Match',
+                tournament: 'Tournament',
+                meetPlayer: 'Meet Player',
+                distance: 'away',
+              }}
+            />
+          </div>
+        )}
+
         {/* Plans List */}
         <TravelPlansList
           userId={userId}
           onCreateNew={handleCreateNew}
           onEditPlan={handleEditPlan}
+          onViewItinerary={handleViewItinerary}
         />
       </div>
     </div>

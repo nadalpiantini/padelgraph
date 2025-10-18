@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import LeaderboardWidget from './LeaderboardWidget';
 
 interface PlayerStats {
   total_matches: number;
@@ -187,6 +188,12 @@ export function AnalyticsDashboard({ userId }: { userId: string }) {
           </div>
         </div>
       )}
+
+      {/* Leaderboard Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LeaderboardWidget type="elo_rating" period={period} limit={10} />
+        <LeaderboardWidget type="win_rate" period={period} limit={10} />
+      </div>
     </div>
   );
 }

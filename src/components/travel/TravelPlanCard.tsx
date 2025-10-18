@@ -1,15 +1,16 @@
 'use client';
 
-import { MapPin, Calendar, User, Settings } from 'lucide-react';
+import { MapPin, Calendar, Settings } from 'lucide-react';
 import type { TravelPlan } from '@/lib/travel/types';
 
 interface TravelPlanCardProps {
   plan: TravelPlan;
   onEdit?: (plan: TravelPlan) => void;
   onCancel?: (planId: string) => void;
+  onViewItinerary?: (plan: TravelPlan) => void;
 }
 
-export default function TravelPlanCard({ plan, onEdit, onCancel }: TravelPlanCardProps) {
+export default function TravelPlanCard({ plan, onEdit, onCancel, onViewItinerary }: TravelPlanCardProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -99,25 +100,35 @@ export default function TravelPlanCard({ plan, onEdit, onCancel }: TravelPlanCar
                   Format: {plan.preferences.format}
                 </span>
               )}
-              {plan.preferences.looking_for && Array.isArray(plan.preferences.looking_for) && (
-                <span className="px-2 py-1 bg-slate-700 text-slate-300 text-xs rounded-full capitalize">
-                  Looking for: {plan.preferences.looking_for.join(', ')}
-                </span>
-              )}
+              {plan.preferences.looking_for &&
+                Array.isArray(plan.preferences.looking_for) &&
+                plan.preferences.looking_for.length > 0 ? (
+                  <span className="px-2 py-1 bg-slate-700 text-slate-300 text-xs rounded-full capitalize">
+                    Looking for: {(plan.preferences.looking_for as string[]).join(', ')}
+                  </span>
+                ) : null}
             </div>
           </div>
         </div>
       )}
 
       {/* Actions */}
-      {(onEdit || onCancel) && plan.status === 'active' && (
+      {(onEdit || onCancel || onViewItinerary) && plan.status === 'active' && (
         <div className="flex gap-2 pt-4 border-t border-slate-700">
+          {onViewItinerary && (
+            <button
+              onClick={() => onViewItinerary(plan)}
+              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              View Itinerary
+            </button>
+          )}
           {onEdit && (
             <button
               onClick={() => onEdit(plan)}
-              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              Edit Plan
+              Edit
             </button>
           )}
           {onCancel && (
@@ -134,9 +145,6 @@ export default function TravelPlanCard({ plan, onEdit, onCancel }: TravelPlanCar
       {/* Metadata */}
       <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-700 text-xs text-slate-500">
         <span>Created {new Date(plan.created_at).toLocaleDateString()}</span>
-        {plan.updated_at && plan.updated_at !== plan.created_at && (
-          <span>Updated {new Date(plan.updated_at).toLocaleDateString()}</span>
-        )}
       </div>
     </div>
   );
