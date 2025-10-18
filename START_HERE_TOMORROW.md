@@ -35,12 +35,29 @@ Implementación completa de mejoras al sistema de media en posts:
 🟢 Listo para producción
 ```
 
-#### 🚨 HOTFIX Aplicado:
-- **Problema**: MediaCarousel crasheaba si `mediaUrls` era undefined
-- **Fix**: Agregado guard clause al inicio del componente
-- **Commit**: `e520929 fix(critical): prevent MediaCarousel crash`
-- **Deployed**: ✅ En producción
-- **Lección**: Siempre validar props ANTES de hooks
+#### 🚨 HOTFIXES Aplicados (2x):
+
+**Hotfix #1** (e520929):
+- Problema: MediaCarousel crasheaba si `mediaUrls` undefined
+- Fix parcial: Agregado guard inicial
+
+**Hotfix #2** (04bef9b) - FIX REAL:
+- **Problema**: Violación de React Rules of Hooks
+- **Causa**: Guards condicionales ENTRE hooks → número de hooks variable
+- **Fix**: Todos los hooks ANTES de cualquier return condicional
+- **Lección crítica**: NUNCA early return entre hooks
+```typescript
+// ❌ MALO:
+const [state1] = useState();
+if (cond) return null;  // Entre hooks
+const [state2] = useState();
+
+// ✅ BUENO:
+if (cond) return null;  // Antes de hooks
+const [state1] = useState();
+const [state2] = useState();
+if (cond2) return null; // Después de hooks OK
+```
 
 ---
 
