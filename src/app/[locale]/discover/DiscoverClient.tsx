@@ -7,7 +7,8 @@ import MatchSuggestions from '@/components/discovery/MatchSuggestions';
 import SearchFilters, { type DiscoveryFilters } from '@/components/discovery/SearchFilters';
 import DiscoveryFeed from '@/components/discovery/DiscoveryFeed';
 import DiscoveryMap from '@/components/discovery/DiscoveryMap';
-import { Users, Map, Activity, Sparkles } from 'lucide-react';
+import NetworkGraph from '@/components/discovery/NetworkGraph';
+import { Users, Map, Activity, Sparkles, Network } from 'lucide-react';
 
 /**
  * DiscoverClient Component
@@ -184,6 +185,7 @@ export default function DiscoverClient() {
     tabs: {
       matches: 'Player Matches',
       map: 'Map View',
+      network: 'Network',
       feed: 'Activity Feed',
     },
     map: {
@@ -207,6 +209,16 @@ export default function DiscoverClient() {
       courts: 'courts',
       liveNow: 'Live Now',
       upcoming: 'Upcoming',
+    },
+    network: {
+      loading: 'Loading network...',
+      noData: 'No network data available',
+      zoomIn: 'Zoom In',
+      zoomOut: 'Zoom Out',
+      resetZoom: 'Reset Zoom',
+      users: 'users',
+      clubs: 'clubs',
+      connections: 'connections',
     },
   };
 
@@ -232,7 +244,7 @@ export default function DiscoverClient() {
 
       {/* Tabbed Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-slate-700 mb-6">
+        <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-slate-700 mb-6">
           <TabsTrigger
             value="matches"
             className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white"
@@ -246,6 +258,13 @@ export default function DiscoverClient() {
           >
             <Map className="w-4 h-4 mr-2" />
             {t.tabs.map}
+          </TabsTrigger>
+          <TabsTrigger
+            value="network"
+            className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white"
+          >
+            <Network className="w-4 h-4 mr-2" />
+            {t.tabs.network}
           </TabsTrigger>
           <TabsTrigger
             value="feed"
@@ -292,6 +311,11 @@ export default function DiscoverClient() {
               </div>
             </div>
           )}
+        </TabsContent>
+
+        {/* Network Graph Tab */}
+        <TabsContent value="network" className="mt-0">
+          <NetworkGraph t={t.network} />
         </TabsContent>
 
         {/* Activity Feed Tab */}

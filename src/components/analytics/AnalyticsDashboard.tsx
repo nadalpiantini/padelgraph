@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Download } from 'lucide-react';
 import LeaderboardWidget from './LeaderboardWidget';
 
 interface PlayerStats {
@@ -56,6 +57,51 @@ export function AnalyticsDashboard({ userId }: { userId: string }) {
     fetchData();
   }, [userId, period]);
 
+  const exportToCSV = () => {
+    if (!stats) return;
+
+    const csvData = [
+      ['Metric', 'Value'],
+      ['Total Matches', stats.total_matches],
+      ['Matches Won', stats.matches_won],
+      ['Matches Lost', stats.matches_lost],
+      ['Win Rate (%)', stats.win_rate.toFixed(2)],
+      ['Current Win Streak', stats.current_win_streak],
+      ['Best Win Streak', stats.best_win_streak],
+      ['Tournaments Won', stats.tournaments_won],
+      ['ELO Rating', stats.elo_rating],
+    ];
+
+    const csv = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `padelgraph-stats-${period}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportToJSON = () => {
+    if (!stats) return;
+
+    const data = {
+      period,
+      exported_at: new Date().toISOString(),
+      stats,
+      evolution,
+    };
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `padelgraph-stats-${period}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -74,21 +120,43 @@ export function AnalyticsDashboard({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-8">
-      {/* Period Selector */}
-      <div className="flex gap-2">
-        {(['week', 'month', 'all_time'] as const).map((p) => (
+      {/* Header with Period Selector and Export */}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          {(['week', 'month', 'all_time'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-4 py-2 rounded-lg ${
+                period === p
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {p === 'all_time' ? 'All Time' : p.charAt(0).toUpperCase() + p.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Export Buttons */}
+        <div className="flex gap-2">
           <button
-            key={p}
-            onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-lg ${
-              period === p
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            title="Export to CSV"
           >
-            {p === 'all_time' ? 'All Time' : p.charAt(0).toUpperCase() + p.slice(1)}
+            <Download className="w-4 h-4" />
+            CSV
           </button>
-        ))}
+          <button
+            onClick={exportToJSON}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            title="Export to JSON"
+          >
+            <Download className="w-4 h-4" />
+            JSON
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -190,10 +258,7 @@ export function AnalyticsDashboard({ userId }: { userId: string }) {
       )}
 
       {/* Leaderboard Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LeaderboardWidget type="elo_rating" period={period} limit={10} />
-        <LeaderboardWidget type="win_rate" period={period} limit={10} />
-      </div>
+      <LeaderboardWidget type="elo_rating" period={period} limit={10} showFilters={true} />
     </div>
   );
 }

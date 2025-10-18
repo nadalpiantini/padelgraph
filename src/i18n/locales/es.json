@@ -789,6 +789,15 @@
         "dates": "Por favor selecciona fechas de inicio y fin",
         "invalidDates": "La fecha de fin debe ser posterior a la fecha de inicio"
       }
+    },
+    "legal": {
+      "backToHome": "Volver al Inicio",
+      "lastUpdated": "Última actualización",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos y Condiciones",
+      "help": "Ayuda y Soporte",
+      "contact": "Contáctanos",
+      "allRightsReserved": "Todos los derechos reservados."
     }
   }
 }

@@ -789,6 +789,15 @@
         "dates": "Please select start and end dates",
         "invalidDates": "End date must be after start date"
       }
+    },
+    "legal": {
+      "backToHome": "Back to Home",
+      "lastUpdated": "Last updated",
+      "privacy": "Privacy Policy",
+      "terms": "Terms & Conditions",
+      "help": "Help & Support",
+      "contact": "Contact Us",
+      "allRightsReserved": "All rights reserved."
     }
   }
 }

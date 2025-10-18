@@ -15,15 +15,19 @@ interface LeaderboardWidgetProps {
   type?: 'win_rate' | 'elo_rating' | 'total_matches';
   period?: 'week' | 'month' | 'all_time';
   limit?: number;
+  showFilters?: boolean;
 }
 
 export default function LeaderboardWidget({
-  type = 'elo_rating',
-  period = 'all_time',
+  type: initialType = 'elo_rating',
+  period: initialPeriod = 'all_time',
   limit = 10,
+  showFilters = true,
 }: LeaderboardWidgetProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [type, setType] = useState(initialType);
+  const [period, setPeriod] = useState(initialPeriod);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -148,24 +152,54 @@ export default function LeaderboardWidget({
         </div>
       )}
 
-      {/* Period Selector */}
-      <div className="mt-6 pt-4 border-t border-slate-700">
-        <div className="flex gap-2 text-xs">
-          {(['week', 'month', 'all_time'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => fetchLeaderboard()}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                period === p
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-              }`}
-            >
-              {p === 'all_time' ? 'All Time' : p.charAt(0).toUpperCase() + p.slice(1)}
-            </button>
-          ))}
+      {/* Filters */}
+      {showFilters && (
+        <div className="mt-6 pt-4 border-t border-slate-700 space-y-4">
+          {/* Metric Type Selector */}
+          <div>
+            <label className="text-xs text-slate-400 mb-2 block">Ranking By</label>
+            <div className="flex gap-2">
+              {([
+                { value: 'elo_rating', label: 'ELO' },
+                { value: 'win_rate', label: 'Win Rate' },
+                { value: 'total_matches', label: 'Matches' },
+              ] as const).map((metric) => (
+                <button
+                  key={metric.value}
+                  onClick={() => setType(metric.value)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    type === metric.value
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  {metric.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Period Selector */}
+          <div>
+            <label className="text-xs text-slate-400 mb-2 block">Time Period</label>
+            <div className="flex gap-2">
+              {(['week', 'month', 'all_time'] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    period === p
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  {p === 'all_time' ? 'All Time' : p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -189,6 +189,28 @@ export default function AuthPage({
               </div>
             )}
 
+            {!isLogin && (
+              <div className="text-xs text-slate-400 mb-4 p-4 bg-slate-900/30 border border-slate-700/50 rounded-lg">
+                <p className="mb-2">
+                  By creating an account, you agree to our{' '}
+                  <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
+                <p className="text-[11px] leading-relaxed">
+                  You also consent to receive notifications about matches, results, and club updates via SMS, email, WhatsApp, or push notifications. You can opt out anytime by replying <strong>STOP</strong> to SMS, clicking &quot;Unsubscribe&quot; in emails, or adjusting notification settings in your profile.
+                </p>
+                <p className="text-[10px] mt-2 text-slate-500">
+                  Message and data rates may apply. Carrier fees may apply for SMS.
+                </p>
+              </div>
+            )}
+
             <button
               data-testid="auth-submit"
               type="submit"
