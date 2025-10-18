@@ -84,8 +84,8 @@ export default function TravelItinerary({ plan, suggestions = [], onAddEvent, t 
     onAddEvent?.(date, event);
   };
 
-  const removeEvent = (date: Date, eventId: string) => {
-    const dateKey = formatDateKey(date);
+  const removeEvent = (_date: Date, eventId: string) => {
+    const dateKey = formatDateKey(_date);
     setEvents((prev) => ({
       ...prev,
       [dateKey]: prev[dateKey]?.filter((e) => e.id !== eventId) || [],
@@ -137,7 +137,7 @@ export default function TravelItinerary({ plan, suggestions = [], onAddEvent, t 
     }
   };
 
-  const getSuggestionsForDay = (date: Date): TravelSuggestion[] => {
+  const getSuggestionsForDay = (_date: Date): TravelSuggestion[] => {
     // In a real implementation, this would filter suggestions by relevance to the day
     return suggestions.slice(0, 3);
   };
@@ -170,7 +170,7 @@ export default function TravelItinerary({ plan, suggestions = [], onAddEvent, t 
 
       {/* Timeline */}
       <div className="space-y-3">
-        {days.map((day, index) => {
+        {days.map((day) => {
           const dateKey = formatDateKey(day);
           const dayEvents = events[dateKey] || [];
           const isExpanded = expandedDays.has(dateKey);

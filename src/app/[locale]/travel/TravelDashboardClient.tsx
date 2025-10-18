@@ -19,7 +19,6 @@ export default function TravelDashboardClient({
   const [showCreatePanel, setShowCreatePanel] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<TravelPlan | null>(null);
   const [suggestions, setSuggestions] = useState<TravelSuggestion[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   // Load suggestions when a plan is selected
   useEffect(() => {
@@ -29,7 +28,6 @@ export default function TravelDashboardClient({
   }, [selectedPlan]);
 
   const loadSuggestions = async (planId: string) => {
-    setLoadingSuggestions(true);
     try {
       const response = await fetch(`/api/travel-plans/${planId}/suggestions`);
       if (response.ok) {
@@ -38,8 +36,6 @@ export default function TravelDashboardClient({
       }
     } catch (err) {
       console.error('Error loading suggestions:', err);
-    } finally {
-      setLoadingSuggestions(false);
     }
   };
 
