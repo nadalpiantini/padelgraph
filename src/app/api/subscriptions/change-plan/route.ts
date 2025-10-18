@@ -1,200 +1,278 @@
 /**
- * Change Subscription Plan Endpoint
+ * Change Subscription Plan API
  * POST /api/subscriptions/change-plan
  *
  * Allows users to upgrade or downgrade their subscription plan
- * - Upgrades: Immediate effect with proration
- * - Downgrades: Take effect at end of billing period
+ * Upgrades take effect immediately with proration
+ * Downgrades take effect at period end
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { paypalClient } from '@/lib/services/paypal-client';
-import { getUserLocale } from '@/lib/email-templates/paypal-notifications';
 import { log } from '@/lib/logger';
-import { emailService } from '@/lib/email';
+import { sendPayPalNotification, getUserLocale } from '@/lib/email-templates/paypal-notifications';
 
-// Plan hierarchy for upgrade/downgrade detection
-const PLAN_HIERARCHY: Record<string, number> = {
+// PayPal API configuration
+const PAYPAL_API_BASE =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
+
+// PayPal Plan ID mapping
+const PLAN_IDS = {
+  pro: process.env.PAYPAL_PRO_PLAN_ID || 'P-8DF61561CK131203HNDZLZVQ',
+  dual: process.env.PAYPAL_DUAL_PLAN_ID || 'P-3R001407AKS44845TNDZLY7',
+  premium: process.env.PAYPAL_PREMIUM_PLAN_ID || 'P-88023967WE506663ENDZN2QQ',
+  club: process.env.PAYPAL_CLUB_PLAN_ID || 'P-1EVQ6856ST196634TNDZN46A',
+} as const;
+
+// Plan tier hierarchy for upgrade/downgrade detection
+const PLAN_TIERS = {
   free: 0,
   pro: 1,
   dual: 2,
-  premium: 2, // Same tier as dual
-  club: 3,
+  premium: 3,
+  club: 4,
 };
 
-// PayPal Plan IDs mapping
-const PAYPAL_PLAN_IDS: Record<string, string> = {
-  pro: process.env.PAYPAL_PLAN_ID_PRO || 'P-8DF61561CK131203HNDZLZVQ',
-  dual: process.env.PAYPAL_PLAN_ID_DUAL || 'P-3R001407AKS44845TNDZLY7',
-  premium: process.env.PAYPAL_PLAN_ID_PREMIUM || 'P-88023967WE506663ENDZN2QQ',
-  club: process.env.PAYPAL_PLAN_ID_CLUB || 'P-1EVQ6856ST196634TNDZN46A',
-};
+type PlanType = keyof typeof PLAN_IDS;
 
-interface ChangePlanRequest {
-  newPlan: 'pro' | 'dual' | 'premium' | 'club';
+async function getPayPalAccessToken(): Promise<string> {
+  const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
+      ).toString('base64')}`,
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!authResponse.ok) {
+    throw new Error('Failed to get PayPal access token');
+  }
+
+  const authData = await authResponse.json();
+  return authData.access_token;
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    // 1. Authenticate user
+  try {
+    // Get authenticated user
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Parse request body
-    const body: ChangePlanRequest = await request.json();
+    // Parse request body
+    const body = await request.json();
+    const { new_plan } = body;
 
-    if (!body.newPlan || !PAYPAL_PLAN_IDS[body.newPlan]) {
+    if (!new_plan || !PLAN_IDS[new_plan as PlanType]) {
       return NextResponse.json(
-        { error: 'Invalid plan specified', validPlans: Object.keys(PAYPAL_PLAN_IDS) },
+        { error: 'Invalid plan. Must be: pro, dual, premium, or club' },
         { status: 400 }
       );
     }
 
-    // 3. Get user's current subscription
+    // Get user's current subscription
     const { data: subscription, error: subError } = await supabase
       .from('subscription')
       .select('*')
       .eq('user_id', user.id)
-      .eq('status', 'active')
       .single();
 
     if (subError || !subscription) {
       return NextResponse.json(
-        {
-          error: 'No active subscription found',
-          hint: 'Please create a new subscription from the pricing page',
-        },
+        { error: 'No active subscription found. Please subscribe first.' },
         { status: 404 }
+      );
+    }
+
+    if (subscription.status !== 'active') {
+      return NextResponse.json(
+        { error: `Cannot change plan. Subscription status is: ${subscription.status}` },
+        { status: 400 }
       );
     }
 
     if (!subscription.paypal_subscription_id) {
       return NextResponse.json(
-        { error: 'Subscription not linked to PayPal' },
+        { error: 'No PayPal subscription ID found' },
         { status: 400 }
       );
     }
 
-    // 4. Check if plan is changing
-    const currentPlan = subscription.plan;
-    if (currentPlan === body.newPlan) {
-      return NextResponse.json({ error: 'You are already on this plan' }, { status: 400 });
+    // Check if already on requested plan
+    if (subscription.plan === new_plan) {
+      return NextResponse.json(
+        { error: `Already on ${new_plan} plan` },
+        { status: 400 }
+      );
     }
 
-    // 5. Determine if upgrade or downgrade
-    const currentTier = PLAN_HIERARCHY[currentPlan] || 0;
-    const newTier = PLAN_HIERARCHY[body.newPlan] || 0;
+    // Determine if upgrade or downgrade
+    const currentTier = PLAN_TIERS[subscription.plan as keyof typeof PLAN_TIERS] || 0;
+    const newTier = PLAN_TIERS[new_plan as keyof typeof PLAN_TIERS] || 0;
     const isUpgrade = newTier > currentTier;
 
-    log.info('Changing subscription plan', {
-      userId: user.id,
-      currentPlan,
-      newPlan: body.newPlan,
-      isUpgrade,
-    });
+    // Get PayPal access token
+    const accessToken = await getPayPalAccessToken();
 
-    // 6. Get new PayPal plan ID
-    const newPayPalPlanId = PAYPAL_PLAN_IDS[body.newPlan];
+    // Get new plan ID from PayPal
+    const newPayPalPlanId = PLAN_IDS[new_plan as PlanType];
 
-    // 7. Call PayPal API to update subscription plan
-    await paypalClient.updateSubscriptionPlan(subscription.paypal_subscription_id, newPayPalPlanId);
+    // Update subscription plan via PayPal API
+    const updateResponse = await fetch(
+      `${PAYPAL_API_BASE}/v1/billing/subscriptions/${subscription.paypal_subscription_id}/revise`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          plan_id: newPayPalPlanId,
+          // Upgrades take effect immediately, downgrades at period end
+          application_context: {
+            shipping_preference: 'NO_SHIPPING',
+          },
+        }),
+      }
+    );
 
-    // 8. Update local database
-    const updateData: Record<string, any> = {
+    if (!updateResponse.ok) {
+      const errorData = await updateResponse.json();
+      log.error('PayPal plan change failed', {
+        error: errorData,
+        userId: user.id,
+        currentPlan: subscription.plan,
+        newPlan: new_plan,
+      });
+      return NextResponse.json(
+        { error: 'Failed to change plan with PayPal' },
+        { status: 500 }
+      );
+    }
+
+    const revisionData = await updateResponse.json();
+
+    // Update local database
+    const updateData: Record<string, unknown> = {
       paypal_plan_id: newPayPalPlanId,
-      plan: body.newPlan,
       updated_at: new Date().toISOString(),
     };
 
-    if (!isUpgrade) {
-      updateData.pending_plan_change = body.newPlan;
+    // For upgrades, update plan immediately
+    if (isUpgrade) {
+      updateData.plan = new_plan;
+    } else {
+      // For downgrades, schedule for period end
+      updateData.pending_plan = new_plan;
     }
 
     const { error: updateError } = await supabase
       .from('subscription')
       .update(updateData)
-      .eq('id', subscription.id);
+      .eq('user_id', user.id);
 
     if (updateError) {
-      log.error('Failed to update subscription in database', { error: updateError });
-      throw new Error('Database update failed');
+      log.error('Failed to update subscription plan', {
+        error: updateError,
+        userId: user.id,
+      });
+      return NextResponse.json(
+        { error: 'Failed to update subscription' },
+        { status: 500 }
+      );
     }
 
-    // 9. Update user current plan in profile (for immediate feature gating)
+    // For upgrades, update user_profile immediately
     if (isUpgrade) {
-      await supabase.from('user_profile').update({ current_plan: body.newPlan }).eq('user_id', user.id);
+      const { error: profileError } = await supabase
+        .from('user_profile')
+        .update({ current_plan: new_plan })
+        .eq('user_id', user.id);
+
+      if (profileError) {
+        log.error('Failed to update user profile plan', {
+          error: profileError,
+          userId: user.id,
+        });
+        // Non-critical, continue
+      }
     }
 
-    // 10. Get user profile for email notification
-    const { data: profile } = await supabase
-      .from('user_profile')
-      .select('name, email, preferred_language')
-      .eq('user_id', user.id)
-      .single();
+    log.info('Subscription plan changed', {
+      userId: user.id,
+      oldPlan: subscription.plan,
+      newPlan: new_plan,
+      isUpgrade,
+      effectiveDate: isUpgrade ? 'immediately' : subscription.current_period_end,
+    });
 
-    // 11. Send plan change confirmation email
-    if (profile?.email) {
-      const locale = await getUserLocale(user.id);
+    // Send plan change confirmation email
+    try {
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('name, email')
+        .eq('user_id', user.id)
+        .single();
 
-      const subject = isUpgrade
-        ? locale === 'es'
-          ? `Mejoraste a ${body.newPlan.toUpperCase()}`
-          : `You upgraded to ${body.newPlan.toUpperCase()}`
-        : locale === 'es'
-          ? `Cambio de plan a ${body.newPlan.toUpperCase()}`
-          : `Plan change to ${body.newPlan.toUpperCase()}`;
+      if (profile?.email) {
+        const locale = await getUserLocale(user.id);
 
-      const effectiveDate = isUpgrade
-        ? 'immediately'
-        : subscription.current_period_end
+        const effectiveDate = isUpgrade
+          ? 'immediately'
+          : subscription.current_period_end
           ? new Date(subscription.current_period_end).toLocaleDateString(
               locale === 'es' ? 'es-ES' : 'en-US'
             )
           : 'end of billing period';
 
-      const html =
-        locale === 'es'
-          ? `<h2>Hola ${profile.name || 'PadelGraph Player'},</h2><p>Tu plan ha sido ${isUpgrade ? 'mejorado' : 'cambiado'} a <strong>${body.newPlan.toUpperCase()}</strong>.</p><p><strong>Efectivo:</strong> ${isUpgrade ? 'Inmediatamente' : effectiveDate}</p>${isUpgrade ? '<p>Disfruta de tus nuevas funciones premium</p>' : '<p>El cambio se aplicara al final de tu periodo de facturacion actual.</p>'}<a href="https://padelgraph.com/account/billing">Ver Detalles</a>`
-          : `<h2>Hi ${profile.name || 'PadelGraph Player'},</h2><p>Your plan has been ${isUpgrade ? 'upgraded' : 'changed'} to <strong>${body.newPlan.toUpperCase()}</strong>.</p><p><strong>Effective:</strong> ${isUpgrade ? 'Immediately' : effectiveDate}</p>${isUpgrade ? '<p>Enjoy your new premium features</p>' : '<p>The change will apply at the end of your current billing period.</p>'}<a href="https://padelgraph.com/account/billing">View Details</a>`;
+        // Use subscriptionActivated for upgrades, custom message for downgrades
+        const emailType = isUpgrade ? 'subscriptionActivated' : 'subscriptionCancelled';
 
-      await emailService.send({
-        to: profile.email,
-        subject,
-        html,
+        await sendPayPalNotification(
+          emailType,
+          profile.email,
+          {
+            name: profile.name || 'PadelGraph Player',
+            plan: new_plan.charAt(0).toUpperCase() + new_plan.slice(1),
+            nextBillingDate: effectiveDate,
+            expiryDate: effectiveDate,
+          },
+          locale
+        );
+      }
+    } catch (emailError) {
+      log.error('Failed to send plan change email', {
+        error: emailError,
+        userId: user.id,
       });
+      // Email failure shouldn't fail the plan change
     }
-
-    log.info('Subscription plan changed successfully', {
-      userId: user.id,
-      subscriptionId: subscription.paypal_subscription_id,
-      oldPlan: currentPlan,
-      newPlan: body.newPlan,
-      isUpgrade,
-    });
 
     return NextResponse.json({
       success: true,
-      message: `Subscription ${isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
-      plan: body.newPlan,
-      effectiveDate: isUpgrade ? 'immediate' : subscription.current_period_end,
-      isUpgrade,
+      message: `Plan ${isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
+      old_plan: subscription.plan,
+      new_plan,
+      effective_date: isUpgrade ? 'immediately' : subscription.current_period_end,
+      is_upgrade: isUpgrade,
+      revision_id: revisionData.id,
     });
   } catch (error) {
     log.error('Error changing subscription plan', { error });
-
     return NextResponse.json(
-      {
-        error: 'Failed to change subscription plan',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
