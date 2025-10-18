@@ -282,42 +282,30 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
   const subscriptionResource = resource as PayPalSubscriptionResource;
   const supabase = await createClient();
 
-  // Get user by PayPal email
-  const subscriberEmail = subscriptionResource.subscriber?.email_address;
-  if (!subscriberEmail) {
-    log.error('No subscriber email in PayPal webhook', { subscriptionId: subscriptionResource.id });
-    return;
-  }
+  try {
+    // Get user by PayPal email
+    const subscriberEmail = subscriptionResource.subscriber?.email_address;
+    if (!subscriberEmail) {
+      log.error('No subscriber email in PayPal webhook', { subscriptionId: subscriptionResource.id });
+      return;
+    }
 
-  const { data: user } = await supabase
-    .from('user_profile')
-    .select('user_id')
-    .eq('email', subscriberEmail)
-    .single();
+    const { data: user, error: userError } = await supabase
+      .from('user_profile')
+      .select('user_id')
+      .eq('email', subscriberEmail)
+      .single();
 
-  if (!user) {
-    log.error('User not found for PayPal subscription', { email: subscriberEmail });
-    return;
-  }
+    if (userError || !user) {
+      log.error('User not found for PayPal subscription', { email: subscriberEmail, error: userError });
+      return;
+    }
 
-  const billingInfo = subscriptionResource.billing_info as {
-    next_billing_time?: string;
-    last_payment?: { amount: { value: string; currency_code: string } };
-  } | undefined;
+    const billingInfo = subscriptionResource.billing_info as {
+      next_billing_time?: string;
+      last_payment?: { amount: { value: string; currency_code: string } };
+    } | undefined;
 
-  // Only use syncPayPalSubscription if we have complete billing info
-  if (billingInfo?.next_billing_time && billingInfo?.last_payment) {
-    await syncPayPalSubscription(user.user_id, {
-      subscription_id: subscriptionResource.id,
-      plan_id: subscriptionResource.plan_id,
-      status: subscriptionResource.status,
-      billing_info: {
-        next_billing_time: billingInfo.next_billing_time,
-        last_payment: billingInfo.last_payment,
-      },
-    });
-  } else {
-    // Manual update if billing info incomplete
     const planMap: Record<string, string> = {
       'P-8DF61561CK131203HNDZLZVQ': 'pro',
       'P-3R001407AKS44845TNDZLY7': 'dual',
@@ -325,53 +313,87 @@ async function handleSubscriptionActivated(resource: unknown): Promise<void> {
       'P-1EVQ6856ST196634TNDZN46A': 'club',
     };
 
-    await supabase.from('subscription').upsert(
-      {
-        user_id: user.user_id,
-        paypal_subscription_id: subscriptionResource.id,
-        paypal_plan_id: subscriptionResource.plan_id,
-        plan: planMap[subscriptionResource.plan_id] || 'pro',
-        status: 'active',
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    );
-  }
+    const plan = planMap[subscriptionResource.plan_id] || 'pro';
 
-  log.info('Subscription activated', { userId: user.user_id, subscriptionId: subscriptionResource.id });
+    // ATOMIC UPDATE: Subscription + User Profile (using RPC function)
+    // Use syncPayPalSubscription which handles both tables
+    if (billingInfo?.next_billing_time && billingInfo?.last_payment) {
+      await syncPayPalSubscription(user.user_id, {
+        subscription_id: subscriptionResource.id,
+        plan_id: subscriptionResource.plan_id,
+        status: subscriptionResource.status,
+        billing_info: {
+          next_billing_time: billingInfo.next_billing_time,
+          last_payment: billingInfo.last_payment,
+        },
+      });
+    } else {
+      // Manual atomic update if billing info incomplete
+      const { error: upsertError } = await supabase.from('subscription').upsert(
+        {
+          user_id: user.user_id,
+          paypal_subscription_id: subscriptionResource.id,
+          paypal_plan_id: subscriptionResource.plan_id,
+          plan,
+          status: 'active',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
 
-  // Send activation email
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('name, email, preferred_language')
-    .eq('user_id', user.user_id)
-    .single();
+      if (upsertError) {
+        log.error('Failed to upsert subscription', { error: upsertError, userId: user.user_id });
+        throw upsertError;
+      }
 
-  if (profile?.email) {
-    const locale = await getUserLocale(user.user_id);
-    const nextBillingDate = billingInfo?.next_billing_time
-      ? new Date(billingInfo.next_billing_time).toLocaleDateString(
-          locale === 'es' ? 'es-ES' : 'en-US'
-        )
-      : 'TBD';
+      // Update user_profile plan
+      const { error: profileError } = await supabase
+        .from('user_profile')
+        .update({ current_plan: plan })
+        .eq('user_id', user.user_id);
 
-    // Get subscription plan from database
-    const { data: subscriptionData } = await supabase
-      .from('subscription')
-      .select('plan')
-      .eq('paypal_subscription_id', subscriptionResource.id)
-      .single();
+      if (profileError) {
+        log.error('Failed to update user profile plan', { error: profileError, userId: user.user_id });
+        // Non-critical, continue
+      }
+    }
 
-    await sendPayPalNotification(
-      'subscriptionActivated',
-      profile.email,
-      {
-        name: profile.name || 'PadelGraph Player',
-        plan: subscriptionData?.plan || 'Pro',
-        nextBillingDate,
-      },
-      locale
-    );
+    log.info('Subscription activated', { userId: user.user_id, subscriptionId: subscriptionResource.id });
+
+    // Send activation email (non-blocking)
+    try {
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('name, email, preferred_language')
+        .eq('user_id', user.user_id)
+        .single();
+
+      if (profile?.email) {
+        const locale = await getUserLocale(user.user_id);
+        const nextBillingDate = billingInfo?.next_billing_time
+          ? new Date(billingInfo.next_billing_time).toLocaleDateString(
+              locale === 'es' ? 'es-ES' : 'en-US'
+            )
+          : 'TBD';
+
+        await sendPayPalNotification(
+          'subscriptionActivated',
+          profile.email,
+          {
+            name: profile.name || 'PadelGraph Player',
+            plan: plan.charAt(0).toUpperCase() + plan.slice(1),
+            nextBillingDate,
+          },
+          locale
+        );
+      }
+    } catch (emailError) {
+      log.error('Failed to send activation email', { error: emailError, userId: user.user_id });
+      // Email failure shouldn't fail the webhook
+    }
+  } catch (error) {
+    log.error('Error in handleSubscriptionActivated', { error, subscriptionId: subscriptionResource.id });
+    throw error;
   }
 }
 
@@ -379,54 +401,75 @@ async function handleSubscriptionCancelled(resource: unknown): Promise<void> {
   const subscriptionResource = resource as PayPalSubscriptionResource;
   const supabase = await createClient();
 
-  const { data: subscription } = await supabase
-    .from('subscription')
-    .select('user_id')
-    .eq('paypal_subscription_id', subscriptionResource.id)
-    .single();
+  try {
+    const { data: subscription, error: subError } = await supabase
+      .from('subscription')
+      .select('user_id')
+      .eq('paypal_subscription_id', subscriptionResource.id)
+      .single();
 
-  if (!subscription) {
-    log.error('Subscription not found for cancellation', { subscriptionId: subscriptionResource.id });
-    return;
-  }
+    if (subError || !subscription) {
+      log.error('Subscription not found for cancellation', { subscriptionId: subscriptionResource.id, error: subError });
+      return;
+    }
 
-  await supabase
-    .from('subscription')
-    .update({
-      status: 'cancelled',
-      canceled_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('paypal_subscription_id', subscriptionResource.id);
+    // ATOMIC UPDATE: Subscription + User Profile
+    const { error: updateError } = await supabase
+      .from('subscription')
+      .update({
+        status: 'cancelled',
+        canceled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('paypal_subscription_id', subscriptionResource.id);
 
-  // Downgrade to free plan
-  await supabase
-    .from('user_profile')
-    .update({ current_plan: 'free' })
-    .eq('user_id', subscription.user_id);
+    if (updateError) {
+      log.error('Failed to update subscription status', { error: updateError, userId: subscription.user_id });
+      throw updateError;
+    }
 
-  log.info('Subscription cancelled', { userId: subscription.user_id });
+    // Downgrade to free plan
+    const { error: profileError } = await supabase
+      .from('user_profile')
+      .update({ current_plan: 'free' })
+      .eq('user_id', subscription.user_id);
 
-  // Send cancellation email
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('name, email')
-    .eq('user_id', subscription.user_id)
-    .single();
+    if (profileError) {
+      log.error('Failed to downgrade user plan', { error: profileError, userId: subscription.user_id });
+      // Non-critical, continue
+    }
 
-  if (profile?.email) {
-    const locale = await getUserLocale(subscription.user_id);
-    const expiryDate = new Date().toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US');
+    log.info('Subscription cancelled', { userId: subscription.user_id });
 
-    await sendPayPalNotification(
-      'subscriptionCancelled',
-      profile.email,
-      {
-        name: profile.name || 'PadelGraph Player',
-        expiryDate,
-      },
-      locale
-    );
+    // Send cancellation email (non-blocking)
+    try {
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('name, email')
+        .eq('user_id', subscription.user_id)
+        .single();
+
+      if (profile?.email) {
+        const locale = await getUserLocale(subscription.user_id);
+        const expiryDate = new Date().toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US');
+
+        await sendPayPalNotification(
+          'subscriptionCancelled',
+          profile.email,
+          {
+            name: profile.name || 'PadelGraph Player',
+            expiryDate,
+          },
+          locale
+        );
+      }
+    } catch (emailError) {
+      log.error('Failed to send cancellation email', { error: emailError, userId: subscription.user_id });
+      // Email failure shouldn't fail the webhook
+    }
+  } catch (error) {
+    log.error('Error in handleSubscriptionCancelled', { error, subscriptionId: subscriptionResource.id });
+    throw error;
   }
 }
 
@@ -569,52 +612,72 @@ async function handleSubscriptionExpired(resource: unknown): Promise<void> {
   const subscriptionResource = resource as PayPalSubscriptionResource;
   const supabase = await createClient();
 
-  const { data: subscription } = await supabase
-    .from('subscription')
-    .select('user_id')
-    .eq('paypal_subscription_id', subscriptionResource.id)
-    .single();
+  try {
+    const { data: subscription, error: subError } = await supabase
+      .from('subscription')
+      .select('user_id')
+      .eq('paypal_subscription_id', subscriptionResource.id)
+      .single();
 
-  if (!subscription) {
-    log.error('Subscription not found for expiration', { subscriptionId: subscriptionResource.id });
-    return;
-  }
+    if (subError || !subscription) {
+      log.error('Subscription not found for expiration', { subscriptionId: subscriptionResource.id, error: subError });
+      return;
+    }
 
-  // Mark subscription as expired and downgrade to free
-  await supabase
-    .from('subscription')
-    .update({
-      status: 'expired',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('paypal_subscription_id', subscriptionResource.id);
+    // ATOMIC UPDATE: Mark subscription as expired
+    const { error: updateError } = await supabase
+      .from('subscription')
+      .update({
+        status: 'expired',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('paypal_subscription_id', subscriptionResource.id);
 
-  // Downgrade user to free plan
-  await supabase
-    .from('user_profile')
-    .update({ current_plan: 'free' })
-    .eq('user_id', subscription.user_id);
+    if (updateError) {
+      log.error('Failed to update subscription status', { error: updateError, userId: subscription.user_id });
+      throw updateError;
+    }
 
-  log.info('Subscription expired, user downgraded to free', { userId: subscription.user_id });
+    // Downgrade user to free plan
+    const { error: profileError } = await supabase
+      .from('user_profile')
+      .update({ current_plan: 'free' })
+      .eq('user_id', subscription.user_id);
 
-  // Send expiration email
-  const { data: profile } = await supabase
-    .from('user_profile')
-    .select('name, email')
-    .eq('user_id', subscription.user_id)
-    .single();
+    if (profileError) {
+      log.error('Failed to downgrade user plan', { error: profileError, userId: subscription.user_id });
+      // Non-critical, continue
+    }
 
-  if (profile?.email) {
-    const locale = await getUserLocale(subscription.user_id);
+    log.info('Subscription expired, user downgraded to free', { userId: subscription.user_id });
 
-    await sendPayPalNotification(
-      'subscriptionExpired',
-      profile.email,
-      {
-        name: profile.name || 'PadelGraph Player',
-      },
-      locale
-    );
+    // Send expiration email (non-blocking)
+    try {
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('name, email')
+        .eq('user_id', subscription.user_id)
+        .single();
+
+      if (profile?.email) {
+        const locale = await getUserLocale(subscription.user_id);
+
+        await sendPayPalNotification(
+          'subscriptionExpired',
+          profile.email,
+          {
+            name: profile.name || 'PadelGraph Player',
+          },
+          locale
+        );
+      }
+    } catch (emailError) {
+      log.error('Failed to send expiration email', { error: emailError, userId: subscription.user_id });
+      // Email failure shouldn't fail the webhook
+    }
+  } catch (error) {
+    log.error('Error in handleSubscriptionExpired', { error, subscriptionId: subscriptionResource.id });
+    throw error;
   }
 }
 

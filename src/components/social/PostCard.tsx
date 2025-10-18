@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CommentThread } from '@/components/comments/CommentThread';
+import { MediaCarousel } from '@/components/social/MediaCarousel';
 import { Heart, MessageCircle, Share2, MoreHorizontal, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -124,37 +125,10 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
 
       {/* Media */}
       {post.media_urls && post.media_urls.length > 0 && (
-        <div className={`grid gap-1 ${
-          post.media_urls.length === 1 ? 'grid-cols-1' :
-          post.media_urls.length === 2 ? 'grid-cols-2' :
-          post.media_urls.length === 3 ? 'grid-cols-3' :
-          'grid-cols-2'
-        }`}>
-          {post.media_urls.slice(0, 4).map((url, index) => (
-            <div
-              key={index}
-              className={`relative ${
-                post.media_urls.length === 3 && index === 0 ? 'col-span-3' :
-                post.media_urls.length > 4 && index === 3 ? 'relative' : ''
-              }`}
-              style={{ aspectRatio: post.media_urls.length === 1 ? '16/9' : '1/1' }}
-            >
-              <Image
-                src={url}
-                alt={`Post image ${index + 1}`}
-                fill
-                className="object-cover"
-              />
-              {post.media_urls.length > 4 && index === 3 && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">
-                    +{post.media_urls.length - 4}
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <MediaCarousel
+          mediaUrls={post.media_urls}
+          alt={`Post by ${post.author?.name || post.author?.username}`}
+        />
       )}
 
       {/* Engagement Stats */}
