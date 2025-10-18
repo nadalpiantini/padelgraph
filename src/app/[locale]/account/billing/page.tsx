@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/format';
 import { toast } from '@/hooks/use-toast';
+import { CancelModal } from '@/components/subscription/CancelModal';
+import { ReactivateButton } from '@/components/subscription/ReactivateButton';
 
 interface SubscriptionData {
   id: string;
@@ -69,7 +71,7 @@ export default function BillingPage() {
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [cancelling, setCancelling] = useState(false);
-  const [reactivating, setReactivating] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const loadBillingData = useCallback(async () => {
     try {
@@ -128,21 +130,23 @@ export default function BillingPage() {
   }, [loadBillingData]);
 
   async function handleCancelSubscription() {
+    // Open modal instead of browser confirm
+    setShowCancelModal(true);
+  }
+
+  async function confirmCancellation() {
     if (!subscription || subscription.status !== 'active') return;
 
-    if (!confirm(t('confirmations.cancelSubscription'))) {
-      return;
-    }
-
     setCancelling(true);
+    setShowCancelModal(false);
+    
     try {
       const response = await fetch('/api/subscriptions/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reason: 'User requested cancellation',
-        }),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         toast({
@@ -151,46 +155,16 @@ export default function BillingPage() {
         });
         await loadBillingData();
       } else {
-        throw new Error('Cancellation failed');
+        throw new Error(data.error || 'Cancellation failed');
       }
-    } catch (_error) {
+    } catch (err) {
       toast({
         title: t('toasts.cancellationFailed.title'),
-        description: t('toasts.cancellationFailed.message'),
+        description: err instanceof Error ? err.message : t('toasts.cancellationFailed.message'),
         variant: 'destructive',
       });
     } finally {
       setCancelling(false);
-    }
-  }
-
-  async function handleReactivateSubscription() {
-    if (!subscription || subscription.status !== 'cancelled' || !subscription.cancel_at_period_end) return;
-
-    setReactivating(true);
-    try {
-      const response = await fetch('/api/subscriptions/reactivate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        toast({
-          title: t('toasts.subscriptionReactivated.title'),
-          description: t('toasts.subscriptionReactivated.message'),
-        });
-        await loadBillingData();
-      } else {
-        throw new Error('Reactivation failed');
-      }
-    } catch (_error) {
-      toast({
-        title: t('toasts.reactivationFailed.title'),
-        description: t('toasts.reactivationFailed.message'),
-        variant: 'destructive',
-      });
-    } finally {
-      setReactivating(false);
     }
   }
 
@@ -357,9 +331,9 @@ export default function BillingPage() {
                 </>
               )}
               {subscription.cancel_at_period_end && (
-                <Button onClick={handleReactivateSubscription} disabled={reactivating}>
-                  {reactivating ? t('buttons.reactivating') : t('buttons.reactivateSubscription')}
-                </Button>
+                <ReactivateButton
+                  periodEnd={formatDate(subscription.current_period_end)}
+                />
               )}
             </CardFooter>
           )}
@@ -483,6 +457,16 @@ export default function BillingPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Cancel Subscription Modal */}
+      {subscription && (
+        <CancelModal
+          isOpen={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          subscriptionPlan={subscription.plan}
+          periodEnd={formatDate(subscription.current_period_end)}
+        />
+      )}
     </div>
   );
 }

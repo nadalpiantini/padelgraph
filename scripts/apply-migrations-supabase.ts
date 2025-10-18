@@ -11,6 +11,7 @@ const migrations = [
   '021_social_feed_rls.sql',
   '022_storage_media_bucket.sql',
   '023_rpc_functions.sql',
+  '024_fix_org_member_rls_recursion.sql',
 ];
 
 async function applyMigrations() {
