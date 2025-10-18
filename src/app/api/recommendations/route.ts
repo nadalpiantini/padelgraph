@@ -15,7 +15,7 @@ import {
   generateRecommendationsSchema,
 } from '@/lib/validations/recommendations';
 import { generateRecommendations } from '@/lib/services/recommendations';
-import { checkUsageLimit, incrementUsage } from '@/lib/middleware/usage-limits';
+import { canCreateRecommendation, incrementUsage } from '@/lib/middleware/usage-limits';
 
 export async function GET(request: Request) {
   try {
@@ -135,10 +135,7 @@ export async function POST(request: Request) {
     }
 
     // Check usage limit for recommendations
-    // Note: We don't have a specific 'recommendation' feature type in new middleware yet
-    // For now, we skip limit check or map to closest feature (e.g., 'booking_created')
-    // TODO: Add 'recommendation_created' feature type to usage-limits.ts
-    const limitCheck = await checkUsageLimit(targetUserId, 'booking_created');
+    const limitCheck = await canCreateRecommendation(targetUserId);
     if (!limitCheck.allowed && !isAdmin) {
       return errorResponse(
         limitCheck.error || 'Recommendation generation limit exceeded. Upgrade your plan to continue.',
@@ -178,7 +175,7 @@ export async function POST(request: Request) {
     });
 
     // Record successful usage
-    await incrementUsage(targetUserId, 'booking_created', {
+    await incrementUsage(targetUserId, 'recommendation_created', {
       type,
       count: recommendations.length,
       force_refresh,

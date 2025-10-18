@@ -3,8 +3,8 @@
  * Sprint 5 Phase 2 - Task #6
  *
  * Enforces tier-based usage limits:
- * - FREE: 10 tournaments, 5 teams, 2 bookings
- * - PRO: 50 tournaments, 20 teams, 10 bookings
+ * - FREE: 10 tournaments, 5 teams, 2 bookings, 10 recommendations
+ * - PRO: 50 tournaments, 20 teams, 10 bookings, 100 recommendations
  * - DUAL/PREMIUM/CLUB: unlimited
  */
 
@@ -24,26 +24,31 @@ const USAGE_LIMITS = {
     tournaments: 10,
     teams: 5,
     bookings: 2,
+    recommendations: 10, // 10 recommendations per month
   },
   pro: {
     tournaments: 50,
     teams: 20,
     bookings: 10,
+    recommendations: 100, // 100 recommendations per month
   },
   dual: {
     tournaments: -1, // unlimited
     teams: -1,
     bookings: -1,
+    recommendations: -1, // unlimited
   },
   premium: {
     tournaments: -1, // unlimited
     teams: -1,
     bookings: -1,
+    recommendations: -1, // unlimited
   },
   club: {
     tournaments: -1, // unlimited
     teams: -1,
     bookings: -1,
+    recommendations: -1, // unlimited
   },
 } as const;
 
@@ -51,7 +56,8 @@ type PlanTier = keyof typeof USAGE_LIMITS;
 type FeatureType =
   | 'tournament_created'
   | 'team_created'
-  | 'booking_created';
+  | 'booking_created'
+  | 'recommendation_created';
 
 /**
  * Get current month period for usage tracking
@@ -144,6 +150,7 @@ export async function checkUsageLimit(
       tournament_created: 'tournaments',
       team_created: 'teams',
       booking_created: 'bookings',
+      recommendation_created: 'recommendations',
     };
 
     const limitKey = featureToLimitKey[feature];
@@ -207,6 +214,15 @@ export async function canCreateBooking(
   userId: string
 ): Promise<UsageLimitResult> {
   return checkUsageLimit(userId, 'booking_created');
+}
+
+/**
+ * Check if user can generate recommendations
+ */
+export async function canCreateRecommendation(
+  userId: string
+): Promise<UsageLimitResult> {
+  return checkUsageLimit(userId, 'recommendation_created');
 }
 
 /**
@@ -278,16 +294,19 @@ export async function getUsageSummary(userId: string): Promise<{
   tournaments: UsageLimitResult;
   teams: UsageLimitResult;
   bookings: UsageLimitResult;
+  recommendations: UsageLimitResult;
 }> {
-  const [tournaments, teams, bookings] = await Promise.all([
+  const [tournaments, teams, bookings, recommendations] = await Promise.all([
     canCreateTournament(userId),
     canCreateTeam(userId),
     canCreateBooking(userId),
+    canCreateRecommendation(userId),
   ]);
 
   return {
     tournaments,
     teams,
     bookings,
+    recommendations,
   };
 }
