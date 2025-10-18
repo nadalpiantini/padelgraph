@@ -31,8 +31,10 @@ const parseMediaUrls = (urls: string[]): MediaItem[] => {
 };
 
 export function MediaCarousel({ mediaUrls, alt = 'Post media' }: MediaCarouselProps) {
-  // Guard: return null if no media URLs provided
-  if (!mediaUrls || mediaUrls.length === 0) return null;
+  // Guard: return null if no media URLs provided or invalid
+  if (!mediaUrls || !Array.isArray(mediaUrls) || mediaUrls.length === 0) {
+    return null;
+  }
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>(
@@ -41,7 +43,18 @@ export function MediaCarousel({ mediaUrls, alt = 'Post media' }: MediaCarouselPr
   const [errorStates, setErrorStates] = useState<Record<number, boolean>>({});
 
   const mediaItems = parseMediaUrls(mediaUrls);
+
+  // Additional guard: verify mediaItems is valid
+  if (!mediaItems || mediaItems.length === 0) {
+    return null;
+  }
+
   const currentMedia = mediaItems[currentIndex];
+
+  // Guard: verify currentMedia exists
+  if (!currentMedia) {
+    return null;
+  }
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? mediaItems.length - 1 : prev - 1));
@@ -59,8 +72,6 @@ export function MediaCarousel({ mediaUrls, alt = 'Post media' }: MediaCarouselPr
     setLoadingStates(prev => ({ ...prev, [index]: false }));
     setErrorStates(prev => ({ ...prev, [index]: true }));
   };
-
-  if (mediaItems.length === 0) return null;
 
   return (
     <div className="relative group">
