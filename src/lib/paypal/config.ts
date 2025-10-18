@@ -1,11 +1,11 @@
 // PayPal Configuration Helpers
-import type { PayPalPlanMapping, PayPalMode } from './types';
+import type { PayPalMode } from './types';
 
 /**
  * Get PayPal Plan ID for a given subscription plan
  */
 export function getPayPalPlanId(planId: 'pro' | 'premium' | 'club'): string {
-  const planMapping: PayPalPlanMapping = {
+  const planMapping: Record<string, string | undefined> = {
     pro: process.env.PAYPAL_PRO_PLAN_ID || process.env.NEXT_PUBLIC_PAYPAL_PLAN_PRO,
     premium: process.env.PAYPAL_PREMIUM_PLAN_ID || process.env.NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM,
     club: process.env.PAYPAL_CLUB_PLAN_ID || process.env.NEXT_PUBLIC_PAYPAL_PLAN_CLUB,
