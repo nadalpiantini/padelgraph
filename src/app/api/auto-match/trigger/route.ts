@@ -10,7 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { triggerAutoMatch, batchAutoMatch } from '@/lib/services/auto-match';
-import { enforceUsageLimit, recordFeatureUsage, UsageLimitError } from '@/lib/middleware/usage-limiter';
+import { enforceUsageLimit, recordFeatureUsage, UsageLimitError } from '@/lib/middleware/usage-enforcement';
 import { z } from 'zod';
 
 const triggerAutoMatchSchema = z.object({

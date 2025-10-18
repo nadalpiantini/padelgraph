@@ -15,7 +15,7 @@ import {
   generateRecommendationsSchema,
 } from '@/lib/validations/recommendations';
 import { generateRecommendations } from '@/lib/services/recommendations';
-import { canCreateRecommendation, incrementUsage } from '@/lib/middleware/usage-limits';
+import { canCreateRecommendation, incrementUsage } from '@/lib/middleware/usage-enforcement';
 
 export async function GET(request: Request) {
   try {

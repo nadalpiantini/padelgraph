@@ -26,6 +26,7 @@ interface PayPalPaymentResource {
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   let eventId: string | undefined;
+  const startTime = Date.now(); // Track processing time
 
   try {
     const body = await request.text();
@@ -46,7 +47,15 @@ export async function POST(request: NextRequest) {
       authAlgo: request.headers.get('paypal-auth-algo'),
     };
 
-    log.info('PayPal webhook received', { eventId, eventType, resourceId });
+    // Enhanced production logging with environment context
+    log.info('PayPal webhook received', {
+      eventId,
+      eventType,
+      resourceId,
+      environment: process.env.NODE_ENV,
+      paypalMode: process.env.PAYPAL_MODE,
+      timestamp: new Date().toISOString(),
+    });
 
     // 1. IDEMPOTENCY CHECK: Try to insert event (will fail if duplicate)
     const { error: insertError } = await supabase
@@ -148,6 +157,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. MARK AS PROCESSED
+    const processingTime = Date.now() - startTime;
+
     if (eventId) {
       await supabase
         .from('paypal_webhook_event')
@@ -159,11 +170,41 @@ export async function POST(request: NextRequest) {
         .eq('id', eventId);
     }
 
-    return NextResponse.json({ success: true, processed: true });
-  } catch (error) {
-    log.error('Error processing PayPal webhook', { error, eventId });
+    // Production performance logging
+    log.info('PayPal webhook processed successfully', {
+      eventId,
+      eventType,
+      processingTimeMs: processingTime,
+      success: true,
+    });
 
-    // Mark event as failed
+    // Alert if processing time exceeds threshold (5 seconds)
+    if (processingTime > 5000) {
+      log.warn('Slow webhook processing detected', {
+        eventId,
+        eventType,
+        processingTimeMs: processingTime,
+        threshold: 5000,
+      });
+    }
+
+    return NextResponse.json({ success: true, processed: true, processingTimeMs: processingTime });
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+
+    // Enhanced error logging with context
+    log.error('Error processing PayPal webhook', {
+      error,
+      eventId,
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+      processingTimeMs: processingTime,
+      environment: process.env.NODE_ENV,
+      paypalMode: process.env.PAYPAL_MODE,
+    });
+
+    // Mark event as failed with detailed error info
     if (eventId) {
       await supabase
         .from('paypal_webhook_event')
@@ -175,7 +216,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      {
+        error: 'Webhook processing failed',
+        eventId,
+        // Include error details in development only
+        ...(process.env.NODE_ENV === 'development' && {
+          details: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      },
       { status: 500 }
     );
   }

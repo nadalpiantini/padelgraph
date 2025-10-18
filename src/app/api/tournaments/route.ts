@@ -13,7 +13,7 @@ import {
   tournamentQuerySchema,
 } from '@/lib/validations/tournament';
 import { notifyTournamentPublished } from '@/lib/notifications/tournament';
-import { canCreateTournament, incrementUsage } from '@/lib/middleware/usage-limits';
+import { canCreateTournament, incrementUsage } from '@/lib/middleware/usage-enforcement';
 
 /**
  * GET /api/tournaments

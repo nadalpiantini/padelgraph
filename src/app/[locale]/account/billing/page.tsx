@@ -10,12 +10,9 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
-  CreditCard,
   RefreshCw,
-  Download,
   AlertCircle,
   CheckCircle,
   XCircle,
@@ -29,6 +26,8 @@ import { formatDate } from '@/lib/utils/format';
 import { toast } from '@/hooks/use-toast';
 import { CancelModal } from '@/components/subscription/CancelModal';
 import { ReactivateButton } from '@/components/subscription/ReactivateButton';
+import { InvoiceHistory } from '@/components/subscription/InvoiceHistory';
+import { UsageDashboard } from '@/components/subscription/UsageDashboard';
 
 interface SubscriptionData {
   id: string;
@@ -44,32 +43,13 @@ interface SubscriptionData {
   updated_at: string;
 }
 
-interface UsageStats {
-  tournaments: { used: number; limit: number };
-  auto_matches: { used: number; limit: number };
-  recommendations: { used: number; limit: number };
-  travel_plans: { used: number; limit: number };
-  plan: string;
-  period: { start: Date; end: Date };
-}
-
-interface PaymentHistory {
-  id: string;
-  amount: number;
-  currency: string;
-  status: string;
-  created_at: string;
-  description: string;
-}
-
 export default function BillingPage() {
   const t = useTranslations('account.billing');
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string>('');
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
-  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -82,6 +62,8 @@ export default function BillingPage() {
         return;
       }
 
+      setUserId(user.id);
+
       // Load subscription data
       const { data: sub } = await supabase
         .from('subscription')
@@ -93,25 +75,6 @@ export default function BillingPage() {
 
       if (sub) {
         setSubscription(sub);
-      }
-
-      // Load usage stats
-      const usageResponse = await fetch('/api/usage/stats');
-      if (usageResponse.ok) {
-        const stats = await usageResponse.json();
-        setUsageStats(stats);
-      }
-
-      // Load payment history
-      const { data: payments } = await supabase
-        .from('payment_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (payments) {
-        setPaymentHistory(payments);
       }
     } catch (error) {
       console.error('Error loading billing data:', error);
@@ -172,26 +135,6 @@ export default function BillingPage() {
     router.push('/pricing');
   }
 
-  async function downloadInvoice(paymentId: string) {
-    try {
-      const response = await fetch(`/api/invoices/${paymentId}`);
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `invoice_${paymentId}.pdf`;
-        a.click();
-      }
-    } catch (_error) {
-      toast({
-        title: t('toasts.downloadFailed.title'),
-        description: t('toasts.downloadFailed.message'),
-        variant: 'destructive',
-      });
-    }
-  }
-
   function getStatusIcon(status: string) {
     switch (status) {
       case 'active':
@@ -233,11 +176,6 @@ export default function BillingPage() {
       default:
         return null;
     }
-  }
-
-  function calculateUsagePercentage(used: number, limit: number): number {
-    if (limit === -1) return 0; // Unlimited
-    return Math.min((used / limit) * 100, 100);
   }
 
   if (loading) {
@@ -339,124 +277,16 @@ export default function BillingPage() {
           )}
         </Card>
 
-        {/* Usage Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('usage.title')}</CardTitle>
-            <CardDescription>{t('usage.description')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {usageStats ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{t('usage.tournaments')}</span>
-                    <span>
-                      {usageStats.tournaments.used}/{usageStats.tournaments.limit === -1 ? '∞' : usageStats.tournaments.limit}
-                    </span>
-                  </div>
-                  <Progress
-                    value={calculateUsagePercentage(usageStats.tournaments.used, usageStats.tournaments.limit)}
-                    className="h-2"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{t('usage.autoMatches')}</span>
-                    <span>
-                      {usageStats.auto_matches.used}/{usageStats.auto_matches.limit === -1 ? '∞' : usageStats.auto_matches.limit}
-                    </span>
-                  </div>
-                  <Progress
-                    value={calculateUsagePercentage(usageStats.auto_matches.used, usageStats.auto_matches.limit)}
-                    className="h-2"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{t('usage.recommendations')}</span>
-                    <span>
-                      {usageStats.recommendations.used}/{usageStats.recommendations.limit === -1 ? '∞' : usageStats.recommendations.limit}
-                    </span>
-                  </div>
-                  <Progress
-                    value={calculateUsagePercentage(usageStats.recommendations.used, usageStats.recommendations.limit)}
-                    className="h-2"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{t('usage.travelPlans')}</span>
-                    <span>
-                      {usageStats.travel_plans.used}/{usageStats.travel_plans.limit === -1 ? '∞' : usageStats.travel_plans.limit}
-                    </span>
-                  </div>
-                  <Progress
-                    value={calculateUsagePercentage(usageStats.travel_plans.used, usageStats.travel_plans.limit)}
-                    className="h-2"
-                  />
-                </div>
-
-                <Separator />
-
-                <p className="text-xs text-muted-foreground text-center">
-                  {t('usage.resetsOn', { date: formatDate(usageStats.period.end.toISOString()) })}
-                </p>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground">{t('usage.noUsageData')}</p>
-            )}
-          </CardContent>
-        </Card>
+        {/* Usage Statistics - Enhanced Component */}
+        {userId && subscription && subscription.status === 'active' && (
+          <UsageDashboard userId={userId} />
+        )}
       </div>
 
-      {/* Payment History */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>{t('paymentHistory.title')}</CardTitle>
-          <CardDescription>{t('paymentHistory.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {paymentHistory.length > 0 ? (
-            <div className="space-y-2">
-              {paymentHistory.map((payment) => (
-                <div
-                  key={payment.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <CreditCard className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">{payment.description}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(payment.created_at)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="font-medium">${payment.amount}</p>
-                      <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
-                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => downloadInvoice(payment.id)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">{t('paymentHistory.noHistory')}</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Invoice History - Enhanced Component */}
+      {userId && subscription && subscription.status === 'active' && (
+        <InvoiceHistory userId={userId} />
+      )}
 
       {/* Cancel Subscription Modal */}
       {subscription && (

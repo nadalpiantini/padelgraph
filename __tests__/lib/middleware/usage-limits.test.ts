@@ -11,7 +11,7 @@ import {
   checkUsageLimit,
   incrementUsage,
   getUsageSummary,
-} from '@/lib/middleware/usage-limits';
+} from '@/lib/middleware/usage-enforcement';
 
 // Mock Supabase client
 vi.mock('@/lib/supabase/server', () => ({
