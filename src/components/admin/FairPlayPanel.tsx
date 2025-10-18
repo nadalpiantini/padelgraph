@@ -288,7 +288,7 @@ export default function FairPlayPanel({ tournamentId, participants }: FairPlayPa
           </div>
         ) : (
           <div className="space-y-3">
-            {incidents.map((incident) => {
+            {Array.isArray(incidents) && incidents.map((incident) => {
               const typeData = getIncidentTypeData(incident.incident_type);
               const isPositive = incident.incident_type === 'positive_conduct';
 

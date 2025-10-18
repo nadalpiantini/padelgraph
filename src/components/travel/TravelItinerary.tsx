@@ -235,7 +235,7 @@ export default function TravelItinerary({ plan, suggestions = [], onAddEvent, t 
               {isExpanded && (
                 <div className="border-t border-slate-700 p-4 space-y-4">
                   {/* Events */}
-                  {dayEvents.length > 0 && (
+                  {Array.isArray(dayEvents) && dayEvents.length > 0 && (
                     <div className="space-y-2">
                       {dayEvents.map((event, idx) => (
                         <div
