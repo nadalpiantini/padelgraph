@@ -690,5 +690,84 @@
       "docs": "Documentation",
       "rights": "© 2025 PadelGraph. All rights reserved."
     }
+  },
+  "social": {
+    "feed": {
+      "title": "Feed",
+      "loading": "Loading your feed...",
+      "noPostsYet": "No posts yet",
+      "beTheFirst": "Be the first to share something with the community!",
+      "allCaughtUp": "You're all caught up!",
+      "newPosts": "New posts available"
+    },
+    "post": {
+      "like": "Like",
+      "comment": "Comment",
+      "share": "Share",
+      "likes": "likes",
+      "comments": "comments",
+      "readMore": "Read more",
+      "showLess": "Show less"
+    },
+    "comments": {
+      "addComment": "Add a comment...",
+      "writeReply": "Write a reply...",
+      "post": "Post",
+      "reply": "Reply",
+      "noComments": "No comments yet. Be the first to comment!",
+      "posting": "Posting...",
+      "loadingComments": "Loading comments..."
+    },
+    "composer": {
+      "placeholder": "Share your highlight or invite someone to play...",
+      "publish": "Publish",
+      "posting": "Posting...",
+      "addMedia": "Media",
+      "addClub": "Club",
+      "invite": "Invite"
+    },
+    "stories": {
+      "title": "Stories",
+      "addStory": "Add Story",
+      "yourStory": "Your Story",
+      "viewStory": "View Story",
+      "createStory": "Create Story"
+    },
+    "follow": {
+      "follow": "Follow",
+      "following": "Following",
+      "unfollow": "Unfollow",
+      "followers": "Followers",
+      "loading": "Loading..."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAsRead": "Mark as read",
+      "noNotifications": "No notifications yet",
+      "newNotification": "New notification",
+      "types": {
+        "post_like": "liked your post",
+        "comment": "commented on your post",
+        "comment_like": "liked your comment",
+        "mention": "mentioned you",
+        "follow": "started following you",
+        "share": "shared your post"
+      }
+    },
+    "discover": {
+      "title": "Discover",
+      "trending": "Trending",
+      "hashtags": "Hashtags",
+      "whoToPlayWith": "Who to play with?",
+      "noTrendingPosts": "No trending posts at the moment",
+      "search": "Search players, clubs, tournaments..."
+    },
+    "sixDegrees": {
+      "title": "Six Degrees · Connect Players",
+      "shortestPath": "Shortest path:",
+      "noConnection": "No connection found or same user selected",
+      "inviteToPlay": "Invite to Play",
+      "inviteSent": "Invitation sent"
+    }
   }
 }

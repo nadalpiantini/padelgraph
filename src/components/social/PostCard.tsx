@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CommentThread } from '@/components/comments/CommentThread';
 import { Heart, MessageCircle, Share2, MoreHorizontal, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,6 +18,7 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
   const [isLiked, setIsLiked] = useState(post.has_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [showAllContent, setShowAllContent] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = async () => {
     try {
@@ -185,7 +187,10 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
         </button>
 
         <button
-          onClick={() => onComment?.(post.id)}
+          onClick={() => {
+            setShowComments(!showComments);
+            onComment?.(post.id);
+          }}
           className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-slate-400 hover:bg-slate-700/50 transition-colors"
         >
           <MessageCircle className="w-5 h-5" />
@@ -200,6 +205,15 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
           <span className="font-medium">Share</span>
         </button>
       </div>
+
+      {/* Comments Section */}
+      {showComments && (
+        <div className="px-4 pb-4 border-t border-slate-700/50">
+          <div className="mt-4">
+            <CommentThread postId={post.id} />
+          </div>
+        </div>
+      )}
     </article>
   );
 }

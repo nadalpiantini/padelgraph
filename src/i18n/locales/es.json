@@ -690,5 +690,84 @@
       "docs": "Documentación",
       "rights": "© 2025 PadelGraph. Todos los derechos reservados."
     }
+  },
+  "social": {
+    "feed": {
+      "title": "Feed",
+      "loading": "Cargando tu feed...",
+      "noPostsYet": "Aún no hay posts",
+      "beTheFirst": "¡Sé el primero en compartir algo con la comunidad!",
+      "allCaughtUp": "¡Estás al día!",
+      "newPosts": "Nuevos posts disponibles"
+    },
+    "post": {
+      "like": "Me gusta",
+      "comment": "Comentar",
+      "share": "Compartir",
+      "likes": "me gusta",
+      "comments": "comentarios",
+      "readMore": "Leer más",
+      "showLess": "Mostrar menos"
+    },
+    "comments": {
+      "addComment": "Agrega un comentario...",
+      "writeReply": "Escribe una respuesta...",
+      "post": "Publicar",
+      "reply": "Responder",
+      "noComments": "Aún no hay comentarios. ¡Sé el primero en comentar!",
+      "posting": "Publicando...",
+      "loadingComments": "Cargando comentarios..."
+    },
+    "composer": {
+      "placeholder": "Comparte tu highlight o invita a alguien a jugar...",
+      "publish": "Publicar",
+      "posting": "Publicando...",
+      "addMedia": "Media",
+      "addClub": "Club",
+      "invite": "Invitar"
+    },
+    "stories": {
+      "title": "Historias",
+      "addStory": "Agregar Historia",
+      "yourStory": "Tu Historia",
+      "viewStory": "Ver Historia",
+      "createStory": "Crear Historia"
+    },
+    "follow": {
+      "follow": "Seguir",
+      "following": "Siguiendo",
+      "unfollow": "Dejar de seguir",
+      "followers": "Seguidores",
+      "loading": "Cargando..."
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "markAsRead": "Marcar como leído",
+      "noNotifications": "Aún no hay notificaciones",
+      "newNotification": "Nueva notificación",
+      "types": {
+        "post_like": "le gustó tu post",
+        "comment": "comentó en tu post",
+        "comment_like": "le gustó tu comentario",
+        "mention": "te mencionó",
+        "follow": "comenzó a seguirte",
+        "share": "compartió tu post"
+      }
+    },
+    "discover": {
+      "title": "Descubrir",
+      "trending": "Tendencias",
+      "hashtags": "Hashtags",
+      "whoToPlayWith": "¿Con quién jugar?",
+      "noTrendingPosts": "No hay posts en tendencia en este momento",
+      "search": "Buscar jugadores, clubes, torneos..."
+    },
+    "sixDegrees": {
+      "title": "Six Degrees · Conecta Jugadores",
+      "shortestPath": "Camino más corto:",
+      "noConnection": "No hay conexión o mismo usuario seleccionado",
+      "inviteToPlay": "Invitar a Jugar",
+      "inviteSent": "Invitación enviada"
+    }
   }
 }
