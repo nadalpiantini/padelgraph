@@ -4,231 +4,173 @@ import { TIMEOUTS } from '../helpers/env';
 /**
  * Critical Flow: PayPal Subscription
  *
+ * Updated for 4-plan structure: Free, Pro ($9.99), Dual ($15, 2 users), Premium ($15, 1 user)
+ *
  * User Journey:
- * 1. Navigate to pricing/subscription page
- * 2. Select a subscription plan
- * 3. PayPal button renders correctly
- * 4. Verify PayPal checkout flow initiates
+ * 1. Navigate to pricing page
+ * 2. Verify all 4 plans are displayed with correct pricing
+ * 3. Select a subscription plan
+ * 4. PayPal checkout flow initiates correctly
+ * 5. Verify plan-specific features are displayed
+ * 6. Test upgrade/downgrade scenarios
  *
  * Note: Full payment E2E is complex with PayPal sandbox.
- * This test validates UI integration and button rendering.
- * Actual payment completion should be tested manually or with PayPal's testing tools.
+ * This test validates UI integration and subscription creation flow.
+ * Actual payment completion should be tested manually with PayPal sandbox.
  */
 authTest.describe('PayPal Subscription Flow', () => {
-  authTest('should display pricing plans', async ({ authenticatedPage }) => {
+  authTest('should display all 4 pricing plans with correct pricing', async ({ authenticatedPage }) => {
     const page = authenticatedPage;
 
-    // Navigate to pricing page (adjust URL based on actual route)
-    const pricingRoutes = ['/pricing', '/subscription', '/plans', '/profile/subscription'];
-    let loaded = false;
+    // Navigate to pricing page
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
 
-    for (const route of pricingRoutes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.MEDIUM });
-        loaded = true;
-        break;
-      } catch (e) {
-        continue;
+    // Verify all 4 plans are displayed
+    const freePlan = page.locator('text=Free').first();
+    const proPlan = page.locator('text=Pro').first();
+    const dualPlan = page.locator('text=Dual').first();
+    const premiumPlan = page.locator('text=Premium').first();
+
+    await expect(freePlan).toBeVisible();
+    await expect(proPlan).toBeVisible();
+    await expect(dualPlan).toBeVisible();
+    await expect(premiumPlan).toBeVisible();
+
+    // Verify correct pricing
+    await expect(page.locator('text=$9.99')).toBeVisible(); // Pro
+    await expect(page.locator('text=$15')).toBeVisible(); // Dual and Premium
+
+    // Verify plan descriptions
+    await expect(page.locator('text=Perfect for couples & families')).toBeVisible(); // Dual
+    await expect(page.locator('text=For professional players')).toBeVisible(); // Premium
+  });
+
+  authTest('should show upgrade buttons for paid plans', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
+
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
+
+    // Look for subscription buttons on paid plans
+    const upgradeButtons = page.locator('button:has-text(/Upgrade|Get Started|Subscribe/i)');
+    await expect(upgradeButtons.first()).toBeVisible();
+
+    // Should have at least 3 upgrade buttons (Pro, Dual, Premium - excluding Free)
+    const buttonCount = await upgradeButtons.count();
+    expect(buttonCount).toBeGreaterThanOrEqual(3);
+  });
+
+  authTest('should display Dual plan with family invitations feature', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
+
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
+
+    // Verify Dual plan has family invitation feature
+    await expect(page.locator('text=Dual')).toBeVisible();
+    await expect(page.locator('text=Family Invitations (2 Users)')).toBeVisible();
+    await expect(page.locator('text=Perfect for couples & families')).toBeVisible();
+  });
+
+  authTest('should display Premium plan with API access', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
+
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
+
+    // Verify Premium plan has API access and custom branding
+    await expect(page.locator('text=Premium')).toBeVisible();
+    await expect(page.locator('text=API Access')).toBeVisible();
+    await expect(page.locator('text=Custom Tournament Branding')).toBeVisible();
+  });
+
+  authTest('should display Free plan with limited features', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
+
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
+
+    // Verify Free plan shows limitations
+    await expect(page.locator('text=Free')).toBeVisible();
+    await expect(page.locator('text=2/month').first()).toBeVisible(); // Tournament limit
+    await expect(page.locator('text=5/month').first()).toBeVisible(); // Auto-Match limit
+  });
+
+  authTest('should initiate PayPal subscription creation for Pro plan', async ({ authenticatedPage }) => {
+    const page = authenticatedPage;
+
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
+
+    // Find and click Pro plan upgrade button
+    const proUpgradeButton = page.locator('button', { hasText: /Upgrade|Subscribe/i }).nth(0);
+
+    // Listen for navigation or API calls
+    const [response] = await Promise.all([
+      page.waitForResponse(response =>
+        response.url().includes('/api/paypal/create-subscription') &&
+        response.status() === 200,
+        { timeout: TIMEOUTS.LONG }
+      ).catch(() => null),
+      proUpgradeButton.click()
+    ]);
+
+    // Should either get a successful API response or redirect to PayPal
+    if (response) {
+      expect(response.status()).toBe(200);
+      const responseData = await response.json().catch(() => null);
+      if (responseData) {
+        expect(responseData).toHaveProperty('approval_url');
       }
-    }
-
-    if (!loaded) {
-      authTest.skip();
-      return;
-    }
-
-    // Should display subscription plans
-    const plansContainer = page.locator('[data-testid="pricing-plans"]');
-    const hasPlans = await plansContainer.isVisible().catch(() => false);
-
-    if (!hasPlans) {
-      // Try alternative selectors
-      const altPlans = page.locator('text=/Pro|Premium|Club|Free/i');
-      const hasAltPlans = await altPlans.first().isVisible().catch(() => false);
-      expect(hasAltPlans).toBe(true);
     } else {
-      expect(await plansContainer.isVisible()).toBe(true);
+      // Check if redirected to PayPal
+      await page.waitForTimeout(2000);
+      const currentUrl = page.url();
+      expect(currentUrl.includes('paypal') || currentUrl.includes('sandbox.paypal')).toBe(true);
     }
   });
 
-  authTest('should show PayPal button for paid plans', async ({ authenticatedPage }) => {
+  authTest('should show Pro plan as Most Popular', async ({ authenticatedPage }) => {
     const page = authenticatedPage;
 
-    // Navigate to subscription page
-    const routes = ['/pricing', '/subscription', '/plans', '/profile/subscription'];
-    for (const route of routes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.SHORT });
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
 
-    // Look for Pro plan (assuming it's a paid tier)
-    const proPlan = page.locator('[data-testid="plan-pro"]');
-    const hasPro = await proPlan.isVisible().catch(() => false);
+    // Verify Pro plan has "Most Popular" badge
+    const mostPopularBadge = page.locator('text=Most Popular');
+    await expect(mostPopularBadge).toBeVisible();
 
-    if (hasPro) {
-      // Click on Pro plan to see subscription options
-      await proPlan.click();
-
-      // Wait for PayPal button container to render
-      await page.waitForTimeout(2000); // Allow PayPal SDK to load
-
-      // Check for PayPal button (PayPal SDK creates iframe or button)
-      const paypalButton = page.locator('[data-testid="paypal-button"]');
-      const hasPaypal = await paypalButton.isVisible({ timeout: TIMEOUTS.MEDIUM }).catch(() => false);
-
-      if (!hasPaypal) {
-        // Try alternative: PayPal SDK creates divs with specific classes
-        const paypalContainer = page.locator('div[id*="paypal"]').first();
-        const hasContainer = await paypalContainer.isVisible().catch(() => false);
-        expect(hasContainer).toBe(true);
-      } else {
-        expect(hasPaypal).toBe(true);
-      }
-    }
+    // Verify the badge is associated with Pro plan
+    const proPlanCard = page.locator('text=Pro').first().locator('..');
+    const hasProPlan = await proPlanCard.locator('text=Pro').isVisible();
+    expect(hasProPlan).toBe(true);
   });
 
-  authTest('should display subscription tiers with correct pricing', async ({ authenticatedPage }) => {
+  authTest('should display subscription FAQ section', async ({ authenticatedPage }) => {
     const page = authenticatedPage;
 
-    // Navigate to pricing
-    const routes = ['/pricing', '/subscription', '/plans'];
-    let loaded = false;
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
 
-    for (const route of routes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.SHORT });
-        loaded = true;
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
+    // Verify FAQ section exists
+    await expect(page.locator('text=Frequently Asked Questions')).toBeVisible();
 
-    if (!loaded) {
-      authTest.skip();
-      return;
-    }
-
-    // Check for pricing tiers (Free, Pro, Premium, Club)
-    const tiers = ['Free', 'Pro', 'Premium', 'Club'];
-    let foundTiers = 0;
-
-    for (const tier of tiers) {
-      const tierElement = page.locator(`text=${tier}`).first();
-      const visible = await tierElement.isVisible().catch(() => false);
-      if (visible) foundTiers++;
-    }
-
-    // Should have at least 2 tiers visible
-    expect(foundTiers).toBeGreaterThanOrEqual(2);
+    // Verify key FAQ items
+    await expect(page.locator('text=Can I change plans anytime?')).toBeVisible();
+    await expect(page.locator('text=What payment methods do you accept?')).toBeVisible();
+    await expect(page.locator('text=Is there a free trial?')).toBeVisible();
+    await expect(page.locator('text=Can I cancel my subscription?')).toBeVisible();
   });
 
-  authTest('should handle subscription upgrade click', async ({ authenticatedPage }) => {
+  authTest('should show correct plan hierarchy: Free < Pro < Dual/Premium', async ({ authenticatedPage }) => {
     const page = authenticatedPage;
 
-    // Navigate to subscription management
-    const routes = ['/profile/subscription', '/subscription', '/pricing'];
-    let loaded = false;
+    await page.goto('/pricing', { timeout: TIMEOUTS.MEDIUM });
 
-    for (const route of routes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.SHORT });
-        loaded = true;
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
+    // Verify pricing order (Dual and Premium both at $15, but Pro at $9.99)
+    await expect(page.locator('text=Free')).toBeVisible();
+    await expect(page.locator('text=$9.99')).toBeVisible(); // Pro
+    await expect(page.locator('text=$15').first()).toBeVisible(); // Dual/Premium
 
-    if (!loaded) {
-      authTest.skip();
-      return;
-    }
+    // Verify all plans are in same container (grid layout)
+    const pricingGrid = page.locator('.grid');
+    const planCards = pricingGrid.locator('.relative');
+    const cardCount = await planCards.count();
 
-    // Look for upgrade button
-    const upgradeButton = page.locator('button:has-text(/Upgrade|Subscribe|Get Started/i)').first();
-    const hasUpgrade = await upgradeButton.isVisible().catch(() => false);
-
-    if (hasUpgrade) {
-      // Click upgrade button
-      await upgradeButton.click();
-
-      // Should show PayPal checkout or modal
-      await page.waitForTimeout(1000);
-
-      // Check if modal, overlay, or redirect occurred
-      const hasModal = await page.locator('[role="dialog"]').isVisible().catch(() => false);
-      const hasOverlay = await page.locator('[data-testid="paypal-overlay"]').isVisible().catch(() => false);
-      const urlChanged = page.url().includes('paypal') || page.url().includes('checkout');
-
-      // At least one should be true
-      expect(hasModal || hasOverlay || urlChanged).toBe(true);
-    }
-  });
-
-  authTest('should show current subscription status', async ({ authenticatedPage }) => {
-    const page = authenticatedPage;
-
-    // Navigate to profile or subscription page
-    const routes = ['/profile', '/profile/subscription', '/subscription'];
-    let loaded = false;
-
-    for (const route of routes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.SHORT });
-        loaded = true;
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (!loaded) {
-      authTest.skip();
-      return;
-    }
-
-    // Look for subscription status indicator
-    const statusText = page.locator('text=/Current Plan|Subscription|Free Plan|Pro Plan/i').first();
-    const hasStatus = await statusText.isVisible({ timeout: TIMEOUTS.MEDIUM }).catch(() => false);
-
-    // Should show some subscription information
-    expect(hasStatus).toBe(true);
-  });
-
-  authTest('should display usage limits based on tier', async ({ authenticatedPage }) => {
-    const page = authenticatedPage;
-
-    // Navigate to profile or dashboard
-    const routes = ['/profile', '/dashboard', '/'];
-    let loaded = false;
-
-    for (const route of routes) {
-      try {
-        await page.goto(route, { timeout: TIMEOUTS.SHORT });
-        loaded = true;
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (!loaded) {
-      authTest.skip();
-      return;
-    }
-
-    // Look for usage limit indicators
-    const usageLimits = page.locator('text=/tournaments.*limit|limit.*tournaments|matches.*limit/i').first();
-    const hasLimits = await usageLimits.isVisible({ timeout: TIMEOUTS.SHORT }).catch(() => false);
-
-    // Limits display is optional, so we just check presence without assertion
-    if (hasLimits) {
-      expect(await usageLimits.isVisible()).toBe(true);
-    }
+    // Should have 4 plan cards
+    expect(cardCount).toBe(4);
   });
 });

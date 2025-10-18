@@ -7,21 +7,500 @@
     "confirm": "Confirm",
     "save": "Save",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "download": "Download",
+    "upload": "Upload",
+    "processing": "Processing...",
+    "noData": "No data available",
+    "viewAll": "View All",
+    "learnMore": "Learn More"
   },
   "navigation": {
     "home": "Home",
+    "dashboard": "Dashboard",
+    "tournaments": "Tournaments",
+    "rankings": "Rankings",
+    "players": "Players",
     "feed": "Feed",
     "bookings": "Bookings",
     "profile": "Profile",
-    "admin": "Admin"
+    "settings": "Settings",
+    "admin": "Admin",
+    "logout": "Logout",
+    "backToHome": "Back to Home"
   },
   "auth": {
-    "login": "Login",
+    "login": "Log In",
     "logout": "Logout",
+    "signUp": "Sign Up",
+    "createAccount": "Create Account",
     "email": "Email",
+    "emailPlaceholder": "your@email.com",
     "password": "Password",
-    "signUp": "Sign Up"
+    "passwordPlaceholder": "••••••••",
+    "username": "Username",
+    "usernamePlaceholder": "Choose a username",
+    "processing": "Processing...",
+    "emailConfirmation": "✅ Check your email for the confirmation link!"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{username}}",
+    "overview": "Your padel activity overview",
+    "ranking": "Ranking",
+    "matches": "Matches",
+    "winRate": "Win Rate",
+    "upcoming": "Upcoming",
+    "changeThisMonth": "↑ {{percent}}% this month",
+    "thisMonth": "This month",
+    "lastMatches": "Last {{count}} matches",
+    "matchesScheduled": "Matches scheduled",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity",
+    "joinTournament": "Join a Tournament",
+    "quickActions": "Quick Actions",
+    "browseTournaments": "Browse Tournaments",
+    "viewRankings": "View Rankings",
+    "findPlayers": "Find Players",
+    "bookCourts": "Book Courts",
+    "upcomingMatches": "Upcoming Matches",
+    "noUpcomingMatches": "No upcoming matches",
+    "scheduleMatch": "Schedule a Match"
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "searchPlaceholder": "Search tournaments...",
+    "upcoming": "Upcoming",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "noTournamentsAvailable": "No tournaments available",
+    "noCompletedTournaments": "No completed tournaments yet",
+    "checkBackSoon": "Check back soon for new tournaments",
+    "viewResults": "View Results",
+    "viewBoard": "View Board",
+    "checkIn": "Check-in",
+    "full": "Full",
+    "join": "Join",
+    "leave": "Leave",
+    "starts": "Starts",
+    "started": "Started",
+    "participants": "participants",
+    "format": {
+      "americano": "Americano",
+      "mexicano": "Mexicano",
+      "round_robin": "Round Robin",
+      "single_elimination": "Single Elimination",
+      "double_elimination": "Double Elimination",
+      "swiss": "Swiss System",
+      "monrad": "Monrad",
+      "compass": "Compass Draw"
+    }
+  },
+  "rankings": {
+    "liveBadge": "Live Rankings",
+    "title": "Player Rankings",
+    "subtitle": "See where you stand among the best padel players",
+    "noRankings": "No rankings available yet",
+    "rank": "Rank",
+    "player": "Player",
+    "level": "Level",
+    "points": "Points",
+    "rating": "Rating",
+    "matches": "Matches",
+    "winRate": "Win Rate",
+    "levels": {
+      "pro": "Pro",
+      "advanced": "Advanced",
+      "intermediate": "Intermediate",
+      "beginner": "Beginner"
+    },
+    "cta": {
+      "heading": "Want to be on the leaderboard?",
+      "text": "Join PadelGraph and start competing with players at your level",
+      "button": "Join Free Today"
+    }
+  },
+  "pricing": {
+    "title": "Choose Your Perfect Plan",
+    "subtitle": "Unlock the full potential of PadelGraph with our premium features. Start free and upgrade anytime to access advanced analytics, unlimited tournaments, and exclusive community features.",
+    "badges": {
+      "mostPopular": "Most Popular",
+      "currentPlan": "Current Plan"
+    },
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Perfect for casual players",
+        "features": {
+          "tournamentCreation": "Tournament Creation",
+          "tournamentCreationLimit": "{{count}}/month",
+          "autoMatch": "Auto-Match",
+          "autoMatchLimit": "{{count}}/month",
+          "playerRecommendations": "Player Recommendations",
+          "playerRecommendationsLimit": "{{count}}/month",
+          "travelPlans": "Travel Plans",
+          "travelPlansLimit": "{{count}}/month",
+          "rankings": "Basic Rankings & Stats",
+          "socialFeed": "Social Feed Access",
+          "courtBooking": "Court Booking",
+          "achievements": "Achievements & Badges"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For serious padel enthusiasts",
+        "features": {
+          "tournamentCreation": "Tournament Creation",
+          "tournamentCreationLimit": "{{count}}/month",
+          "autoMatch": "Auto-Match",
+          "autoMatchLimit": "{{count}}/month",
+          "playerRecommendations": "Player Recommendations",
+          "playerRecommendationsLimit": "{{count}}/month",
+          "travelPlans": "Travel Plans",
+          "travelPlansLimit": "{{count}}/month",
+          "advancedAnalytics": "Advanced Analytics & Insights",
+          "prioritySupport": "Priority Support",
+          "customProfile": "Custom Profile Themes",
+          "videoHighlights": "Video Highlights",
+          "earlyAccess": "Early Access to New Features"
+        }
+      },
+      "dual": {
+        "name": "Dual",
+        "description": "Perfect for couples & families",
+        "features": {
+          "twoAccounts": "2 Pro Accounts",
+          "tournamentCreation": "Tournament Creation",
+          "tournamentCreationLimit": "{{count}}/month each",
+          "autoMatch": "Auto-Match",
+          "autoMatchLimit": "{{count}}/month each",
+          "sharedAnalytics": "Shared Analytics Dashboard",
+          "doublesPairTracking": "Doubles Pair Performance Tracking",
+          "familySavings": "Save {{percent}}% vs 2 separate Pro plans"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "For professional players",
+        "features": {
+          "tournamentCreation": "Unlimited Tournament Creation",
+          "autoMatch": "Unlimited Auto-Match",
+          "playerRecommendations": "Unlimited Player Recommendations",
+          "travelPlans": "Unlimited Travel Plans",
+          "dedicatedSupport": "Dedicated Account Manager",
+          "coachingInsights": "Pro Coaching Insights",
+          "videoAnalysis": "Advanced Video Analysis",
+          "tournamentHistory": "Complete Tournament History",
+          "apiAccess": "API Access for Data Export"
+        }
+      }
+    },
+    "buttons": {
+      "manageSubscription": "Manage Subscription",
+      "processing": "Processing...",
+      "getStarted": "Get Started",
+      "downgrade": "Downgrade",
+      "upgrade": "Upgrade"
+    },
+    "toasts": {
+      "freePlan": {
+        "title": "Free Plan",
+        "message": "You are already on the free plan"
+      },
+      "currentPlan": {
+        "title": "Current Plan",
+        "message": "You are already subscribed to this plan"
+      },
+      "subscriptionFailed": {
+        "title": "Subscription Failed",
+        "message": "Failed to create subscription. Please try again."
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": [
+        {
+          "question": "Can I change my plan anytime?",
+          "answer": "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges."
+        },
+        {
+          "question": "What payment methods do you accept?",
+          "answer": "We accept all major credit cards (Visa, Mastercard, Amex) and PayPal for subscription payments."
+        },
+        {
+          "question": "Is there a free trial for premium plans?",
+          "answer": "Our Free plan lets you explore PadelGraph risk-free. Upgrade anytime to unlock advanced features."
+        },
+        {
+          "question": "How do tournament limits work?",
+          "answer": "Tournament creation limits reset monthly. If you need more, you can upgrade to a higher plan anytime."
+        }
+      ]
+    }
+  },
+  "account": {
+    "billing": {
+      "title": "Billing & Subscription",
+      "currentSubscription": {
+        "title": "Current Subscription",
+        "description": "Manage your subscription and billing details",
+        "planSuffix": "Plan",
+        "currentPeriod": "Current Period",
+        "nextPayment": "Next Payment",
+        "cancelled": "Cancelled",
+        "cancellationWarning": "Your subscription will end on {{date}}. You can reactivate anytime before then.",
+        "freePlanMessage": "You are currently on the Free plan",
+        "upgradeButton": "Upgrade to Pro"
+      },
+      "buttons": {
+        "changePlan": "Change Plan",
+        "cancelSubscription": "Cancel Subscription",
+        "cancelling": "Cancelling...",
+        "reactivateSubscription": "Reactivate Subscription",
+        "reactivating": "Reactivating..."
+      },
+      "usage": {
+        "title": "Usage This Month",
+        "description": "Track your feature usage",
+        "tournaments": "Tournaments",
+        "autoMatches": "Auto-Matches",
+        "recommendations": "Recommendations",
+        "travelPlans": "Travel Plans",
+        "resetsOn": "Resets on {{date}}",
+        "noUsageData": "No usage data available"
+      },
+      "paymentHistory": {
+        "title": "Payment History",
+        "description": "Your recent transactions",
+        "noHistory": "No payment history available"
+      },
+      "confirmations": {
+        "cancelSubscription": "Are you sure you want to cancel your subscription? You will retain access until the end of the current billing period."
+      },
+      "toasts": {
+        "error": {
+          "title": "Error",
+          "loadingFailed": "Failed to load billing information"
+        },
+        "subscriptionCancelled": {
+          "title": "Subscription Cancelled",
+          "message": "Your subscription has been cancelled. You will retain access until the end of the billing period."
+        },
+        "cancellationFailed": {
+          "title": "Cancellation Failed",
+          "message": "Failed to cancel subscription. Please try again."
+        },
+        "subscriptionReactivated": {
+          "title": "Subscription Reactivated",
+          "message": "Your subscription has been reactivated successfully."
+        },
+        "reactivationFailed": {
+          "title": "Reactivation Failed",
+          "message": "Failed to reactivate subscription. Please try again."
+        },
+        "downloadFailed": {
+          "title": "Download Failed",
+          "message": "Failed to download invoice"
+        }
+      }
+    }
+  },
+  "admin": {
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "subtitle": "Business intelligence and key metrics",
+      "periods": {
+        "last7Days": "Last 7 Days",
+        "last30Days": "Last 30 Days",
+        "last90Days": "Last 90 Days"
+      },
+      "kpis": {
+        "mrr": {
+          "title": "Monthly Recurring Revenue",
+          "label": "MRR"
+        },
+        "dau": {
+          "title": "Daily Active Users",
+          "mau": "MAU: {{count}}"
+        },
+        "churnRate": {
+          "title": "Churn Rate"
+        },
+        "retention": {
+          "title": "Day 7 Retention"
+        }
+      },
+      "sections": {
+        "revenueMetrics": "Revenue Metrics",
+        "userGrowth": "User Growth",
+        "cohortRetention": "Cohort Retention Analysis",
+        "featureAdoption": "Feature Adoption Rates",
+        "engagement": "Engagement Metrics"
+      },
+      "metrics": {
+        "arr": "ARR",
+        "arpu": "ARPU",
+        "ltv": "LTV",
+        "newUsers": "New Users",
+        "dau": "DAU",
+        "wau": "WAU",
+        "mau": "MAU",
+        "growthRate": "Growth Rate",
+        "sessionDuration": "Session Duration",
+        "averagePerSession": "Average per session",
+        "pagesPerSession": "Pages per Session",
+        "averagePageViews": "Average page views",
+        "bounceRate": "Bounce Rate",
+        "singlePageSessions": "Single page sessions"
+      },
+      "chartLabels": {
+        "day1": "Day 1",
+        "day7": "Day 7",
+        "day30": "Day 30"
+      },
+      "errors": {
+        "loadingFailed": "Error Loading Analytics"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscription Management",
+      "buttons": {
+        "syncPayPal": "Sync with PayPal",
+        "exportCSV": "Export CSV"
+      },
+      "stats": {
+        "total": "Total Subscriptions",
+        "active": "Active Subscriptions",
+        "revenue": "Monthly Revenue",
+        "churn": "Churn Rate"
+      },
+      "searchPlaceholder": "Search by name or email...",
+      "filterByPlan": "Filter by plan",
+      "filterByStatus": "Filter by status",
+      "planFilters": {
+        "all": "All Plans",
+        "free": "Free",
+        "pro": "Pro",
+        "premium": "Premium",
+        "club": "Club"
+      },
+      "statusFilters": {
+        "all": "All Status",
+        "active": "Active",
+        "cancelled": "Cancelled",
+        "pastDue": "Past Due",
+        "suspended": "Suspended"
+      },
+      "tableHeaders": {
+        "user": "User",
+        "plan": "Plan",
+        "status": "Status",
+        "amount": "Amount",
+        "period": "Period",
+        "actions": "Actions"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "reactivate": "Reactivate",
+        "viewUser": "View User"
+      },
+      "confirmations": {
+        "cancelSubscription": "Are you sure you want to cancel this subscription?"
+      },
+      "toasts": {
+        "accessDenied": {
+          "title": "Access Denied",
+          "message": "You must be an admin to access this page"
+        },
+        "error": {
+          "title": "Error",
+          "loadingFailed": "Failed to load subscription data"
+        },
+        "syncComplete": {
+          "title": "Sync Complete",
+          "message": "Subscriptions have been synced with PayPal"
+        },
+        "syncFailed": {
+          "title": "Sync Failed",
+          "message": "Failed to sync subscriptions"
+        }
+      }
+    }
+  },
+  "about": {
+    "badge": "Built for Padel Lovers",
+    "title": "About PadelGraph",
+    "subtitle": "We're building the ultimate social network for padel players around the world. Connect, compete, and grow your game with a community that shares your passion.",
+    "mission": {
+      "title": "Our Mission",
+      "text": "To create the world's most comprehensive padel platform where players of all levels can connect, compete, and improve their game through data-driven insights and a vibrant community."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "text": "A world where every padel player has access to professional-grade analytics, meaningful connections with fellow enthusiasts, and opportunities to compete and grow—regardless of skill level or location."
+    },
+    "whatWeOffer": {
+      "title": "What We Offer",
+      "rankings": {
+        "title": "Real-Time Rankings",
+        "description": "Comprehensive ranking system that tracks your performance across matches and tournaments. See exactly where you stand and watch your progress over time."
+      },
+      "social": {
+        "title": "Social Network",
+        "description": "Connect with players worldwide, share highlights, and build your padel community. Follow your favorite players and clubs."
+      },
+      "tournaments": {
+        "title": "Tournaments",
+        "description": "Create, join, and track tournaments with various formats. From casual club events to competitive championships, all in one place."
+      }
+    },
+    "stats": {
+      "title": "Growing the Padel Community",
+      "activePlayers": "Active Players",
+      "matchesPlayed": "Matches Played",
+      "partnerClubs": "Partner Clubs"
+    },
+    "cta": {
+      "title": "Join the Movement",
+      "text": "Become part of the fastest-growing padel community in the world. Start tracking your progress and connecting with players today.",
+      "buttonPrimary": "Get Started Free",
+      "buttonSecondary": "View Rankings"
+    },
+    "contact": {
+      "title": "Questions?",
+      "text": "We'd love to hear from you. Reach out to our team anytime."
+    },
+    "nav": {
+      "rankings": "Rankings",
+      "joinNetwork": "Join Network"
+    }
+  },
+  "leaderboard": {
+    "titleSuffix": "Leaderboard",
+    "subtitleSuffix": "Rankings",
+    "periods": {
+      "week": "Week",
+      "month": "Month",
+      "allTime": "All Time"
+    },
+    "tableHeaders": {
+      "rank": "Rank",
+      "player": "Player",
+      "change": "Change"
+    },
+    "metrics": {
+      "elo": "ELO",
+      "winRate": "Win Rate",
+      "tournamentsWon": "Tournaments Won",
+      "winStreak": "Win Streak"
+    },
+    "emptyState": "No players in this leaderboard yet"
   },
   "homepage": {
     "nav": {
