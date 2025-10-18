@@ -16,9 +16,9 @@ export const createCommentSchema = z.object({
 
 export const feedQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  cursor: z.string().uuid().optional(),
-  user_id: z.string().uuid().optional(), // Filter by specific user
-  org_id: z.string().uuid().optional(), // Filter by organization
+  cursor: z.string().uuid().nullable().optional(),
+  user_id: z.string().uuid().nullable().optional(), // Filter by specific user
+  org_id: z.string().uuid().nullable().optional(), // Filter by organization
 });
 
 export const postIdSchema = z.object({

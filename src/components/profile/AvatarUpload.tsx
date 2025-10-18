@@ -72,7 +72,7 @@ export default function AvatarUpload({
 
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from('user_profile')
         .update({ avatar_url: publicUrl })
         .eq('id', userId);
 

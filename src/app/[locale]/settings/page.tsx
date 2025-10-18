@@ -72,7 +72,7 @@ export default function SettingsPage() {
       setUser(user);
 
       const { data: profileData } = await supabase
-        .from('profiles')
+        .from('user_profile')
         .select('*')
         .eq('id', user.id)
         .single();
@@ -99,7 +99,7 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('user_profile')
         .update({
           username: formData.username,
           name: formData.name,

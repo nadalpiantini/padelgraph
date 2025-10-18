@@ -26,7 +26,7 @@ async function getPlayers() {
   const supabase = await createClient();
 
   const { data: players } = await supabase
-    .from('profiles')
+    .from('user_profile')
     .select('id, username, name, bio, avatar_url, location, ranking_points')
     .order('ranking_points', { ascending: false })
     .limit(50);
@@ -54,7 +54,7 @@ export default async function PlayersPage() {
   let profile = null;
   if (user) {
     const { data: profileData } = await supabase
-      .from('profiles')
+      .from('user_profile')
       .select('*')
       .eq('id', user.id)
       .single();
