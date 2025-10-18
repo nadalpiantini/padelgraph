@@ -29,11 +29,18 @@ Implementación completa de mejoras al sistema de media en posts:
 
 #### Git Status:
 ```bash
-✅ Commit: 9fe1547 - Pushed to main
+✅ Commit: e520929 - Pushed to main (HOTFIX)
 ✅ TypeScript: PASS
 ✅ Build: PASS
 🟢 Listo para producción
 ```
+
+#### 🚨 HOTFIX Aplicado:
+- **Problema**: MediaCarousel crasheaba si `mediaUrls` era undefined
+- **Fix**: Agregado guard clause al inicio del componente
+- **Commit**: `e520929 fix(critical): prevent MediaCarousel crash`
+- **Deployed**: ✅ En producción
+- **Lección**: Siempre validar props ANTES de hooks
 
 ---
 
@@ -114,9 +121,10 @@ Build: ✅ Clean
 
 ### Últimos Commits:
 ```
+e520929 fix(critical): prevent MediaCarousel crash (HOTFIX)
+2e953dc fix(critical): resolve org_member RLS + PWA manifest
+0dd1ace docs: update START_HERE_TOMORROW
 9fe1547 fix(subscriptions): improve change-plan route error handling
-8e0797b fix(subscriptions): improve cancel/reactivate routes and RLS policies
-b903c2d feat(ui): add MediaCarousel component and improve error handling
 ```
 
 ### Media Carousel Architecture:
