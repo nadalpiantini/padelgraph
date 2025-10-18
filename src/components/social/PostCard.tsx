@@ -54,11 +54,11 @@ export default function PostCard({ post, onLike, onComment, onShare }: PostCardP
     return date.toLocaleDateString();
   };
 
-  const contentPreview = post.content.length > 300 && !showAllContent
+  const contentPreview = post.content && post.content.length > 300 && !showAllContent
     ? post.content.substring(0, 300) + '...'
     : post.content;
 
-  const shouldShowReadMore = post.content.length > 300;
+  const shouldShowReadMore = post.content && post.content.length > 300;
 
   return (
     <article className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden hover:border-indigo-500/30 transition-colors">

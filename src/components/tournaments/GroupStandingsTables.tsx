@@ -32,6 +32,13 @@ export default function GroupStandingsTables({
   useEffect(() => {
     async function fetchGroups() {
       try {
+        // Guard: Ensure standings is an array
+        if (!Array.isArray(standings)) {
+          console.warn('GroupStandingsTables: standings is not an array:', standings);
+          setLoading(false);
+          return;
+        }
+
         // In a real implementation, this would be an API endpoint
         // For now, we'll simulate it by checking format_settings
         const res = await fetch(`/api/tournaments/${tournamentId}`);
