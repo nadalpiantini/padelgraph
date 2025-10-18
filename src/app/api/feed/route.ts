@@ -97,10 +97,22 @@ export async function GET(request: Request) {
       query = query.or(`visibility.eq.public,user_id.eq.${user.id}`);
     }
 
+    // Debug: Log the query before execution
+    console.log('[Feed API] Executing query with filters:', {
+      user_id: user.id,
+      filters: { user_id, org_id, cursor },
+      limit,
+    });
+
     const { data: posts, error: postsError } = await query;
 
     if (postsError) {
-      console.error('[Feed API] Error fetching feed:', postsError);
+      console.error('[Feed API] Error fetching feed:', {
+        error: postsError,
+        code: postsError.code,
+        message: postsError.message,
+        details: postsError.details,
+      });
       return serverErrorResponse('Failed to fetch feed', postsError);
     }
 
@@ -110,6 +122,11 @@ export async function GET(request: Request) {
       postsCount: posts?.length || 0,
       filters: { user_id, org_id, cursor },
       hasData: !!posts,
+      firstPost: posts?.[0] ? {
+        id: posts[0].id,
+        has_author: !!posts[0].author,
+        author_username: posts[0].author?.username,
+      } : null,
     });
 
     // Normalize posts: ensure media_urls is always an array, never null
