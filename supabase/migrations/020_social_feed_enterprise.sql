@@ -45,6 +45,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS comment_like_count_trigger ON comment_like;
+
 CREATE TRIGGER comment_like_count_trigger
   AFTER INSERT OR DELETE ON comment_like
   FOR EACH ROW
@@ -85,6 +87,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS follow_count_trigger ON follow;
+
 CREATE TRIGGER follow_count_trigger
   AFTER INSERT OR DELETE ON follow
   FOR EACH ROW
@@ -124,6 +128,8 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS post_hashtag_count_trigger ON post_hashtag;
 
 CREATE TRIGGER post_hashtag_count_trigger
   AFTER INSERT OR DELETE ON post_hashtag
@@ -233,6 +239,8 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS story_view_count_trigger ON story_view;
 
 CREATE TRIGGER story_view_count_trigger
   AFTER INSERT OR DELETE ON story_view
