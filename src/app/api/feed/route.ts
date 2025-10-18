@@ -103,11 +103,17 @@ export async function GET(request: Request) {
       return serverErrorResponse('Failed to fetch feed', postsError);
     }
 
+    // Normalize posts: ensure media_urls is always an array, never null
+    const normalizedPosts = (posts || []).map(post => ({
+      ...post,
+      media_urls: post.media_urls || [],
+    }));
+
     // Determine next cursor
-    const nextCursor = posts && posts.length === limit ? posts[posts.length - 1].id : null;
+    const nextCursor = normalizedPosts.length === limit ? normalizedPosts[normalizedPosts.length - 1].id : null;
 
     return successResponse({
-      posts: posts || [],
+      posts: normalizedPosts,
       nextCursor,
       hasMore: nextCursor !== null,
     });
