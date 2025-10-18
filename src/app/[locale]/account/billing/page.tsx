@@ -463,8 +463,10 @@ export default function BillingPage() {
         <CancelModal
           isOpen={showCancelModal}
           onClose={() => setShowCancelModal(false)}
+          onConfirm={confirmCancellation}
           subscriptionPlan={subscription.plan}
           periodEnd={formatDate(subscription.current_period_end)}
+          isLoading={cancelling}
         />
       )}
     </div>

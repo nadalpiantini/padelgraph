@@ -31,6 +31,9 @@ const parseMediaUrls = (urls: string[]): MediaItem[] => {
 };
 
 export function MediaCarousel({ mediaUrls, alt = 'Post media' }: MediaCarouselProps) {
+  // Guard: return null if no media URLs provided
+  if (!mediaUrls || mediaUrls.length === 0) return null;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>(
     Object.fromEntries(mediaUrls.map((_, i) => [i, true]))

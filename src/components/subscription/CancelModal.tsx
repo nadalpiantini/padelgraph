@@ -5,54 +5,28 @@
  * Shows confirmation dialog before cancelling subscription
  */
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
 interface CancelModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => Promise<void>;
   subscriptionPlan: string;
   periodEnd?: string;
+  isLoading?: boolean;
 }
 
 export function CancelModal({
   isOpen,
   onClose,
+  onConfirm,
   subscriptionPlan,
   periodEnd,
+  isLoading = false,
 }: CancelModalProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const handleCancel = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/subscriptions/cancel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to cancel subscription');
-      }
-
-      // Show success message and refresh
-      alert('Subscription cancelled successfully. Your plan will remain active until ' + periodEnd);
-      router.refresh();
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel subscription');
-    } finally {
-      setIsLoading(false);
-    }
+    await onConfirm();
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -99,11 +73,7 @@ export function CancelModal({
             </ul>
           </div>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
-              {error}
-            </div>
-          )}
+
         </div>
 
         {/* Actions */}
