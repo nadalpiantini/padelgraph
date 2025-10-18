@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard Index: [1, 2]
+        shardIndex: [1, 2]
         shardTotal: [2]
 
     steps:
