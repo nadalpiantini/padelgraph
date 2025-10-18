@@ -1,164 +1,274 @@
-# 🚀 START HERE TOMORROW - Sprint 4 Complete!
+# 🚀 START HERE TOMORROW - Session Complete!
 
-**Fecha:** 2025-10-18 (Night Session)
-**Status:** ✅ Sprint 4 COMPLETE (95%)
+**Fecha:** 2025-10-18 (Evening Session)
+**Status:** ✅ All Critical Tasks COMPLETE
 
 ---
 
 ## 🎉 LO QUE SE COMPLETÓ HOY
 
-### Sprint 4: Travel Graph UI (85% → 95%) ✅
+### 1. Array Safety Fix ✅ (10 min)
+**Problema resuelto**: `Cannot read properties of undefined (reading 'length')`
 
-**Metodología:** BMAD METHOD con agentes @sm, @dev, @qa
+**Fixes aplicados**:
+- ✅ MatchSuggestions.tsx - `Array.isArray()` guard
+- ✅ PostCard.tsx - String validation
+- ✅ GroupStandingsTables.tsx - Array validation
 
-#### US-1: Mapa de Discovery ✅ (30 min)
-- ✅ DiscoveryMap component activado
-- ✅ Mapbox GL JS integration
-- ✅ API `/api/discover/nearby` verificado
-- ✅ 18 traducciones añadidas
-- ✅ Fallback UI si no hay token
-- ✅ Geolocation + markers (players, clubs, matches)
+**Commits**:
+- `5fde2de` - Force deploy array safety fixes
+- `4cef4ab` - Add array validation to more components
+- `fe7bc38` - Prevent undefined length access errors
 
-**Archivos:**
-- Modified: `src/app/[locale]/discover/DiscoverClient.tsx`
-- Modified: `.env.local` (NEXT_PUBLIC_MAPBOX_TOKEN)
-
-#### US-2: Grafo Social ✅ (35 min)
-- ✅ NetworkGraph component creado (409 líneas)
-- ✅ API `/api/discover/graph` endpoint (165 líneas)
-- ✅ D3.js force-directed layout
-- ✅ Tab "Network" integrado (4 tabs total)
-- ✅ Zoom, drag, click interactions
-- ✅ Color coding por skill level
-- ✅ Stats en tiempo real
-
-**Archivos Creados:**
-- `src/app/api/discover/graph/route.ts`
-- `src/components/discovery/NetworkGraph.tsx`
-
-**Documentación:**
-- `claudedocs/US1_COMPLETE.md`
-- `claudedocs/US2_GRAFO_SOCIAL_COMPLETE.md`
-- `claudedocs/BMAD_SPRINT_4_STORIES.md`
-- `claudedocs/SPRINT_4_FINAL_REPORT.md`
+**Status**: ✅ DEPLOYED & VERIFIED in production
 
 ---
 
-## ⚡ DEPLOYMENT PENDIENTE
+### 2. Mapbox Configuration ✅ (15 min)
+**Feature**: Discovery Map + Network Graph (Sprint 4 → 100%)
 
-### 1️⃣ Obtener Mapbox Token (2 minutos)
+**Setup**:
+- ✅ Cuenta Mapbox creada (nadalpiantini)
+- ✅ Token obtenido: `pk.eyJ1IjoibmFkYWxwaWFudGluaSIsImEiOiJjbWd3YWUyem8wemJrMmxxNGJmeWk0czVmIn0.-tVML6FXaNpKVKncXPRidQ`
+- ✅ Configurado en `.env.local`
+- ✅ Configurado en Vercel (Production + Preview + Development)
 
-```bash
-# 1. Visit: https://account.mapbox.com/access-tokens/
-# 2. Create free account
-# 3. Create new token (Public scope)
-# 4. Copy token
+**Features Activas**:
+- 🗺️ /discover?tab=map → Mapa interactivo con jugadores
+- 🕸️ /discover?tab=network → Grafo social D3.js
+
+**Free Tier**: 50,000 map loads/month (más que suficiente)
+
+---
+
+### 3. Database Migrations ✅ (5 min)
+**Migrations Aplicadas**: 2/2
+
+**Migration #1**: PayPal Webhook Events (144 líneas)
+```sql
+✅ Tabla: paypal_webhook_event
+✅ 6 Indexes (performance)
+✅ 2 RLS Policies (security)
+✅ 2 Helper Functions (monitoring)
+
+Features:
+- Idempotency (previene duplicados)
+- Audit trail completo
+- Error tracking
+- Admin dashboard data
 ```
 
-### 2️⃣ Configurar Local (.env.local)
+**Migration #2**: Storage Policies (39 líneas)
+```sql
+✅ 4 Policies para profile-images bucket:
+  - Upload (authenticated users)
+  - Read (public access)
+  - Update (authenticated users)
+  - Delete (authenticated users)
 
-```bash
-# Open .env.local
-nano /Users/nadalpiantini/Dev/Padelgraph/.env.local
-
-# Find line:
-NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoicGFkZWxncmFwaCIsImEiOiJjbTU5Nm1vZHgwa2NrMmxzOGh5ZmgyY3BhIn0.YOUR_TOKEN_HERE
-
-# Replace YOUR_TOKEN_HERE with real token
+Features:
+- Avatar uploads funcionando
+- Public profile images
+- User-owned file management
 ```
 
-### 3️⃣ Test Local
+---
 
+## 📊 ESTADO ACTUAL
+
+### Production Status
+```
+Build: ✅ PASSING (71 pages)
+TypeScript: ✅ 0 errors
+Tests: ✅ Array safety verified
+Database: ✅ 2 migrations applied
+Deployment: ✅ LIVE on Vercel
+Sprint 4: ✅ 100% COMPLETE
+```
+
+### Features Funcionando
+```
+✅ Discovery Map (Mapbox)
+✅ Network Graph (D3.js)
+✅ Array Safety (guards everywhere)
+✅ PayPal Webhooks Infrastructure
+✅ Profile Images Storage
+```
+
+---
+
+## 🎯 PRÓXIMOS PASOS PRIORITARIOS
+
+### 🔴 CRÍTICO - Próxima Sesión (30 min)
+**PayPal Production Setup**
+```
+1. Crear Production App en PayPal
+2. Crear 3 Billing Plans:
+   - Pro: $9/month
+   - Premium: $19/month
+   - Club: $49/month
+3. Crear Production Webhook
+4. Configurar variables en Vercel:
+   - PAYPAL_MODE=production
+   - PAYPAL_CLIENT_ID=<prod>
+   - PAYPAL_SECRET=<prod>
+   - PAYPAL_WEBHOOK_ID=<prod>
+   - PAYPAL_*_PLAN_ID (3 plans)
+
+Doc: claudedocs/PAYPAL_PRODUCTION_SETUP.md
+```
+
+---
+
+### 🟡 IMPORTANTE - Esta Semana (12-15h)
+
+**1. PayPal Webhooks - 8 eventos** (4-6h)
+```typescript
+Archivo: src/app/api/paypal/webhook/route.ts
+
+Implementar handlers:
+❌ PAYMENT.SALE.COMPLETED
+❌ PAYMENT.SALE.REFUNDED
+❌ BILLING.SUBSCRIPTION.SUSPENDED
+❌ BILLING.SUBSCRIPTION.CANCELLED
+❌ BILLING.SUBSCRIPTION.EXPIRED
+❌ BILLING.SUBSCRIPTION.PAYMENT.FAILED
+❌ CUSTOMER.DISPUTE.CREATED
+❌ CUSTOMER.DISPUTE.RESOLVED
+```
+
+**2. Cron Jobs - 4 de 5** (3-4h)
+```bash
+Crear endpoints:
+❌ /api/cron/calculate-stats
+❌ /api/cron/update-leaderboards
+❌ /api/cron/retry-failed-payments
+❌ /api/cron/reset-usage
+
++ Configurar vercel.json para scheduling
+```
+
+**3. KPI Service** (2h)
+```typescript
+Completar métricas (src/lib/services/kpi-service.ts):
+- conversion_time_avg
+- signup_conversion_rate
+- trial_to_paid_conversion
+- free_to_paid_conversion
+```
+
+**4. Alert Service** (3h)
+```typescript
+Implementar (src/lib/services/alert-service.ts):
+- Email notifications via Resend
+- Slack notifications (opcional)
+```
+
+---
+
+### 🟢 FEATURES - Próximo Sprint (20-24h)
+
+**5. Tournament System TODOs** (8-10h)
+- bracket-progression.ts (8 TODOs)
+- swiss.ts (2 TODOs)
+- knockout.ts (2 TODOs)
+
+**6. Social Features** (2h)
+- Comment modal
+- Share modal
+- Invite API
+
+**7. Sitemap Dinámico** (2h)
+- Tournament pages
+- Player profiles
+
+---
+
+## 📋 RESUMEN EJECUTIVO
+
+| Categoría | Tareas | Estado |
+|-----------|--------|--------|
+| 🔴 Crítico HOY | 3 | ✅ 100% |
+| 🟡 Esta Semana | 4 | ⏳ 0% |
+| 🟢 Próximo Sprint | 3 | ⏳ 0% |
+| **Total Restante** | **7** | **~25-30h** |
+
+---
+
+## 🚀 COMANDOS ÚTILES
+
+### Test Local
 ```bash
 cd /Users/nadalpiantini/Dev/Padelgraph
 npm run dev
-
-# Navigate to:
-# http://localhost:3000/discover?tab=map  ✅ Map loads
-# http://localhost:3000/discover?tab=network  ✅ Graph loads
+# Visit: http://localhost:3000/discover
 ```
 
-### 4️⃣ Configure Vercel
-
+### Build Production
 ```bash
-# Vercel Dashboard:
-# https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings/environment-variables
-
-# Add variable:
-# Name: NEXT_PUBLIC_MAPBOX_TOKEN
-# Value: <your_actual_token>
-# Scope: Production, Preview, Development
+npm run build
+# Verifica 0 errores antes de deploy
 ```
 
-### 5️⃣ Deploy to Production
-
+### Deploy
 ```bash
+git add .
+git commit -m "feat: description"
 git push origin main
+# Vercel auto-deploys en 2-3 min
+```
 
-# Vercel auto-deploys
-# Wait ~2-3 min
-# Smoke test: https://padelgraph.com/discover
+### Check Vercel
+```
+Dashboard: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph
+Deployments: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/deployments
+Env Vars: https://vercel.com/nadalpiantini-fcbc2d66/padelgraph/settings/environment-variables
+```
+
+### Check Supabase
+```
+Dashboard: https://supabase.com/dashboard/project/kqftsiohgdzlyfqbhxbc
+SQL Editor: https://supabase.com/dashboard/project/kqftsiohgdzlyfqbhxbc/sql/new
 ```
 
 ---
 
-## 📊 MÉTRICAS DEL SPRINT
+## 💡 NOTAS IMPORTANTES
 
-| Métrica | Before | After | Status |
-|---------|--------|-------|--------|
-| Sprint Progress | 85% | 95% | ✅ +10% |
-| TypeScript Errors | 0 | 0 | ✅ |
-| P0 Features | 0/2 | 2/2 | ✅ 100% |
-| Story Points | 0/13 | 13/13 | ✅ 100% |
-| Time Spent | 0 | 65min | ✅ 38% faster |
-| Lines Added | 0 | 574 | ✅ |
+### Mapbox Token
+- **Local**: Ya configurado en `.env.local` ✅
+- **Vercel**: Ya configurado en todas las environments ✅
+- **Free tier**: 50,000 loads/month
+- **Usage**: ~100-500/month (súper dentro del límite)
 
----
+### Database Migrations
+- **Applied**: 2 migrations ✅
+- **Location**: `supabase/migrations/`
+- **How to apply**: Supabase Dashboard > SQL Editor > Copy/Paste > Run
 
-## 🎯 PRÓXIMOS PASOS RECOMENDADOS
-
-### Opción A: Deploy NOW (Recomendado) ⭐
-```bash
-1. Get Mapbox token (2 min)
-2. Update .env.local (1 min)
-3. Test local (5 min)
-4. Configure Vercel (2 min)
-5. Push to production (3 min)
-
-Total: ~15 minutos
-```
-
-**Beneficio:** Sprint 4 en producción, usuarios pueden usar Map + Network
+### Array Safety
+- **Pattern**: Always use `Array.isArray()` before `.length`
+- **Bad**: `if (arr && arr.length > 0)`
+- **Good**: `if (Array.isArray(arr) && arr.length > 0)`
 
 ---
 
-## 📚 DOCUMENTACIÓN
+## 🎯 RECOMENDACIÓN PRÓXIMA SESIÓN
 
-**Sprint 4 Docs:**
-- `claudedocs/SPRINT_4_FINAL_REPORT.md` - Reporte completo
-- `claudedocs/US1_COMPLETE.md` - Mapa Discovery
-- `claudedocs/US2_GRAFO_SOCIAL_COMPLETE.md` - Grafo Social
-- `claudedocs/BMAD_SPRINT_4_STORIES.md` - User Stories
+**Opción Recomendada**: PayPal Production Setup (30 min)
 
-**Commits:**
-- `3729478` - Array safety audit
-- `407faff` - Legal compliance framework
-- `601f970` - Complete project to 100%
+**¿Por qué?**
+- Desbloquea monetización real
+- Setup rápido (30 min)
+- Critical business feature
+- Ya tienes sandbox funcionando
 
----
-
-## 💡 RECOMENDACIÓN FINAL
-
-**Deploy a producción HOY** (15 min):
-1. Obtener Mapbox token
-2. Configurar Vercel
-3. Push to production (git push origin main)
-4. Smoke test
+**Alternativa**: Webhook handlers (4-6h sesión larga)
 
 ---
 
-**Session Completed:** 2025-10-18 - Night
-**Next Session:** Deployment + monitoring
-**Status:** ✅ READY FOR PRODUCTION
+**Session Completed:** 2025-10-18 Evening
+**Next Session:** PayPal Production + Webhooks
+**Status:** ✅ ALL CRITICAL TASKS COMPLETE
 
-🚀 Sprint 4 completado con éxito usando BMAD METHOD!
+🚀 Proyecto estable, Sprint 4 al 100%, listo para monetización!
